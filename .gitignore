@@ -6,3 +6,7 @@ CLAUDE.md
 seed*.json
 *.seed.json
 *.backup.*
+
+# Die Plugin-ZIP wird aus wordpress-plugin/sc1911-camp-fenster/ erzeugt --
+# ein gebautes Artefakt, das nicht mitversioniert wird.
+wordpress-plugin/*.zip
