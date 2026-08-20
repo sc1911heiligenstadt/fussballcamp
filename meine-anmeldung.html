@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Meine Camp-Anmeldung — 1. SC 1911 Heilbad Heiligenstadt</title>
+<meta name="theme-color" content="#1a56a0" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="stylesheet" href="oeffentlich.css?v=1.0" />
+</head>
+<body class="fc-oeffentlich">
+
+<div class="fc-kopf">
+  <img src="https://sc1911heiligenstadt.github.io/logo.svg" alt="" />
+  <div>
+    <h1>Meine Camp-Anmeldung</h1>
+    <div class="fc-verein">1. SC 1911 e.V. Heilbad Heiligenstadt · Nachwuchsbereich</div>
+  </div>
+</div>
+
+<div class="fc-blatt">
+
+  <div class="fc-karte" id="laden">
+    <p class="fc-grau">Die Anmeldung wird geladen …</p>
+  </div>
+
+  <div class="fc-karte fc-hidden" id="problem">
+    <h2 id="problem-titel">Das hat nicht geklappt</h2>
+    <div class="fc-hinweis fehler" id="problem-text"></div>
+    <p class="fc-grau">Der Link steht in der Bestätigungsmail. Wenn er nicht mehr geht, melde dich bitte beim Verein.</p>
+  </div>
+
+  <div id="bereich" class="fc-hidden">
+
+    <div class="fc-karte">
+      <h2 id="kopf-titel"></h2>
+      <div id="kopf-status"></div>
+      <dl class="fc-eckdaten" id="camp-eckdaten"></dl>
+    </div>
+
+    <div class="fc-karte" id="zahlung-karte"></div>
+
+    <form class="fc-karte" id="aendern-form" novalidate>
+      <h2>Angaben ändern</h2>
+      <p class="fc-grau" style="margin-bottom:16px;">Was hier steht, ist der aktuelle Stand. Ändere, was sich geändert hat, und speichere.</p>
+
+      <div id="felder"></div>
+
+      <div id="zusatzfrage-bereich" class="fc-hidden">
+        <div class="anm-feld">
+          <label for="f-zusatz" id="zusatzfrage-label"></label>
+          <input type="text" id="f-zusatz" maxlength="200" />
+        </div>
+      </div>
+
+      <div class="fc-hinweis fehler fc-hidden" id="form-fehler"></div>
+      <div class="fc-hinweis ok fc-hidden" id="form-ok"></div>
+
+      <button type="submit" class="fc-btn gruen breit" id="btn-speichern">Änderungen speichern</button>
+    </form>
+
+    <div class="fc-karte" id="absage-karte">
+      <h2>Doch nicht dabei?</h2>
+      <p>Wenn dein Kind nicht teilnehmen kann, sag uns bitte ab. Der Platz geht dann an ein Kind von der Warteliste.</p>
+      <div class="fc-hinweis warn">Eine Absage lässt sich hier nicht rückgängig machen. Wenn es doch klappt, melde dich bitte direkt beim Verein.</div>
+      <button type="button" class="fc-btn rot" id="btn-absagen">Anmeldung absagen</button>
+    </div>
+
+  </div>
+</div>
+
+<p class="fc-fuss">1. SC 1911 e.V. Heilbad Heiligenstadt · Nachwuchsbereich</p>
+
+<script src="config.js?v=1.0"></script>
+<script src="oeffentlich.js?v=1.0"></script>
+<script src="meine-anmeldung.js?v=1.0"></script>
+</body>
+</html>

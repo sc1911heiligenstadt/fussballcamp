@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vorschau: Fenster auf der Homepage</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  /* Absichtlich eine ganz andere Optik als die Vereinsseite: Diese Seite soll
+     zeigen, wie sich das Fenster in eine FREMDE Seite legt — nicht, wie eine
+     weitere Seite der App aussieht. */
+  body { font-family: Georgia, "Times New Roman", serif; background: #fff; color: #333; margin: 0; }
+  .band { background: #7a1f2b; color: #fff; padding: 22px 28px; }
+  .band h1 { margin: 0; font-size: 24px; }
+  .inhalt { max-width: 760px; margin: 0 auto; padding: 28px 20px 80px; }
+  .inhalt h2 { font-size: 20px; margin: 26px 0 8px; }
+  .inhalt p { line-height: 1.7; margin-bottom: 12px; }
+  .platzhalter { background: #f0f0f0; border-radius: 6px; height: 190px; margin: 18px 0; }
+  .merke {
+    background: #fff8e1; border: 1px solid #e0c060; border-radius: 8px;
+    padding: 14px 18px; margin: 22px 0; font-family: system-ui, sans-serif; font-size: 14px;
+  }
+  .merke code { background: #fff; padding: 2px 6px; border-radius: 4px; }
+  .neu-knopf {
+    font-family: system-ui, sans-serif; font-size: 14px; background: #1a56a0; color: #fff;
+    border: none; border-radius: 6px; padding: 9px 16px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="band"><h1>So könnte die Vereinsseite aussehen</h1></div>
+
+<div class="inhalt">
+  <div class="merke">
+    <strong>Das hier ist nur eine Vorschau.</strong>
+    Die Schrift und die Farben sind absichtlich anders als in der App — damit du siehst,
+    dass sich das Fenster über eine <em>fremde</em> Seite legt, ohne sie umzufärben.
+    <br /><br />
+    Es erscheint gleich von selbst, sofern gerade mindestens ein Camp auf
+    <em>„Anmeldung offen"</em> steht. Passiert nichts, ist entweder kein Camp offen,
+    oder du hast das Fenster hier schon einmal mit <em>„Nicht mehr anzeigen"</em> weggeklickt.
+    <br /><br />
+    <button type="button" class="neu-knopf" id="btn-reset">Merkzettel löschen und neu laden</button>
+  </div>
+
+  <h2>Willkommen beim 1. SC 1911</h2>
+  <p>Dieser Text steht hier nur als Füllung, damit sich beurteilen lässt, wie sich das
+    Fenster über einen echten Seiteninhalt legt. Der Text der Vereinsseite bleibt
+    lesbar, sobald das Fenster geschlossen wird.</p>
+  <div class="platzhalter"></div>
+  <h2>Aus dem Verein</h2>
+  <p>Auch dieser Absatz ist Füllung. Wichtig ist allein, dass Schrift, Farben und
+    Abstände dieser Seite unverändert bleiben, während das Fenster offen ist —
+    genau das ist der Test.</p>
+  <div class="platzhalter"></div>
+  <p>Ende der Vorschau.</p>
+</div>
+
+<script>
+  document.getElementById("btn-reset").addEventListener("click", function () {
+    try { window.localStorage.removeItem("fc_popup_zu"); } catch (_) {}
+    window.location.reload();
+  });
+</script>
+<script src="popup.js?v=1.0" async></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Anmeldung zum Fußballcamp — 1. SC 1911 Heilbad Heiligenstadt</title>
+<meta name="theme-color" content="#1a56a0" />
+<!-- Diese Seite ist ein Anmeldeformular, keine Fundstelle für Suchmaschinen.
+     Der Link soll über die Vereinsseite laufen, nicht über eine Suche. -->
+<meta name="robots" content="noindex, nofollow" />
+<link rel="stylesheet" href="oeffentlich.css?v=1.0" />
+</head>
+<body class="fc-oeffentlich">
+
+<div class="fc-kopf">
+  <img src="https://sc1911heiligenstadt.github.io/logo.svg" alt="" />
+  <div>
+    <h1>Anmeldung zum Fußballcamp</h1>
+    <div class="fc-verein">1. SC 1911 e.V. Heilbad Heiligenstadt · Nachwuchsbereich</div>
+  </div>
+</div>
+
+<div class="fc-blatt">
+
+  <!-- Wird geladen -->
+  <div class="fc-karte" id="laden">
+    <p class="fc-grau">Das Camp wird geladen …</p>
+  </div>
+
+  <!-- Etwas stimmt nicht: Link falsch, Camp zu, Fenster abgelaufen -->
+  <div class="fc-karte fc-hidden" id="problem">
+    <h2 id="problem-titel">Das hat nicht geklappt</h2>
+    <div class="fc-hinweis fehler" id="problem-text"></div>
+    <p class="fc-grau">Wenn du meinst, das sei ein Versehen, melde dich bitte beim Verein.</p>
+  </div>
+
+  <!-- Das Camp und das Formular -->
+  <div id="formular-bereich" class="fc-hidden">
+
+    <div class="fc-karte">
+      <h2 id="camp-name"></h2>
+      <dl class="fc-eckdaten" id="camp-eckdaten"></dl>
+      <p class="fc-vorzeile" id="camp-beschreibung"></p>
+      <div id="camp-warnung"></div>
+    </div>
+
+    <form class="fc-karte" id="anmelde-form" novalidate>
+      <h2>Angaben zur Anmeldung</h2>
+      <p class="fc-grau" style="margin-bottom:16px;">Felder mit <span class="pflicht-stern">*</span> müssen ausgefüllt werden. Für jedes Kind eine eigene Anmeldung — für Geschwister gibt es am Ende einen Knopf, der die Elternangaben übernimmt.</p>
+
+      <div id="felder"></div>
+
+      <div id="zusatzfrage-bereich" class="fc-hidden">
+        <div class="anm-feld">
+          <label for="f-zusatz" id="zusatzfrage-label"></label>
+          <input type="text" id="f-zusatz" maxlength="200" />
+        </div>
+      </div>
+
+      <h3>Datenschutz</h3>
+      <details class="fc-details">
+        <summary>Was mit den Daten passiert (Information nach Art. 13 DSGVO)</summary>
+        <div>
+          <p><strong>Verantwortlich</strong> ist der 1. SC 1911 e.V. Heilbad Heiligenstadt, Nachwuchsbereich. Die Kontaktdaten stehen im Impressum der Vereinsseite.</p>
+          <p><strong>Wozu und auf welcher Grundlage:</strong> Die Angaben werden verarbeitet, um dein Kind zum Fußballcamp anzumelden, es dort zu betreuen und den Beitrag zuzuordnen. Rechtsgrundlage ist die Erfüllung des Vertrags über die Teilnahme (Art. 6 Abs. 1 lit. b DSGVO).</p>
+          <p><strong>Gesundheitsangaben</strong> (Allergien, Medikamente, Erkrankungen) sind besondere Daten nach Art. 9 DSGVO. Sie werden allein deshalb erhoben, damit im Camp richtig reagiert werden kann, und nur auf deine ausdrückliche Einwilligung hin (Art. 9 Abs. 2 lit. a DSGVO). Du kannst diese Felder leer lassen.</p>
+          <p><strong>Wer die Daten sieht:</strong> die Verantwortlichen des Nachwuchsbereichs und die Betreuer des jeweiligen Camps. Die Betreuer bekommen nur eine verkürzte Liste — Name, Alter, Gesundheitshinweise und die Notfallnummer. Eine Weitergabe an Dritte findet nicht statt.</p>
+          <p><strong>Wo die Daten liegen:</strong> auf dem Vereinsspeicher (Nextcloud) bei einem Anbieter innerhalb der EU. Der Versand der Bestätigungsmail läuft über einen Dienstleister als Auftragsverarbeiter.</p>
+          <p><strong>Wie lange:</strong> bis zum Ende des Camps und danach für eine Übergangszeit von in der Regel sechs Monaten. Anschließend werden Namen, Anschriften und Gesundheitsangaben gelöscht; es bleiben nur anonyme Zahlen für die Statistik.</p>
+          <p><strong>Deine Rechte:</strong> Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit und Widerspruch. Eine erteilte Einwilligung kannst du jederzeit für die Zukunft widerrufen. Außerdem steht dir ein Beschwerderecht bei der Aufsichtsbehörde zu.</p>
+          <p><strong>Freiwilligkeit:</strong> Die Angabe der Daten ist freiwillig; ohne die Pflichtfelder ist eine Teilnahme allerdings nicht möglich.</p>
+        </div>
+      </details>
+
+      <div class="anm-feld haken">
+        <label for="f-datenschutz">
+          <input type="checkbox" id="f-datenschutz" required />
+          <span>Ich habe die Datenschutz-Information gelesen und bin damit einverstanden. Als erziehungsberechtigte Person willige ich zugleich in die Verarbeitung der oben gemachten Gesundheitsangaben ein. <span class="pflicht-stern">*</span></span>
+        </label>
+      </div>
+
+      <div class="fc-hinweis fehler fc-hidden" id="form-fehler"></div>
+
+      <button type="submit" class="fc-btn gruen breit" id="btn-absenden">Verbindlich anmelden</button>
+      <p class="fc-grau" style="margin-top:10px;font-size:13px;">Nach dem Absenden bekommst du eine Bestätigung per E-Mail — darin stehen auch die Zahlungsangaben und ein Link, über den du die Anmeldung später ändern oder absagen kannst.</p>
+    </form>
+  </div>
+
+  <!-- Nach dem Absenden -->
+  <div id="fertig-bereich" class="fc-hidden">
+    <div class="fc-karte">
+      <div class="fc-hinweis ok" id="fertig-kopf"></div>
+      <div id="fertig-zahlung"></div>
+      <div id="fertig-link"></div>
+      <div class="fc-btn-reihe">
+        <button type="button" class="fc-btn hell" id="btn-geschwister">Noch ein Geschwisterkind anmelden</button>
+        <a class="fc-btn hell" href="https://www.sc1911-heiligenstadt.de/" id="btn-zurueck">Zur Vereinsseite</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="fc-fuss">1. SC 1911 e.V. Heilbad Heiligenstadt · Nachwuchsbereich</p>
+
+<script src="config.js?v=1.0"></script>
+<script src="oeffentlich.js?v=1.0"></script>
+<script src="anmeldung.js?v=1.0"></script>
+</body>
+</html>
