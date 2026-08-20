@@ -190,19 +190,25 @@
 
         <div class="card">
           <h2>Fenster auf der Vereins-Homepage</h2>
-          <p class="muted" style="margin-bottom:14px;">Diesen Schnipsel <strong>einmal</strong> in die Homepage einbauen. Danach musst du dort nie wieder etwas ändern: Welches Camp im Fenster erscheint, entscheidet allein der Status hier in der App.</p>
-          <div class="hinweis">
-            <strong>Zwei Dinge, sonst bleibt das Fenster leer:</strong>
-            <ol style="margin:8px 0 0 18px;">
-              <li>In WordPress als <em>Code-Block</em> einfügen, nicht als Text — sonst zeigt die Seite den Schnipsel als Buchstaben an.</li>
-              <li>In <strong>Borlabs Cookie</strong> freigeben. Borlabs blockt fremde Skripte, und dieses hier kommt von <code>sc1911heiligenstadt.github.io</code>.</li>
-            </ol>
+          <div class="hinweis ok">
+            <strong>Das ist bereits eingebaut — du musst hier nichts tun.</strong>
+            Auf <code>www.sc1911-heiligenstadt.de</code> läuft dafür das Plugin
+            <strong>„SC 1911 Camp-Fenster"</strong>. Es lädt den Schnipsel unten auf jeder Seite.
+            Sobald ein Camp hier auf <em>„Anmeldung offen"</em> steht, erscheint es dort von selbst;
+            steht keines offen, passiert gar nichts.
           </div>
-          <textarea id="einbau-code" rows="4" readonly></textarea>
+          <p class="muted" style="margin-bottom:14px;">Der Schnipsel steht hier nur noch zum Nachschlagen — etwa, wenn die Vereinsseite einmal umzieht oder das Fenster zusätzlich woanders erscheinen soll.</p>
+          <textarea id="einbau-code" rows="3" readonly></textarea>
           <div class="btn-row">
             <button type="button" class="btn small" id="btn-code-kopieren">Schnipsel kopieren</button>
             <button type="button" class="btn small ghost" id="btn-popup-vorschau">Vorschau ansehen</button>
           </div>
+          <p class="muted" style="margin-top:14px;font-size:13px;">
+            <strong>Fenster abschalten:</strong> in WordPress unter <em>Plugins</em> bei
+            „SC 1911 Camp-Fenster" auf <em>Deaktivieren</em> klicken. Die Vereinsseite bleibt dabei
+            unverändert. Schneller geht es meist über diese App: ein Camp auf
+            <em>„Anmeldung schließen"</em> setzen nimmt es sofort aus dem Fenster.
+          </p>
         </div>
 
         <div class="btn-row">
