@@ -58,18 +58,20 @@ const FORMULAR_FELDER = [
   { id: "vegetarisch",     gruppe: "essen",       label: "Isst vegetarisch",     typ: "haken" },
   { id: "essenHinweis",    gruppe: "essen",       label: "Beim Essen beachten",  typ: "mehrzeilig", maxLen: 300, sensibel: true },
 
-  // Einwilligungen. Ein HAKEN auf „pflicht" muss gesetzt sein — das passt nur für
-  // eine echte Einwilligung, bei der „nein" gleichbedeutend mit „dann eben nicht
-  // anmelden" ist.
-  //
-  // ⚠️ `alleinNachHause` ist deshalb bewusst KEIN Haken, sondern eine Ja/Nein-Frage.
+  // Heimweg. ⚠️ `alleinNachHause` ist bewusst KEIN Haken, sondern eine Ja/Nein-Frage.
   // Bei einem Haken wären „nein" und „vergessen anzukreuzen" derselbe Zustand — und
   // am letzten Camptag steht dann jemand vor der Frage, ob das Kind gehen darf, und
   // hat nur ein leeres Kästchen als Antwort. Als Pflichtfeld wäre ein Haken sogar
   // schlimmer: er ließe sich nur erfüllen, indem man JEDEM Kind erlaubt zu gehen.
-  { id: "einwilligungFoto", gruppe: "einwilligung", label: "Fotos vom Camp dürfen veröffentlicht werden", typ: "haken", hinweis: "Vereinsseite, Zeitung, soziale Netzwerke." },
-  { id: "alleinNachHause",  gruppe: "einwilligung", label: "Darf das Kind nach dem Camp allein nach Hause gehen?", typ: "janein", hinweis: "Wenn nein: bitte unten eintragen, wer es abholen darf." },
-  { id: "abholberechtigt",  gruppe: "einwilligung", label: "Wer darf das Kind abholen",                    typ: "mehrzeilig", maxLen: 300 },
+  //
+  // ⚠️ Hier stand bis 2026-08-21 ein Häkchen `einwilligungFoto`. Es ist entfallen
+  // (Michel-Entscheidung): die Foto-Einwilligung regelt jetzt allein Punkt 16 der
+  // Teilnahmebedingungen, und die sind Pflicht. Wer es zurückholt, holt sich den
+  // Widerspruch zurück — zwei Stellen, die dasselbe unterschiedlich beantworten
+  // können. Die Art.-13-Information auf anmeldung.html verweist stattdessen auf
+  // Punkt 16; wer das eine ändert, zieht das andere mit.
+  { id: "alleinNachHause",  gruppe: "heimweg", label: "Darf das Kind nach dem Camp allein nach Hause gehen?", typ: "janein", hinweis: "Wenn nein: bitte unten eintragen, wer es abholen darf." },
+  { id: "abholberechtigt",  gruppe: "heimweg", label: "Wer darf das Kind abholen",                    typ: "mehrzeilig", maxLen: 300 },
 
   // Freitext
   { id: "bemerkung",       gruppe: "sonstiges",   label: "Bemerkung",            typ: "mehrzeilig", maxLen: 800 }
@@ -81,7 +83,9 @@ const FELD_GRUPPEN = [
   { id: "eltern",       label: "Erziehungsberechtigte" },
   { id: "gesundheit",   label: "Gesundheit",    hinweis: "Diese Angaben sehen nur die Verantwortlichen und die Betreuer im Camp." },
   { id: "essen",        label: "Verpflegung" },
-  { id: "einwilligung", label: "Einverständnis" },
+  // Hieß bis 2026-08-21 „Einverständnis" — mit dem Wegfall des Foto-Häkchens
+  // stehen hier nur noch die beiden Fragen zum Heimweg.
+  { id: "heimweg",      label: "Abholung und Heimweg" },
   { id: "sonstiges",    label: "Sonstiges" }
 ];
 
@@ -157,7 +161,6 @@ const DEFAULT_FELDER = {
   krankheiten: "optional",
   vegetarisch: "optional",
   essenHinweis: "optional",
-  einwilligungFoto: "optional",
   alleinNachHause: "pflicht",
   abholberechtigt: "optional",
   bemerkung: "optional"
@@ -169,6 +172,20 @@ const DEFAULT_FELDER = {
 const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
+  {
+    version: "1.3",
+    groups: [
+      {
+        title: "Fotos regeln allein die Teilnahmebedingungen",
+        items: [
+          "Das Häkchen „Fotos vom Camp dürfen veröffentlicht werden“ ist aus dem Anmeldeformular entfallen. Punkt 16 der Teilnahmebedingungen regelt das jetzt allein — und die müssen die Eltern ohnehin anerkennen.",
+          "Grund: Es gab zwei Stellen, die dieselbe Frage unterschiedlich beantworten konnten. Wer die Bedingungen anerkannte, das Häkchen aber wegließ, hinterließ einen widersprüchlichen Datensatz.",
+          "Die Datenschutz-Information im Formular nennt die Aufnahmen jetzt ausdrücklich und verweist für Einzelheiten und den Widerruf auf Punkt 16. Vorher stand dort gar nichts zu Fotos — das Häkchen war die einzige sichtbare Stelle.",
+          "Der Abschnitt „Einverständnis“ im Formular heißt jetzt „Abholung und Heimweg“. Darin stehen nur noch die beiden Fragen dazu."
+        ]
+      }
+    ]
+  },
   {
     version: "1.2",
     groups: [
