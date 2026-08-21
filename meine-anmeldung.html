@@ -6,7 +6,7 @@
 <title>Meine Camp-Anmeldung — 1. SC 1911 Heilbad Heiligenstadt</title>
 <meta name="theme-color" content="#1a56a0" />
 <meta name="robots" content="noindex, nofollow" />
-<link rel="stylesheet" href="oeffentlich.css?v=1.0" />
+<link rel="stylesheet" href="oeffentlich.css?v=1.1" />
 </head>
 <body class="fc-oeffentlich">
 
@@ -53,6 +53,26 @@
         </div>
       </div>
 
+      <!-- Teilnahmebedingungen zum Nachlesen. Gezeigt wird die Fassung, der DIESE
+           Eltern zugestimmt haben — nicht die aktuelle. Nur wenn sich der Text
+           seit ihrer Anmeldung geändert hat, verlangt meine-anmeldung.js hier
+           eine neue Zustimmung und blendet das Häkchen ein. -->
+      <div id="agb-bereich" class="fc-hidden">
+        <h3 id="agb-titel">Teilnahmebedingungen</h3>
+        <div id="agb-meldung"></div>
+        <details class="fc-details">
+          <summary id="agb-summary">Allgemeine Teilnahmebedingungen für Fußballcamps</summary>
+          <div id="agb-text"></div>
+        </details>
+
+        <div class="anm-feld haken fc-hidden" id="agb-haken-feld">
+          <label for="f-agb">
+            <input type="checkbox" id="f-agb" />
+            <span>Ich habe die geänderten Teilnahmebedingungen gelesen und erkenne sie an. <span class="pflicht-stern">*</span></span>
+          </label>
+        </div>
+      </div>
+
       <div class="fc-hinweis fehler fc-hidden" id="form-fehler"></div>
       <div class="fc-hinweis ok fc-hidden" id="form-ok"></div>
 
@@ -71,8 +91,8 @@
 
 <p class="fc-fuss">1. SC 1911 e.V. Heilbad Heiligenstadt · Nachwuchsbereich</p>
 
-<script src="config.js?v=1.0"></script>
-<script src="oeffentlich.js?v=1.0"></script>
-<script src="meine-anmeldung.js?v=1.0"></script>
+<script src="config.js?v=1.1"></script>
+<script src="oeffentlich.js?v=1.1"></script>
+<script src="meine-anmeldung.js?v=1.1"></script>
 </body>
 </html>

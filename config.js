@@ -37,7 +37,7 @@ const FORMULAR_FELDER = [
   { id: "kindVorname",     gruppe: "kind",        label: "Vorname des Kindes",   typ: "text",   fest: true,  maxLen: 60 },
   { id: "kindNachname",    gruppe: "kind",        label: "Nachname des Kindes",  typ: "text",   fest: true,  maxLen: 60 },
   { id: "geburtsdatum",    gruppe: "kind",        label: "Geburtsdatum",         typ: "datum",  maxLen: 10, hinweis: "Damit die Gruppen nach Alter eingeteilt werden können." },
-  { id: "trikotgroesse",   gruppe: "kind",        label: "Trikotgröße",          typ: "auswahl", optionen: ["116", "128", "140", "152", "164", "176", "S", "M", "L", "XL"] },
+  { id: "trikotgroesse",   gruppe: "kind",        label: "Konfektionsgröße",     typ: "auswahl", optionen: ["116", "128", "140", "152", "164", "176", "S", "M", "L", "XL"], hinweis: "Für das Camp-Trikot." },
   { id: "verein",          gruppe: "kind",        label: "Verein",               typ: "text",   maxLen: 80, hinweis: "Leer lassen, wenn das Kind in keinem Verein spielt." },
   { id: "position",        gruppe: "kind",        label: "Lieblingsposition",    typ: "auswahl", optionen: ["Torwart", "Abwehr", "Mittelfeld", "Sturm", "egal"] },
 
@@ -58,10 +58,17 @@ const FORMULAR_FELDER = [
   { id: "vegetarisch",     gruppe: "essen",       label: "Isst vegetarisch",     typ: "haken" },
   { id: "essenHinweis",    gruppe: "essen",       label: "Beim Essen beachten",  typ: "mehrzeilig", maxLen: 300, sensibel: true },
 
-  // Einwilligungen. `zwingend` heißt: als Pflicht eingeschaltet muss der Haken
-  // gesetzt sein, sonst nimmt der Worker die Anmeldung nicht an.
+  // Einwilligungen. Ein HAKEN auf „pflicht" muss gesetzt sein — das passt nur für
+  // eine echte Einwilligung, bei der „nein" gleichbedeutend mit „dann eben nicht
+  // anmelden" ist.
+  //
+  // ⚠️ `alleinNachHause` ist deshalb bewusst KEIN Haken, sondern eine Ja/Nein-Frage.
+  // Bei einem Haken wären „nein" und „vergessen anzukreuzen" derselbe Zustand — und
+  // am letzten Camptag steht dann jemand vor der Frage, ob das Kind gehen darf, und
+  // hat nur ein leeres Kästchen als Antwort. Als Pflichtfeld wäre ein Haken sogar
+  // schlimmer: er ließe sich nur erfüllen, indem man JEDEM Kind erlaubt zu gehen.
   { id: "einwilligungFoto", gruppe: "einwilligung", label: "Fotos vom Camp dürfen veröffentlicht werden", typ: "haken", hinweis: "Vereinsseite, Zeitung, soziale Netzwerke." },
-  { id: "alleinNachHause",  gruppe: "einwilligung", label: "Das Kind darf allein nach Hause gehen",       typ: "haken" },
+  { id: "alleinNachHause",  gruppe: "einwilligung", label: "Darf das Kind nach dem Camp allein nach Hause gehen?", typ: "janein", hinweis: "Wenn nein: bitte unten eintragen, wer es abholen darf." },
   { id: "abholberechtigt",  gruppe: "einwilligung", label: "Wer darf das Kind abholen",                    typ: "mehrzeilig", maxLen: 300 },
 
   // Freitext
@@ -82,6 +89,13 @@ const FELD_STUFEN = [
   { id: "aus",      label: "nicht fragen" },
   { id: "optional", label: "fragen, freiwillig" },
   { id: "pflicht",  label: "fragen, Pflicht" }
+];
+
+// Beschriftung der Ja/Nein-Felder. Steht hier und nicht im Formularbauer, damit
+// die Anmeldeseite, die Anmeldeliste und der Export dieselben Wörter benutzen.
+const JANEIN = [
+  { id: "ja",   label: "Ja" },
+  { id: "nein", label: "Nein" }
 ];
 
 // Die Felder, die ein Betreuer über fussballcamp-teilnehmer zu sehen bekommt.
@@ -108,28 +122,44 @@ const DEFAULT_JOBS = [
 ];
 
 // Vorgaben für eine noch leere Datei. Änderbar im Verwaltungs-Tab.
+//
+// ⚠️ `agbText` steht hier LEER, und das ist kein Versehen. Der wirksame Text ist
+// FC_AGB_VORGABE im Worker; leer heißt „nimm die Vorgabe". Sonst stünde derselbe
+// Rechtstext in zwei Dateien, und man änderte irgendwann die falsche.
 const DEFAULT_EINSTELLUNGEN = {
   iban: "", bic: "", kontoinhaber: "1. SC 1911 e.V. Heilbad Heiligenstadt", bank: "",
   kontaktName: "", kontaktEmail: "",
+  agbText: "",
   startErinnerung: true, startErinnerungTage: 3,
   zahlErinnerung: true, zahlErinnerungTage: 14,
   aufraeumenNachMonaten: 6
 };
 
+// Obergrenze für den AGB-Text. Großzügig — die vorliegende Fassung liegt bei rund
+// 5.000 Zeichen, und der Text wird bei jedem Aufruf der Anmeldeseite mitgeliefert.
+const AGB_MAX_ZEICHEN = 30000;
+
 // Standard-Feldeinstellung für ein neu angelegtes Camp: der Satz, den die
 // meisten Camps brauchen. Alles, was hier fehlt, steht auf "aus".
+//
+// ⚠️ Die sechs Pflichtfelder sind eine Vorgabe des Nachwuchsbereichs (Michael Apel,
+// 2026-08-21) und der Mindestsatz, ohne den ein Camp nicht durchführbar ist:
+// Name (fest), Geburtsdatum, Konfektionsgröße, Allergien, „allein nach Hause",
+// E-Mail (fest) und Telefon. Sie lassen sich je Camp weiterhin umstellen — das
+// hier ist die Vorbelegung, keine Sperre.
 const DEFAULT_FELDER = {
   geburtsdatum: "pflicht",
-  trikotgroesse: "optional",
+  trikotgroesse: "pflicht",
   verein: "optional",
   elternTelefon: "pflicht",
-  allergien: "optional",
+  allergien: "pflicht",
   medikamente: "optional",
   krankheiten: "optional",
   vegetarisch: "optional",
   essenHinweis: "optional",
   einwilligungFoto: "optional",
-  alleinNachHause: "optional",
+  alleinNachHause: "pflicht",
+  abholberechtigt: "optional",
   bemerkung: "optional"
 };
 
@@ -139,6 +169,36 @@ const DEFAULT_FELDER = {
 const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
+  {
+    version: "1.1",
+    groups: [
+      {
+        title: "Teilnahmebedingungen im Formular",
+        items: [
+          "Vor dem Absenden stehen die Teilnahmebedingungen des Vereins im Formular — aufklappbar, dazu ein eigenes Pflicht-Häkchen. Ohne dieses Häkchen nimmt der Server keine Anmeldung an.",
+          "Der Text wird unter „Verwaltung → Teilnahmebedingungen“ gepflegt. Es braucht dafür keine Änderung am Programm; was dort steht, erscheint sofort im Formular.",
+          "Bei jeder Anmeldung wird festgehalten, WELCHE Fassung die Eltern zugestimmt haben. Änderst du den Text später, bleibt für die früheren Anmeldungen die damals gültige Fassung erhalten und ist im Anmeldedialog nachlesbar — eine spätere Änderung wirkt nie rückwirkend.",
+          "Ändern die Eltern ihre Anmeldung über den Link aus der Mail, müssen sie nur dann erneut zustimmen, wenn sich der Text seit ihrer Anmeldung geändert hat."
+        ]
+      },
+      {
+        title: "Pflichtangaben nach Vorgabe des Nachwuchsbereichs",
+        items: [
+          "Ein neues Camp fragt jetzt von sich aus verpflichtend: Name, Geburtsdatum, Konfektionsgröße, Allergien, „darf allein nach Hause“, E-Mail und Telefon der Erziehungsberechtigten. Bestehende Camps bleiben unverändert; je Camp lässt sich weiterhin alles umstellen.",
+          "„Trikotgröße“ heißt jetzt „Konfektionsgröße“.",
+          "„Wer darf das Kind abholen“ wird bei einem neuen Camp mit angeboten — vorher war das Feld standardmäßig aus."
+        ]
+      },
+      {
+        title: "„Darf allein nach Hause“ ist jetzt eine echte Frage",
+        items: [
+          "Aus dem Häkchen ist eine Ja/Nein-Frage geworden. Bei einem Häkchen waren „nein“ und „nicht angekreuzt“ derselbe Zustand — am letzten Camptag sah man dem leeren Kästchen nicht an, ob die Eltern es verneint oder schlicht übersehen haben.",
+          "Als Pflichtfeld ging ein Häkchen ohnehin nicht: erfüllen ließe es sich nur, indem man jedem Kind erlaubt, allein zu gehen.",
+          "In der Teilnehmerliste der Betreuer steht bei „nein“ jetzt ein sichtbarer roter Hinweis statt gar nichts."
+        ]
+      }
+    ]
+  },
   {
     version: "1.0",
     groups: [

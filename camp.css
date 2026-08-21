@@ -136,7 +136,23 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 .marker.offen { background: var(--red-light); color: var(--red); }
 .marker.warteliste { background: var(--gold-light); color: var(--gold); }
 .marker.gesundheit { background: var(--blue-light); color: var(--blue); }
+/* Für Angaben, die FEHLEN und gebraucht werden — nicht für einen schlechten
+   Zustand. Beispiel: bei einem Kind ist nicht beantwortet, ob es allein nach
+   Hause darf. Rot, weil genau das am letzten Camptag auffallen muss. */
+.marker.warn { background: var(--red-light); color: var(--red); }
 .anm-aktionen { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Abgelöste Fassungen der Teilnahmebedingungen (Verwaltung).
+   ⚠️ `pre-wrap` statt `pre`: der Rechtstext hat sehr lange Zeilen, und ein
+   nicht umbrechendes <pre> zieht in einer Flex-Spalte die ganze Karte auf.
+   `overflow-x` bleibt als Netz für Zeilen ohne Leerzeichen. */
+.agb-fassung { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; }
+.agb-fassung > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--blue); }
+.agb-alt {
+  white-space: pre-wrap; word-break: break-word; overflow-x: auto;
+  font-family: inherit; font-size: 13px; line-height: 1.5; color: var(--muted);
+  max-height: 320px; overflow-y: auto; margin-top: 10px;
+}
 
 /* Der Detail-Block einer Anmeldung im Dialog. */
 .detail-zeile { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }

@@ -779,10 +779,25 @@ async function zeichneTeilnehmer() {
         </div>
         <div class="anm-marker">
           ${hinweise.length ? `<span class="marker gesundheit">beachten</span>` : ""}
-          ${t.alleinNachHause ? `<span class="marker">darf allein gehen</span>` : ""}
+          ${heimwegMarker(t.alleinNachHause)}
         </div>
       </div>`;
   }).join("");
+}
+
+// Der Heimweg-Marker in der Teilnehmerliste der Betreuer.
+//
+// ⚠️ Alle drei Zustände bekommen ihre EIGENE Anzeige, und das ist der Grund für
+// den Umbau vom Häkchen zur Ja/Nein-Frage: Beim Häkchen stand bei „nein" und bei
+// „nicht ausgefüllt" gleichermaßen nichts da. Wer am letzten Camptag vor der
+// Frage steht, ob ein Kind gehen darf, braucht den Unterschied zwischen „die
+// Eltern haben nein gesagt" und „wir wissen es nicht".
+//
+// `true` kommt von Anmeldungen aus der Häkchen-Zeit.
+function heimwegMarker(wert) {
+  if (wert === "ja" || wert === true) return `<span class="marker">darf allein gehen</span>`;
+  if (wert === "nein") return `<span class="marker">wird abgeholt</span>`;
+  return `<span class="marker warn">Heimweg ungeklärt</span>`;
 }
 
 // ============================================================
@@ -926,6 +941,18 @@ function anmDetails(camp, a) {
   zeile("Verwendungszweck", vz);
   zeile("Bezahlt", a.bezahlt ? "ja, vermerkt am " + datumDe(a.bezahltAm) : "nein");
 
+  // Der Nachweis, worauf sich diese Familie eingelassen hat. Ein Eintrag ohne
+  // `agbAm` stammt aus der Zeit vor den Teilnahmebedingungen — das steht dann
+  // ausdrücklich da, statt die Zeile wegzulassen: eine fehlende Zeile liest sich
+  // wie „nicht nachgeschaut", nicht wie „gab es damals nicht".
+  zeilen.push(`<h3>Teilnahmebedingungen</h3>`);
+  if (a.agbAm) {
+    const aktuell = daten && daten.einstellungen && a.agbStand === daten.einstellungen.agbStand;
+    zeile("Anerkannt am", datumZeitDe(a.agbAm) + (aktuell ? " (aktuelle Fassung)" : " (frühere Fassung, siehe Verwaltung)"));
+  } else {
+    zeile("Anerkannt am", "nicht erfasst — diese Anmeldung stammt aus der Zeit vor den Teilnahmebedingungen");
+  }
+
   return `
     ${zeilen.join("")}
     <h3>Ändern</h3>
@@ -972,8 +999,31 @@ function fuelleVerwaltung() {
     ? `Letzter nächtlicher Lauf: ${datumZeitDe(lauf.zuletztAm)} — ${lauf.ergebnis || "ohne Meldung"}`
     : "Der nächtliche Lauf ist noch nicht gelaufen.";
 
+  // Der Server schickt hier den WIRKSAMEN Text — auch dann, wenn noch nichts
+  // gespeichert wurde und die eingebaute Vorgabe gilt. Ein leeres Feld sähe aus,
+  // als gäbe es gar keine Bedingungen.
+  setzeWert("e-agb", e.agbText || "");
+  document.getElementById("agb-vorgabe-hinweis").classList.toggle("hidden", !e.agbIstVorgabe);
+  zeichneAgbArchiv();
+
   zeichneKatalog();
   document.getElementById("einbau-code").value = einbauCode();
+}
+
+// Die abgelösten Fassungen. Aufgehoben werden nur die, denen noch eine bestehende
+// Anmeldung zugestimmt hat — deshalb ist die Liste meistens leer, und das ist
+// kein Fehler.
+function zeichneAgbArchiv() {
+  const archiv = (daten && daten.agbArchiv) || [];
+  const block = document.getElementById("agb-archiv-block");
+  block.classList.toggle("hidden", !archiv.length);
+  if (!archiv.length) return;
+
+  document.getElementById("agb-archiv-liste").innerHTML = archiv.map((a) => `
+    <details class="agb-fassung">
+      <summary>Fassung bis ${escapeHtml(datumZeitDe(a.abgeloestAm) || "unbekannt")}</summary>
+      <pre class="agb-alt">${escapeHtml(a.text || "")}</pre>
+    </details>`).join("");
 }
 
 function zeichneKatalog() {
@@ -1017,6 +1067,7 @@ async function speichereVerwaltung() {
     bank: wert("e-bank").trim(),
     kontaktName: wert("e-kontaktname").trim(),
     kontaktEmail: wert("e-kontaktemail").trim(),
+    agbText: wert("e-agb"),
     startErinnerung: document.getElementById("e-starterinnerung").checked,
     startErinnerungTage: zahlOderNull("e-starterinnerungtage") || 3,
     zahlErinnerung: document.getElementById("e-zahlerinnerung").checked,
@@ -1025,6 +1076,18 @@ async function speichereVerwaltung() {
   };
   if (e.iban && !/^[A-Z]{2}[0-9A-Z]{13,32}$/.test(e.iban)) return toast("Die IBAN sieht nicht richtig aus.", true);
   if (e.kontaktEmail && !e.kontaktEmail.includes("@")) return toast("Die Kontakt-E-Mail sieht nicht richtig aus.", true);
+
+  // Eine Änderung an den Bedingungen ist kein Nebenbei-Speichern: sie verlangt
+  // von allen Eltern, die ihre Anmeldung später noch anfassen, eine neue
+  // Zustimmung. Deshalb einmal nachfragen — aber nur, wenn sich der Text
+  // wirklich geändert hat.
+  const agbAlt = String((daten && daten.einstellungen && daten.einstellungen.agbText) || "").trim();
+  if (e.agbText.trim() !== agbAlt) {
+    if (!e.agbText.trim()) {
+      return toast("Die Teilnahmebedingungen dürfen nicht leer sein — ohne sie kann sich niemand anmelden.", true);
+    }
+    if (!confirm("Die Teilnahmebedingungen wurden geändert.\n\nFür bestehende Anmeldungen bleibt die bisherige Fassung gültig — sie ist weiter nachlesbar.\nEltern, die ihre Anmeldung danach über den Link aus der Mail ändern, müssen der neuen Fassung einmal zustimmen.\n\nSpeichern?")) return;
+  }
 
   await mitFehler(async () => {
     await speichereEinstellungen(e);

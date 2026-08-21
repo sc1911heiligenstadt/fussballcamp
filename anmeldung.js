@@ -90,6 +90,17 @@ function zeigeCamp() {
 
   baueFormular(document.getElementById("felder"), camp.felder, letzteEltern || {});
 
+  // Teilnahmebedingungen. Steht in der Verwaltung nichts, entfällt der Block
+  // ersatzlos — dann wird auch kein Häkchen verlangt. Ein leerer Aufklapper mit
+  // Pflicht-Häkchen wäre für die Eltern nicht erfüllbar.
+  const agbBereich = document.getElementById("agb-bereich");
+  if (camp.agbText) {
+    agbBereich.classList.remove("fc-hidden");
+    document.getElementById("agb-text").innerHTML = agbHtml(camp.agbText);
+  } else {
+    agbBereich.classList.add("fc-hidden");
+  }
+
   const zb = document.getElementById("zusatzfrage-bereich");
   if (camp.zusatzfrage) {
     zb.classList.remove("fc-hidden");
@@ -115,6 +126,11 @@ async function absenden(ev) {
   const { daten, fehlend } = leseFormular(document.getElementById("felder"), camp.felder);
   if (camp.zusatzfrage) daten.zusatzantwort = document.getElementById("f-zusatz").value.trim();
 
+  // Das AGB-Häkchen wird nur verlangt, wenn auch Bedingungen hinterlegt sind.
+  // Der Worker prüft dasselbe noch einmal selbst — hier geht es nur darum, dass
+  // die Eltern den Fehler VOR dem Absenden sehen.
+  const agbNoetig = !!camp.agbText;
+  if (agbNoetig && !document.getElementById("f-agb").checked) fehlend.push("Anerkennung der Teilnahmebedingungen");
   if (!document.getElementById("f-datenschutz").checked) fehlend.push("Einverständnis mit der Datenschutz-Information");
 
   if (fehlend.length) {
@@ -136,7 +152,13 @@ async function absenden(ev) {
       action: "fussballcamp-anmelden",
       token: campToken,
       daten,
-      datenschutz: true
+      datenschutz: true,
+      // ⚠️ `agbStand` ist die Kennung der Fassung, die oben WIRKLICH ANGEZEIGT
+      // wurde. Ändert jemand den Text, während das Formular offen liegt, weist
+      // der Worker die Anmeldung zurück und lässt neu zustimmen — sonst stünde
+      // im Nachweis eine Fassung, die diese Eltern nie zu sehen bekamen.
+      agb: agbNoetig ? true : undefined,
+      agbStand: agbNoetig ? camp.agbStand : undefined
     });
     letzteEltern = {
       elternName: daten.elternName, elternEmail: daten.elternEmail,

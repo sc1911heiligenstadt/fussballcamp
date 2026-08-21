@@ -80,6 +80,30 @@ function feldHtml(f, konf, wert) {
       </div>`;
   }
 
+  // Ja/Nein als zwei Knöpfe, nicht als Auswahlliste: eine Auswahlliste hat immer
+  // einen sichtbaren ersten Eintrag, und der wirkt wie eine schon gegebene
+  // Antwort. Hier soll man SEHEN, dass noch nichts gewählt ist.
+  //
+  // ⚠️ Ein alter Wert kann noch `true`/`false` aus der Häkchen-Zeit sein. `true`
+  // wird zu „ja"; `false` wird NICHT zu „nein", sondern bleibt unbeantwortet —
+  // ein nicht gesetztes Häkchen war nie eine belastbare Verneinung, sondern
+  // konnte genauso gut übersehen worden sein.
+  if (f.typ === "janein") {
+    const gewaehlt = wert === true ? "ja" : (wert === "ja" || wert === "nein" ? wert : "");
+    return `
+      <div class="anm-feld janein" role="group" aria-labelledby="${id}-frage"${pflicht ? ' aria-required="true"' : ""}>
+        <span class="janein-frage" id="${id}-frage">${oEsc(f.label)}${stern}</span>
+        <div class="janein-knoepfe">
+          ${JANEIN.map((o) => `
+            <label class="janein-knopf">
+              <input type="radio" name="${id}" value="${oEsc(o.id)}" data-feld="${oEsc(f.id)}"${o.id === gewaehlt ? " checked" : ""} />
+              <span>${oEsc(o.label)}</span>
+            </label>`).join("")}
+        </div>
+        ${hinweis}
+      </div>`;
+  }
+
   let eingabe;
   if (f.typ === "mehrzeilig") {
     eingabe = `<textarea id="${id}" data-feld="${oEsc(f.id)}" rows="2" maxlength="${f.maxLen || 500}"${req}>${oEsc(wert || "")}</textarea>`;
@@ -106,6 +130,17 @@ function leseFormular(wurzel, konf) {
   const fehlend = [];
 
   sichtbareFelder(konf).forEach((f) => {
+    // ⚠️ Ja/Nein liegt als ZWEI Radio-Knöpfe vor. Ohne `:checked` läge hier immer
+    // der erste von beiden — also stünde bei jeder Anmeldung „ja", auch wenn
+    // niemand etwas angeklickt hat.
+    if (f.typ === "janein") {
+      const gewaehlt = wurzel.querySelector(`[data-feld="${CSS.escape(f.id)}"]:checked`);
+      const v = gewaehlt ? String(gewaehlt.value) : "";
+      daten[f.id] = v;
+      if (istPflicht(f, konf) && !v) fehlend.push(f.label);
+      return;
+    }
+
     const el = wurzel.querySelector(`[data-feld="${CSS.escape(f.id)}"]`);
     if (!el) return;
     const v = f.typ === "haken" ? el.checked : String(el.value || "").trim();
@@ -115,6 +150,37 @@ function leseFormular(wurzel, konf) {
   });
 
   return { daten, fehlend };
+}
+
+// ---------- Teilnahmebedingungen ----------
+
+// Macht aus dem gepflegten Fließtext lesbares HTML: Leerzeile trennt Absätze,
+// eine Zeile, die mit „* " oder „- " beginnt, wird zum Aufzählungspunkt, und
+// eine kurze Zeile, die mit einer Ziffer und einem Punkt anfängt, zur Überschrift.
+//
+// ⚠️ ESCAPEN, bevor irgendetwas zusammengebaut wird. Der Text steht zwar nur
+// Administratoren offen, landet aber ungeprüft auf einer Seite, die jeder
+// aufruft, der einen Camp-Link hat.
+function agbHtml(text) {
+  const roh = String(text || "").replace(/\r\n?/g, "\n").trim();
+  if (!roh) return "";
+
+  return roh.split(/\n{2,}/).map((absatz) => {
+    const zeilen = absatz.split("\n").map((z) => z.trim()).filter(Boolean);
+    if (!zeilen.length) return "";
+
+    // Ein Block aus lauter Aufzählungszeilen wird eine Liste.
+    if (zeilen.every((z) => /^[*\-•]\s+/.test(z))) {
+      return `<ul>${zeilen.map((z) => `<li>${oEsc(z.replace(/^[*\-•]\s+/, ""))}</li>`).join("")}</ul>`;
+    }
+
+    // „3. Teilnehmerbeitrag und Zahlung" — Nummer, kurze Zeile, kein Satzende.
+    if (zeilen.length === 1 && /^\d+\.\s+\S/.test(zeilen[0]) && zeilen[0].length < 80 && !/[.!?]$/.test(zeilen[0])) {
+      return `<h4>${oEsc(zeilen[0])}</h4>`;
+    }
+
+    return `<p>${zeilen.map(oEsc).join("<br />")}</p>`;
+  }).join("");
 }
 
 // ---------- Kleine Helfer ----------

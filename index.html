@@ -6,7 +6,7 @@
 <title>⚽ Fußballcamp</title>
 <meta name="theme-color" content="#1a56a0" />
 <link rel="stylesheet" href="style.css?v=1.0" />
-<link rel="stylesheet" href="camp.css?v=1.0" />
+<link rel="stylesheet" href="camp.css?v=1.1" />
 </head>
 <body>
 
@@ -173,6 +173,34 @@
           <h2>Aufräum-Frist</h2>
           <p class="muted" style="margin-bottom:14px;">Nach wie vielen Monaten ein abgeschlossenes Camp zum Aufräumen vorgeschlagen wird. Gelöscht wird <strong>nie</strong> von allein — die App zeigt nur einen Hinweis mit Knopf.</p>
           <label class="feld-schmal">Monate<input type="number" id="e-aufraeumen" min="1" max="60" /></label>
+        </div>
+
+        <div class="card">
+          <h2>Teilnahmebedingungen</h2>
+          <div class="hinweis warn hidden" id="agb-vorgabe-hinweis">
+            <strong>Hier steht noch die eingebaute Fassung vom 21.08.2026.</strong>
+            Sie reicht bis Punkt 5 und bricht dort ab — es fehlen unter anderem Aufsicht,
+            Haftung und die Absage eines Camps durch den Verein. Trag den vollständigen
+            Text hier ein und speichere; ein Programm-Update braucht es dafür nicht.
+          </div>
+          <p class="muted" style="margin-bottom:14px;">
+            Steht im Anmeldeformular zum Aufklappen, mit einem eigenen Pflicht-Häkchen.
+            Ohne dieses Häkchen nimmt der Server keine Anmeldung an.
+            <strong>Leerzeile trennt Absätze</strong>, eine Zeile mit <code>*</code> davor
+            wird ein Aufzählungspunkt, eine Zeile wie <code>3. Überschrift</code> eine Zwischenüberschrift.
+          </p>
+          <textarea id="e-agb" rows="14" maxlength="30000" spellcheck="true"></textarea>
+          <p class="muted" style="margin-top:10px;font-size:13px;">
+            <strong>Eine Änderung wirkt nicht rückwirkend.</strong> Bei jeder Anmeldung ist
+            festgehalten, welcher Fassung zugestimmt wurde; für frühere Anmeldungen bleibt
+            die damalige Fassung erhalten und steht unten unter <em>Frühere Fassungen</em>.
+            Eltern, die ihre Anmeldung danach über den Link aus der Mail ändern, müssen der
+            neuen Fassung einmal zustimmen.
+          </p>
+          <details class="hidden" id="agb-archiv-block" style="margin-top:14px;">
+            <summary>Frühere Fassungen</summary>
+            <div id="agb-archiv-liste"></div>
+          </details>
         </div>
 
         <div class="card">
@@ -353,8 +381,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="config.js?v=1.0"></script>
+  <script src="config.js?v=1.1"></script>
   <script src="db.js?v=1.0"></script>
-  <script src="app.js?v=1.0"></script>
+  <script src="app.js?v=1.1"></script>
 </body>
 </html>

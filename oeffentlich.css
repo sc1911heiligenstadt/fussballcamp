@@ -84,6 +84,22 @@ body.fc-oeffentlich {
 .anm-hinweis { display: block; font-size: 12px; color: var(--fc-grau); margin-top: 3px; }
 .pflicht-stern { color: var(--fc-rot); }
 
+/* Ja/Nein: zwei Knöpfe nebeneinander, damit "noch nichts gewählt" sichtbar ist.
+   Die Knöpfe sind mindestens 44 px hoch — Fingerbreite, siehe Handy-Messung. */
+.janein-frage { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.janein-knoepfe { display: flex; gap: 10px; }
+.janein-knopf {
+  flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; padding: 8px 12px; cursor: pointer;
+  border: 2px solid var(--fc-rand); border-radius: 8px; background: #fff;
+  font-size: 15px; font-weight: 600; color: var(--fc-grau);
+}
+.janein-knopf input { width: 20px; height: 20px; flex-shrink: 0; margin: 0; }
+/* :has() fehlt auf alten iOS-Fassungen. Dann bleibt der Rahmen grau — der
+   Radio-Knopf selbst zeigt die Wahl trotzdem, die Färbung ist nur Zugabe. */
+.janein-knopf:has(input:checked) { border-color: var(--fc-blau); background: #eef4fc; color: var(--fc-blau); }
+.janein-knopf:has(input:focus-visible) { outline: 2px solid var(--fc-blau); outline-offset: 2px; }
+
 /* Knöpfe */
 .fc-btn {
   display: inline-block; background: var(--fc-blau); color: #fff; border: none; border-radius: 8px;
@@ -118,6 +134,13 @@ body.fc-oeffentlich {
 .fc-details > div { margin-top: 10px; }
 .fc-details p { margin-bottom: 8px; }
 .fc-details ul { margin: 0 0 8px 18px; }
+/* Zwischenüberschriften der Teilnahmebedingungen („3. Teilnehmerbeitrag …“).
+   Baut agbHtml() aus einer nummerierten Zeile; ohne Regel erbt h4 die
+   Browser-Vorgabe und stünde größer da als die Überschrift der Karte darüber. */
+.fc-details h4 { font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
+.fc-details h4:first-child { margin-top: 0; }
+/* Der Rechtstext ist lang — in sich scrollen lassen, statt die Seite zu strecken. */
+#agb-text { max-height: 45vh; overflow-y: auto; }
 
 /* ---------- Das Fenster auf der Vereins-Homepage ----------
    ⚠️ Alle Regeln hier hängen an #fc-popup-wurzel. popup.js baut das in eine

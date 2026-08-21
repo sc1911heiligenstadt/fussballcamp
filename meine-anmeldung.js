@@ -110,6 +110,7 @@ function zeige() {
   if (abgesagt) return;
 
   baueFormular(document.getElementById("felder"), camp.felder, a);
+  zeigeAgb();
 
   const zb = document.getElementById("zusatzfrage-bereich");
   if (camp.zusatzfrage) {
@@ -118,6 +119,47 @@ function zeige() {
     document.getElementById("f-zusatz").value = a.zusatzantwort || "";
   } else {
     zb.classList.add("fc-hidden");
+  }
+}
+
+// Zeigt die Teilnahmebedingungen. Zwei Fälle, und der Unterschied ist der Punkt
+// der ganzen Sache:
+//
+//   unverändert — die Eltern sehen GENAU die Fassung, der sie zugestimmt haben,
+//                 samt Datum. Kein Häkchen: sie haben bereits zugestimmt.
+//   geändert    — sie sehen die NEUE Fassung, deutlich als geändert markiert,
+//                 und müssen ihr zustimmen, bevor sie speichern können.
+//
+// ⚠️ Was hier NICHT passieren darf: die neue Fassung stillschweigend zeigen und
+// die alte Zustimmung weitergelten lassen. Dann stünde im Nachweis eine
+// Zustimmung zu einem Text, den diese Eltern nie gesehen haben.
+function zeigeAgb() {
+  const agb = stand.agb;
+  const bereich = document.getElementById("agb-bereich");
+  const hakenFeld = document.getElementById("agb-haken-feld");
+
+  if (!agb || !agb.text) {
+    bereich.classList.add("fc-hidden");
+    return;
+  }
+
+  bereich.classList.remove("fc-hidden");
+  document.getElementById("agb-text").innerHTML = agbHtml(agb.text);
+
+  const meldung = document.getElementById("agb-meldung");
+  if (agb.geaendert) {
+    hakenFeld.classList.remove("fc-hidden");
+    document.getElementById("f-agb").checked = false;
+    document.getElementById("agb-summary").textContent = "Die geänderten Teilnahmebedingungen lesen";
+    meldung.innerHTML = `<div class="fc-hinweis warn"><strong>Die Teilnahmebedingungen haben sich geändert.</strong>
+      Bitte lies sie durch und bestätige unten — sonst lässt sich hier nichts speichern.
+      Deine Anmeldung bleibt davon unberührt und gilt weiter.</div>`;
+  } else {
+    hakenFeld.classList.add("fc-hidden");
+    document.getElementById("agb-summary").textContent = "Die Teilnahmebedingungen nachlesen";
+    meldung.innerHTML = agb.akzeptiertAm
+      ? `<p class="fc-grau">Diesen Bedingungen hast du bei der Anmeldung am ${oEsc(oDatum(agb.akzeptiertAm))} zugestimmt.</p>`
+      : "";
   }
 }
 
@@ -132,6 +174,11 @@ async function speichern(ev) {
   const { daten, fehlend } = leseFormular(document.getElementById("felder"), stand.camp.felder);
   if (stand.camp.zusatzfrage) daten.zusatzantwort = document.getElementById("f-zusatz").value.trim();
 
+  const agbNeuNoetig = !!(stand.agb && stand.agb.geaendert);
+  if (agbNeuNoetig && !document.getElementById("f-agb").checked) {
+    fehlend.push("Anerkennung der geänderten Teilnahmebedingungen");
+  }
+
   if (fehlend.length) {
     fehlerBox.textContent = `Bitte noch ausfüllen: ${fehlend.join(", ")}.`;
     fehlerBox.classList.remove("fc-hidden");
@@ -142,10 +189,18 @@ async function speichern(ev) {
   knopf.disabled = true;
   knopf.textContent = "Wird gespeichert …";
   try {
-    await oeffAufruf({ action: "fussballcamp-meine-speichern", token: anmToken, daten });
+    await oeffAufruf({
+      action: "fussballcamp-meine-speichern", token: anmToken, daten,
+      agb: agbNeuNoetig ? true : undefined,
+      agbStand: agbNeuNoetig ? stand.agb.stand : undefined
+    });
     okBox.textContent = "Gespeichert. Vielen Dank — wir haben die Änderung.";
     okBox.classList.remove("fc-hidden");
     okBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Nach einer neuen Zustimmung ist der Stand ein anderer. Ohne Neuladen bliebe
+    // die Warnung stehen, und das Häkchen würde beim nächsten Speichern erneut
+    // verlangt, obwohl es gerade gesetzt wurde.
+    if (agbNeuNoetig) await lade();
   } catch (e) {
     fehlerBox.textContent = e.message;
     fehlerBox.classList.remove("fc-hidden");

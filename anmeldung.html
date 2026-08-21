@@ -8,7 +8,7 @@
 <!-- Diese Seite ist ein Anmeldeformular, keine Fundstelle für Suchmaschinen.
      Der Link soll über die Vereinsseite laufen, nicht über eine Suche. -->
 <meta name="robots" content="noindex, nofollow" />
-<link rel="stylesheet" href="oeffentlich.css?v=1.0" />
+<link rel="stylesheet" href="oeffentlich.css?v=1.1" />
 </head>
 <body class="fc-oeffentlich">
 
@@ -54,6 +54,24 @@
         <div class="anm-feld">
           <label for="f-zusatz" id="zusatzfrage-label"></label>
           <input type="text" id="f-zusatz" maxlength="200" />
+        </div>
+      </div>
+
+      <!-- Teilnahmebedingungen. Inhalt und Häkchen baut anmeldung.js, denn der
+           Text kommt vom Server (Verwaltung → Teilnahmebedingungen). Steht dort
+           nichts, bleibt dieser ganze Block weg — dann wird auch nichts verlangt. -->
+      <div id="agb-bereich" class="fc-hidden">
+        <h3>Teilnahmebedingungen</h3>
+        <details class="fc-details">
+          <summary>Allgemeine Teilnahmebedingungen für Fußballcamps</summary>
+          <div id="agb-text"></div>
+        </details>
+
+        <div class="anm-feld haken">
+          <label for="f-agb">
+            <input type="checkbox" id="f-agb" />
+            <span>Ich habe die Teilnahmebedingungen gelesen und erkenne sie an. Ich bin erziehungsberechtigt und zur Anmeldung dieses Kindes berechtigt. <span class="pflicht-stern">*</span></span>
+          </label>
         </div>
       </div>
 
@@ -103,8 +121,8 @@
 
 <p class="fc-fuss">1. SC 1911 e.V. Heilbad Heiligenstadt · Nachwuchsbereich</p>
 
-<script src="config.js?v=1.0"></script>
-<script src="oeffentlich.js?v=1.0"></script>
-<script src="anmeldung.js?v=1.0"></script>
+<script src="config.js?v=1.1"></script>
+<script src="oeffentlich.js?v=1.1"></script>
+<script src="anmeldung.js?v=1.1"></script>
 </body>
 </html>
