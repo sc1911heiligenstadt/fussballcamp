@@ -180,6 +180,26 @@ function zeigeFertig(a) {
   document.getElementById("fertig-bereich").classList.remove("fc-hidden");
   window.scrollTo({ top: 0, behavior: "smooth" });
 
+  // ⚠️ Fuer dieses Kind lag schon eine Anmeldung vor. Der Server gibt dann
+  // NICHTS ueber sie heraus -- weder den Aendern-Link noch den Namen, die
+  // Mailadresse oder den Beitrag. Der Grund steht im Worker bei handleFcAnmelden:
+  // Kindname und Eltern-Mail sind im Verein bekannt, sie duerfen kein Ausweis
+  // sein. Der Link geht stattdessen per Mail an die hinterlegte Adresse.
+  //
+  // Diese Seite darf hier deshalb nichts erfinden. Kein "an deine E-Mail" mit
+  // eingesetzter Adresse, kein Beitragsblock, kein Link.
+  if (a.schonDa) {
+    document.getElementById("fertig-kopf").innerHTML =
+      `<strong>Für dieses Kind liegt schon eine Anmeldung vor.</strong>
+       Wir haben den Link zur Anmeldung noch einmal an die E-Mail-Adresse geschickt,
+       die dort hinterlegt ist. Bitte schau auch im Spam-Ordner nach.`;
+    document.getElementById("fertig-zahlung").innerHTML = "";
+    document.getElementById("fertig-link").innerHTML =
+      `<div class="fc-hinweis">Kommt keine E-Mail an, oder war das gar nicht deine
+       Anmeldung? Dann melde dich bitte direkt beim Verein — wir klären das.</div>`;
+    return;
+  }
+
   const aufWarteliste = a.status === "warteliste";
   document.getElementById("fertig-kopf").innerHTML = aufWarteliste
     ? `<strong>${oEsc(a.kind)} steht auf der Warteliste.</strong>

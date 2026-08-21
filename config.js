@@ -173,6 +173,20 @@ const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
   {
+    version: "1.6",
+    groups: [
+      {
+        title: "Der Änderungs-Link geht nur noch per E-Mail",
+        items: [
+          "Wer ein Kind anmeldet, für das schon eine Anmeldung vorliegt, bekommt den Link zum späteren Ändern nicht mehr auf der Seite angezeigt. Er geht per E-Mail an die Adresse, die in der vorhandenen Anmeldung hinterlegt ist.",
+          "Der Grund: Vor- und Nachname eines Kindes und die E-Mail-Adresse der Eltern sind im Verein bekannt. Wer sie kannte, bekam durch ein zweites Absenden des Formulars den Link — und über den Link Allergien, Medikamente, Anschrift und Telefonnummer einer fremden Familie. Das geht jetzt nicht mehr.",
+          "Der normale Fall bleibt genauso: Bleibt die Anmeldung im Netz hängen und wird noch einmal abgeschickt, entsteht weiterhin keine zweite Anmeldung, der Platz bleibt derselbe, und die Bestätigung kommt erneut per E-Mail.",
+          "Damit niemand ein fremdes Postfach mit Mails zudecken kann, wird der Link höchstens alle zehn Minuten einmal nachgeschickt."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.5",
     groups: [
       {
