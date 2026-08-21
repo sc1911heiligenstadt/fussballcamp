@@ -69,7 +69,9 @@
       '#fc-popup-wurzel *{box-sizing:border-box;margin:0;padding:0}',
       '#fc-popup-wurzel .fc-pop{background:#fff;border-radius:14px;max-width:460px;width:100%;',
       'max-height:calc(100vh - 32px);overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);position:relative}',
-      '#fc-popup-wurzel .fc-pop-kopf{background:#1a56a0;color:#fff;padding:18px 46px 18px 22px;border-radius:14px 14px 0 0}',
+      // Rechtes Polster 58 statt 46 px: der Schliessen-Knopf ist auf Fingerbreite
+      // gewachsen und laege sonst ueber der Ueberschrift.
+      '#fc-popup-wurzel .fc-pop-kopf{background:#1a56a0;color:#fff;padding:18px 58px 18px 22px;border-radius:14px 14px 0 0}',
       '#fc-popup-wurzel .fc-pop-kopf h2{font-size:19px;margin:0;color:#fff;font-weight:600}',
       '#fc-popup-wurzel .fc-pop-body{padding:18px 22px 22px}',
       '#fc-popup-wurzel .fc-pop-camp{border-bottom:1px solid #dde1e8;padding-bottom:14px;margin-bottom:14px}',
@@ -82,10 +84,18 @@
       '#fc-popup-wurzel .fc-pop-btn{display:inline-block;background:#2d8c4e;color:#fff;border:none;',
       'border-radius:8px;padding:11px 20px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer}',
       '#fc-popup-wurzel .fc-pop-btn:hover{filter:brightness(1.08)}',
-      '#fc-popup-wurzel .fc-pop-zu{position:absolute;top:12px;right:14px;background:none;border:none;',
-      'color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:2px 8px}',
-      '#fc-popup-wurzel .fc-pop-spaeter{display:block;margin-top:14px;background:none;border:none;color:#6b7280;',
-      'font-size:13px;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0}'
+      // 44 x 44 px. Vorher war das Kreuz 31 x 30 px gross und am Handy kaum zu
+      // treffen (gemessen 2026-08-21). Nur die Flaeche waechst, das Zeichen
+      // bleibt gleich gross.
+      '#fc-popup-wurzel .fc-pop-zu{position:absolute;top:10px;right:10px;background:none;border:none;',
+      'color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:0;width:44px;height:44px;',
+      'display:flex;align-items:center;justify-content:center}',
+      // War 17 px hoch. inline-flex statt block: die Tippflaeche wird 44 px hoch,
+      // bleibt aber so schmal wie der Text — ein versehentlicher Tipp wuerde das
+      // Fenster fuer sieben Tage stummschalten.
+      '#fc-popup-wurzel .fc-pop-spaeter{display:inline-flex;align-items:center;min-height:44px;',
+      'margin-top:2px;background:none;border:none;color:#6b7280;font-size:13px;',
+      'text-decoration:underline;cursor:pointer;font-family:inherit;padding:0 2px}'
     ].join("");
     document.head.appendChild(s);
   }

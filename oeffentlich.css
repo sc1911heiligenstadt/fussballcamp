@@ -47,6 +47,13 @@ body.fc-oeffentlich {
 .fc-karte h3 { font-size: 15px; color: var(--fc-blau); margin: 18px 0 6px; }
 .fc-karte p { margin-bottom: 10px; }
 .fc-karte p:last-child { margin-bottom: 0; }
+
+/* Der Änderungslink auf der Bestätigungsseite steht in voller Länge da, damit
+   man ihn abtippen oder weitergeben kann — er hat aber keine Leerzeichen. Ohne
+   den Umbruch lief er am Handy über den rechten Rand hinaus und schob die ganze
+   Seite mit: bei 375 px war er 412 px breit, die Seite 76 px zu breit
+   (gemessen 2026-08-21). Gilt genauso für eine URL im Rechtstext. */
+.fc-karte a, .fc-details { overflow-wrap: anywhere; }
 .fc-grau { color: var(--fc-grau); font-size: 14px; }
 .fc-vorzeile { white-space: pre-line; }
 
@@ -157,7 +164,7 @@ body.fc-oeffentlich {
   background: #fff; border-radius: 14px; max-width: 460px; width: 100%;
   max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.3); position: relative;
 }
-#fc-popup-wurzel .fc-pop-kopf { background: #1a56a0; color: #fff; padding: 18px 22px; border-radius: 14px 14px 0 0; }
+#fc-popup-wurzel .fc-pop-kopf { background: #1a56a0; color: #fff; padding: 18px 58px 18px 22px; border-radius: 14px 14px 0 0; }
 #fc-popup-wurzel .fc-pop-kopf h2 { font-size: 19px; margin: 0; color: #fff; }
 #fc-popup-wurzel .fc-pop-body { padding: 18px 22px 22px; }
 #fc-popup-wurzel .fc-pop-camp { border-bottom: 1px solid #dde1e8; padding-bottom: 14px; margin-bottom: 14px; }
@@ -171,11 +178,20 @@ body.fc-oeffentlich {
   display: inline-block; background: #2d8c4e; color: #fff; border: none; border-radius: 8px;
   padding: 11px 20px; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer;
 }
+/* 44 x 44 px: das Kreuz war 31 x 30 px gross und damit mit dem Finger kaum zu
+   treffen (gemessen 2026-08-21). Die Flaeche waechst, das Zeichen bleibt gleich
+   gross. Das rechte Polster im Kopf ist deshalb auf 58 px erhoeht — sonst
+   laege der groessere Knopf ueber der Ueberschrift. */
 #fc-popup-wurzel .fc-pop-zu {
-  position: absolute; top: 12px; right: 14px; background: none; border: none;
-  color: #fff; font-size: 26px; line-height: 1; cursor: pointer; padding: 2px 8px;
+  position: absolute; top: 10px; right: 10px; background: none; border: none;
+  color: #fff; font-size: 26px; line-height: 1; cursor: pointer; padding: 0;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
 }
+/* War 17 px hoch. inline-flex statt block: die Tippflaeche wird 44 px hoch,
+   bleibt aber so breit wie der Text — ein versehentlicher Tipp wuerde das
+   Fenster fuer sieben Tage stummschalten. */
 #fc-popup-wurzel .fc-pop-spaeter {
-  display: block; margin-top: 14px; background: none; border: none; color: #6b7280;
-  font-size: 13px; text-decoration: underline; cursor: pointer; font-family: inherit; padding: 0;
+  display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px;
+  background: none; border: none; color: #6b7280;
+  font-size: 13px; text-decoration: underline; cursor: pointer; font-family: inherit; padding: 0 2px;
 }
