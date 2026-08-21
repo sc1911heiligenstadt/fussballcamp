@@ -55,7 +55,7 @@ function zeige() {
 
   const kind = `${a.kindVorname || ""} ${a.kindNachname || ""}`.trim();
   document.getElementById("kopf-titel").textContent = `${kind} — ${camp.name}`;
-  document.title = `Anmeldung ${kind} — 1. SC 1911 Heilbad Heiligenstadt`;
+  document.title = `Anmeldung ${kind} — 1. SC 1911 Heiligenstadt e.V.`;
 
   const status = document.getElementById("kopf-status");
   if (a.status === "abgesagt") {
@@ -91,7 +91,7 @@ function zeige() {
       <div class="fc-zahlung">
         <dl>
           <dt>Betrag</dt><dd>${oEsc(oEuro(z.betrag))}</dd>
-          <dt>Empfänger</dt><dd>${oEsc(z.kontoinhaber || "1. SC 1911 e.V. Heilbad Heiligenstadt")}</dd>
+          <dt>Empfänger</dt><dd>${oEsc(z.kontoinhaber || "1. SC 1911 Heiligenstadt e.V.")}</dd>
           <dt>IBAN</dt><dd>${oEsc(ibanLesbar(z.iban))}</dd>
           ${z.bic ? `<dt>BIC</dt><dd>${oEsc(z.bic)}</dd>` : ""}
           <dt>Verwendungszweck</dt><dd>${oEsc(z.verwendungszweck)}</dd>

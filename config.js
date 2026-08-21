@@ -127,7 +127,7 @@ const DEFAULT_JOBS = [
 // FC_AGB_VORGABE im Worker; leer heißt „nimm die Vorgabe". Sonst stünde derselbe
 // Rechtstext in zwei Dateien, und man änderte irgendwann die falsche.
 const DEFAULT_EINSTELLUNGEN = {
-  iban: "", bic: "", kontoinhaber: "1. SC 1911 e.V. Heilbad Heiligenstadt", bank: "",
+  iban: "", bic: "", kontoinhaber: "1. SC 1911 Heiligenstadt e.V.", bank: "",
   kontaktName: "", kontaktEmail: "",
   agbText: "",
   startErinnerung: true, startErinnerungTage: 3,
@@ -169,6 +169,19 @@ const DEFAULT_FELDER = {
 const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
+  {
+    version: "1.2",
+    groups: [
+      {
+        title: "Der richtige Vereinsname",
+        items: [
+          "Überall, wo der Verein genannt wird, steht jetzt „1. SC 1911 Heiligenstadt e.V.“ — so, wie er wirklich heißt. Vorher stand dort „1. SC 1911 e.V. Heilbad Heiligenstadt“.",
+          "Betrifft die Anmeldeseite, die Seite „Meine Anmeldung“, den Fuß der Mails an die Eltern und die Datenschutz-Information. Gerade dort zählt es: die Information nach Art. 13 DSGVO muss den Verantwortlichen richtig benennen.",
+          "⚠️ Der vorgeschlagene Kontoinhaber unter „Verwaltung“ heißt jetzt ebenfalls so. Prüfe beim Eintragen der IBAN, wie das Konto bei der Bank wirklich lautet — der Empfängername muss dazu passen, sonst kann eine Überweisung abgelehnt werden."
+        ]
+      }
+    ]
+  },
   {
     version: "1.1",
     groups: [

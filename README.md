@@ -1,6 +1,6 @@
 # ⚽ Fußballcamp
 
-Werkzeug des **1. SC 1911 e.V. Heilbad Heiligenstadt** (Nachwuchsbereich), um
+Werkzeug des **1. SC 1911 Heiligenstadt e.V.** (Nachwuchsbereich), um
 Fußballcamps anzulegen, auf der Vereinsseite zu bewerben, die Anmeldungen der Kinder
 einzusammeln und die Aufgaben der Helfer zu verteilen.
 

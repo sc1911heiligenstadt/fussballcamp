@@ -55,7 +55,7 @@ function zeigeProblem(titel, text) {
 function zeigeCamp() {
   document.getElementById("laden").classList.add("fc-hidden");
   document.getElementById("formular-bereich").classList.remove("fc-hidden");
-  document.title = `Anmeldung: ${camp.name} — 1. SC 1911 Heilbad Heiligenstadt`;
+  document.title = `Anmeldung: ${camp.name} — 1. SC 1911 Heiligenstadt e.V.`;
 
   document.getElementById("camp-name").textContent = camp.name || "Fußballcamp";
   document.getElementById("camp-beschreibung").textContent = camp.beschreibung || "";
@@ -198,7 +198,7 @@ function zeigeFertig(a) {
       <div class="fc-zahlung">
         <dl>
           <dt>Betrag</dt><dd>${oEsc(oEuro(a.zahlung.betrag))}</dd>
-          <dt>Empfänger</dt><dd>${oEsc(a.zahlung.kontoinhaber || "1. SC 1911 e.V. Heilbad Heiligenstadt")}</dd>
+          <dt>Empfänger</dt><dd>${oEsc(a.zahlung.kontoinhaber || "1. SC 1911 Heiligenstadt e.V.")}</dd>
           <dt>IBAN</dt><dd>${oEsc(ibanLesbar(a.zahlung.iban))}</dd>
           ${a.zahlung.bic ? `<dt>BIC</dt><dd>${oEsc(a.zahlung.bic)}</dd>` : ""}
           <dt>Verwendungszweck</dt><dd>${oEsc(a.zahlung.verwendungszweck)}</dd>
