@@ -231,14 +231,32 @@ function zeichneAufraeumBox() {
   if (!canAdmin()) { box.classList.add("hidden"); return; }
 
   const reif = camps().filter((c) => c.aufraeumenFaellig && !c.aufgeraeumtAm);
-  if (!reif.length) { box.classList.add("hidden"); box.innerHTML = ""; return; }
+  // ⚠️ Der zweite Fall ist der leisere: das Camp ist lange vorbei, aber niemand
+  // hat es je abgeschlossen. Dann wird `aufraeumenFaellig` nie true, der Kasten
+  // bliebe für immer leer — und die Daten der Kinder stünden unbefristet in der
+  // Datei, obwohl das Anmeldeformular den Eltern etwas anderes verspricht.
+  const offen = camps().filter((c) => c.abschlussFaellig && !c.aufgeraeumtAm);
+  if (!reif.length && !offen.length) { box.classList.add("hidden"); box.innerHTML = ""; return; }
 
   box.classList.remove("hidden");
-  box.innerHTML = `
-    <h3>Diese Camps sind reif zum Aufräumen</h3>
-    <ul>${reif.map((c) => `<li><strong>${escapeHtml(c.name)}</strong> — beendet am ${datumDe(c.bisDatum)}, ${(c.anmeldungen || []).length} Anmeldungen</li>`).join("")}</ul>
-    <p class="muted" style="font-size:13px;margin-bottom:10px;">Aufräumen löscht Namen, Anschriften und Gesundheitsangaben. Die Zahlen für die Statistik bleiben. Das lässt sich nicht rückgängig machen.</p>
-    ${reif.map((c) => `<button type="button" class="btn small warn" data-aufraeumen="${escapeAttr(c.id)}">„${escapeHtml(c.name)}" aufräumen</button>`).join(" ")}`;
+  const teile = [];
+
+  if (offen.length) {
+    teile.push(`
+      <h3>Diese Camps sind längst vorbei</h3>
+      <ul>${offen.map((c) => `<li><strong>${escapeHtml(c.name)}</strong> — beendet am ${datumDe(c.bisDatum)}, ${(c.anmeldungen || []).length} Anmeldungen mit Namen und Gesundheitsangaben</li>`).join("")}</ul>
+      <p class="muted" style="font-size:13px;margin-bottom:10px;">Setz sie auf <strong>abgeschlossen</strong> — danach lassen sie sich hier aufräumen. Solange das nicht passiert, bleiben die Daten der Kinder gespeichert.</p>`);
+  }
+
+  if (reif.length) {
+    teile.push(`
+      <h3>Diese Camps sind reif zum Aufräumen</h3>
+      <ul>${reif.map((c) => `<li><strong>${escapeHtml(c.name)}</strong> — beendet am ${datumDe(c.bisDatum)}, ${(c.anmeldungen || []).length} Anmeldungen</li>`).join("")}</ul>
+      <p class="muted" style="font-size:13px;margin-bottom:10px;">Aufräumen löscht Namen, Anschriften und Gesundheitsangaben. Die Zahlen für die Statistik bleiben. Das lässt sich nicht rückgängig machen.</p>
+      ${reif.map((c) => `<button type="button" class="btn small warn" data-aufraeumen="${escapeAttr(c.id)}">„${escapeHtml(c.name)}" aufräumen</button>`).join(" ")}`);
+  }
+
+  box.innerHTML = teile.join("");
 
   box.querySelectorAll("[data-aufraeumen]").forEach((b) => {
     b.addEventListener("click", async () => {

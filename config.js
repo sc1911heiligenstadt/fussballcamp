@@ -173,6 +173,48 @@ const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
   {
+    version: "1.5",
+    groups: [
+      {
+        title: "Datenschutz nachgeschärft",
+        items: [
+          "Die Datenschutz-Information im Anmeldeformular nennt jetzt die vollständige Anschrift des Vereins, die zuständige Aufsichtsbehörde und alle Dienstleister, über die die Anmeldung läuft — vorher verwies sie nur auf das Impressum und nannte den Serverdienst nicht.",
+          "Sie sagt außerdem ehrlich, dass die Frage nach Allergien in der Regel ein Pflichtfeld ist. Vorher stand dort „Du kannst diese Felder leer lassen“ — das stimmte seit den neuen Pflichtangaben nicht mehr.",
+          "Die Seite „Meine Anmeldung“ hat einen eigenen Datenschutz-Abschnitt bekommen. Sie ist für viele Eltern die einzige Seite, die sie nach der Anmeldung wiedersehen; bisher stand dort kein Wort dazu und keine Adresse, an die man sich wenden kann.",
+          "Bei der Absage steht jetzt, was eine Absage tut und was nicht: sie gibt den Platz frei, löscht die Anmeldung aber nicht. Wer vorher gelöscht werden möchte, findet dort den Hinweis, sich zu melden."
+        ]
+      },
+      {
+        title: "Aufräum-Hinweis erwischt auch vergessene Camps",
+        items: [
+          "Der Kasten „reif zum Aufräumen“ erschien bisher nur für Camps im Status „abgeschlossen“. Blieb ein Camp nach dem letzten Tag einfach auf „offen“ stehen, wurde es nie fällig — und die Namen und Gesundheitsangaben der Kinder blieben unbefristet gespeichert.",
+          "Jetzt meldet der Kasten zusätzlich Camps, die längst vorbei sind und noch Anmeldungen tragen, mit der Bitte, sie abzuschließen.",
+          "Gelöscht wird weiterhin nichts von allein. Das Aufräumen bleibt ein bewusster Klick."
+        ]
+      },
+      {
+        title: "Keine Kindernamen mehr im Verlauf",
+        items: [
+          "Jedes Camp führt im Hintergrund einen Verlauf — wer wann was getan hat. Bei Anmeldungen stand darin bisher der volle Name des Kindes, obwohl der Verlauf nirgends angezeigt wird.",
+          "Der Verlauf hält jetzt nur noch die laufende Nummer fest. Beim Löschen einer Anmeldung und beim Aufräumen eines Camps werden zusätzlich die alten Einträge von Namen befreit — sonst hätte eine Löschung nur die halbe Arbeit gemacht."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.4",
+    groups: [
+      {
+        title: "Am Handy",
+        items: [
+          "Nach dem Absenden einer Anmeldung stand der Link zum späteren Ändern in voller Länge da und lief seitlich aus dem Bild — er ist 412 Pixel breit, das Handy hat 375. Die ganze Bestätigungsseite ließ sich dadurch nach rechts schieben, und der Link war nur zur Hälfte lesbar. Jetzt bricht er um.",
+          "Im Fenster auf der Vereinsseite waren die beiden kleinen Knöpfe kaum zu treffen: das Kreuz zum Schließen maß 31 × 30 Pixel, „Nicht mehr anzeigen“ war 17 Pixel hoch. Beide haben jetzt 44 Pixel Fingerbreite. Sichtbar ändert sich nichts — das Kreuz bleibt gleich groß, nur die Fläche darum wächst.",
+          "Geprüft, aber in Ordnung: die Anmeldeseite mit allen Feldern, „Meine Anmeldung“ mit Kontodaten, und die Verwaltung mit allen sechs Reitern nebeneinander. Überall 0 Pixel Überlauf bei 375 Pixel Breite."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.3",
     groups: [
       {
