@@ -92,6 +92,53 @@ function campHatMich(camp) {
       (j.besetzung || []).some((b) => b.username && b.username === me.username)));
 }
 
+// ⚠️ Verstecken ist nicht Räumen. Fällt einem Nutzer ein Recht weg, während die
+// App offen ist (Michel nimmt ihn aus einer Gruppe, ein Passwortwechsel setzt die
+// Sitzung zurück), dann versteckt `applyAdminVisibility` zwar die Reiter — der
+// zuletzt gezeichnete Inhalt bleibt aber im DOM stehen. Und darin stehen
+// Kindernamen, Eltern-Mailadressen und die Kontoverbindung des Vereins.
+//
+// Die vier betroffenen Zeichenfunktionen steigen bei fehlendem Recht als ERSTES
+// aus (`if (!canEdit()) return;`) und kommen gar nicht mehr bis zu der Zeile, die
+// den Inhalt setzt. Deshalb wird hier zentral geräumt statt in jeder einzelnen —
+// von vier Stellen vergisst früher oder später eine den Fall, und man sieht es
+// nicht.
+//
+// Der Server gibt die Daten nach dem Rechteverlust ohnehin nicht mehr heraus
+// ([[f-ausblenden]]); das hier ist die zweite Hälfte davon — das, was schon im
+// Browser liegt, muss auch weg.
+function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
+  const leere = (id) => { const el = document.getElementById(id); if (el) el.innerHTML = ""; };
+  const leereText = (id) => { const el = document.getElementById(id); if (el) el.textContent = ""; };
+  const leereFeld = (id) => { const el = document.getElementById(id); if (el) el.value = ""; };
+
+  if (!edit) {
+    // Anmeldungen: Kindernamen, Geburtsdaten, Eltern-Mail, Beitragsstand.
+    leere("anm-liste");
+    leereText("anm-zusammenfassung");
+    // Der Meldekasten nennt Kindernamen und was geändert wurde.
+    leere("meldebox");
+  }
+  if (!admin) {
+    leere("aufraeum-box");
+    // Kontoverbindung und Ansprechpartner stehen in Formularfeldern, nicht im
+    // Markup — ein leeres innerHTML räumt sie NICHT weg.
+    ["e-kontoinhaber", "e-iban", "e-bic", "e-bank", "e-kontaktname", "e-kontaktemail",
+     "e-agb"].forEach(leereFeld);
+    leere("agb-archiv-liste");
+    const archivBlock = document.getElementById("agb-archiv-block");
+    if (archivBlock) archivBlock.classList.add("hidden");
+    leere("katalog-liste");
+  }
+  if (!betreuer) {
+    // Die Betreuer-Sicht trägt Allergien, Medikamente und Notfallnummern.
+    leere("teilnehmer-liste");
+    // ⚠️ Auch den Zwischenspeicher: sonst zeichnet der nächste Reiterwechsel die
+    // Liste aus dem Speicher neu, ohne den Server noch einmal zu fragen.
+    teilnehmerCache = {};
+  }
+}
+
 // Geteiltes Flotten-Muster: .editor-only am Bearbeiten-Recht, .admin-only am
 // Administrieren-Recht. Der Info-Reiter trägt bewusst keine der beiden Klassen
 // und bleibt für alle sichtbar.
@@ -103,6 +150,8 @@ function applyAdminVisibility() {
   document.querySelectorAll(".editor-only").forEach((el) => el.classList.toggle("hidden", !edit));
   document.querySelectorAll(".admin-only").forEach((el) => el.classList.toggle("hidden", !admin));
   document.querySelectorAll(".betreuer-only").forEach((el) => el.classList.toggle("hidden", !betreuer));
+
+  raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer);
 
   const wer = namen[me.username] || me.username || "";
   const stufe = admin ? "Administrieren" : (edit ? "Bearbeiten" : "Sehen");
@@ -162,10 +211,13 @@ function zeichneKennzahlen() {
   const frei = offene.reduce((s, c) => s + Math.max(0, (c.plaetze || 0) - (c.belegt || 0)), 0);
   const warte = offene.reduce((s, c) => s + (c.warteliste || 0), 0);
 
+  // ⚠️ Bei genau 1 muss die Beschriftung mitgehen: „1 Camps mit offener
+  // Anmeldung" und „1 freie Plätze" standen so auf der Startseite.
+  const ein = (n, einzahl, mehrzahl) => (n === 1 ? einzahl : mehrzahl);
   const karten = [
-    { label: "Camps mit offener Anmeldung", wert: offene.length },
-    { label: "angemeldete Kinder", wert: belegt },
-    { label: "freie Plätze", wert: frei, art: frei === 0 && offene.length ? "warn" : "" },
+    { label: ein(offene.length, "Camp mit offener Anmeldung", "Camps mit offener Anmeldung"), wert: offene.length },
+    { label: ein(belegt, "angemeldetes Kind", "angemeldete Kinder"), wert: belegt },
+    { label: ein(frei, "freier Platz", "freie Plätze"), wert: frei, art: frei === 0 && offene.length ? "warn" : "" },
     { label: "auf der Warteliste", wert: warte, art: warte > 0 ? "warn" : "" }
   ];
 
@@ -174,7 +226,8 @@ function zeichneKennzahlen() {
   // eine Falschaussage.
   if (canEdit()) {
     const offenerBeitrag = camps().reduce((s, c) => s + offeneBeitraege(c).length, 0);
-    karten.push({ label: "Beiträge offen", wert: offenerBeitrag, art: offenerBeitrag > 0 ? "warn" : "ok" });
+    karten.push({ label: ein(offenerBeitrag, "Beitrag offen", "Beiträge offen"), wert: offenerBeitrag,
+                  art: offenerBeitrag > 0 ? "warn" : "ok" });
   }
 
   ziel.innerHTML = karten.map((k) => `

@@ -215,6 +215,20 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.14",
+    groups: [
+      {
+        title: "Durchsicht: zwei Sachen richtiggestellt",
+        items: [
+          "Fällt jemandem ein Recht weg, während er die App offen hat, wird jetzt auch weggeräumt, was schon auf dem Bildschirm steht. Vorher wurden die Reiter nur versteckt — die zuletzt geladenen Anmeldungen samt Kindernamen und die Kontoverbindung blieben im Browser stehen.",
+          "Betroffen waren die Anmeldeliste, der Meldekasten, die Teilnehmerliste der Betreuer und die Felder unter Verwaltung.",
+          "Im Normalbetrieb ändert sich dadurch nichts: Wer das Recht hat, sieht alles wie bisher.",
+          "Die Zahlen oben auf der Startseite sagen bei genau eins jetzt „1 Camp mit offener Anmeldung“ und „1 freier Platz“ statt „1 Camps“ und „1 freie Plätze“."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.13",
     groups: [
       {
