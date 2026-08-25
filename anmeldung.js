@@ -64,14 +64,17 @@ function zeigeCamp() {
   // Symbol stehenzubleiben — die Anmeldung hängt nicht daran, und ein graues
   // Platzhalter-Kästchen ganz oben ließe die Seite defekt aussehen.
   const bild = document.getElementById("camp-bild");
+  const bildBox = document.getElementById("camp-bildbox");
   const bildUrl = campBildUrl(camp.token, camp.bildId);
   if (bildUrl) {
-    bild.onerror = () => bild.classList.add("fc-hidden");
+    // ⚠️ Versteckt wird die HÜLLE. Nur das Bild auszublenden ließe ihren
+    // grauen Grund samt Abstand als leeren Streifen über der Überschrift stehen.
+    bild.onerror = () => bildBox.classList.add("fc-hidden");
     bild.src = bildUrl;
-    bild.classList.remove("fc-hidden");
+    bildBox.classList.remove("fc-hidden");
   } else {
     bild.removeAttribute("src");
-    bild.classList.add("fc-hidden");
+    bildBox.classList.add("fc-hidden");
   }
 
   const eck = [

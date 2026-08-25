@@ -71,7 +71,9 @@
       'display:flex;align-items:center;justify-content:center;padding:16px;',
       'font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5;color:#1e2330}',
       '#fc-popup-wurzel *{box-sizing:border-box;margin:0;padding:0}',
-      '#fc-popup-wurzel .fc-pop{background:#fff;border-radius:14px;max-width:460px;width:100%;',
+      // 560 statt 460 px: am Rechner ist das Plakat sonst nur halb so gross wie
+      // auf dem Handy, wo ohnehin die Fensterbreite bestimmt.
+      '#fc-popup-wurzel .fc-pop{background:#fff;border-radius:14px;max-width:560px;width:100%;',
       'max-height:calc(100vh - 32px);overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);position:relative}',
       // Rechtes Polster 58 statt 46 px: der Schliessen-Knopf ist auf Fingerbreite
       // gewachsen und laege sonst ueber der Ueberschrift.
@@ -83,11 +85,20 @@
       // Werbeplakat. ⚠️ Bewusst OHNE feste Höhe und ohne object-fit: mit
       // max-width + max-height schrumpft der Browser das Bild von selbst auf
       // das Kleinere von beidem und behält das Seitenverhältnis — ein Plakat
-      // bleibt also ganz zu sehen, ohne Balken und ohne Anschnitt. Die 38vh
+      // bleibt also ganz zu sehen, ohne Balken und ohne Anschnitt. Die 62vh
       // sind die Reißleine: ein hochformatiges Plakat schöbe sonst Name,
       // Termin und den Anmelde-Knopf aus dem sichtbaren Bereich.
-      '#fc-popup-wurzel .fc-pop-bild{display:block;max-width:100%;max-height:38vh;',
-      'width:auto;height:auto;margin:0 auto 10px;border-radius:8px}',
+      //
+      // ⚠️ Die Hülle zieht mit -22px das seitliche Polster des Körpers wieder
+      // heraus, damit das Plakat über die VOLLE Fensterbreite geht. Am Handy
+      // ist die Breite die bindende Grenze — ohne das bliebe das Bild 44 px
+      // schmaler, als es sein könnte. Sie braucht `text-align:center`, weil
+      // ein negativer Rand und `margin:auto` sich gegenseitig ausschließen.
+      '#fc-popup-wurzel .fc-pop-bildbox{margin:0 -22px 12px;text-align:center}',
+      // Beim ERSTEN Camp schliesst das Plakat buendig an den blauen Kopf an.
+      '#fc-popup-wurzel .fc-pop-camp:first-of-type .fc-pop-bildbox{margin-top:-18px}',
+      '#fc-popup-wurzel .fc-pop-bild{display:inline-block;vertical-align:top;',
+      'max-width:100%;max-height:62vh;width:auto;height:auto}',
       '#fc-popup-wurzel .fc-pop-name{font-size:17px;font-weight:700;color:#1a56a0;margin-bottom:3px}',
       '#fc-popup-wurzel .fc-pop-zeit{font-size:13px;color:#6b7280;margin-bottom:7px}',
       '#fc-popup-wurzel .fc-pop-text{font-size:14px;margin-bottom:10px}',
@@ -156,8 +167,8 @@
           camps.map(function (c) {
             var voll = !!c.voll;
             var bild = c.token && c.bildId
-              ? '<img class="fc-pop-bild" alt="" src="' +
-                  esc(BILD_BASIS + encodeURIComponent(c.token) + "/" + encodeURIComponent(c.bildId)) + '">'
+              ? '<div class="fc-pop-bildbox"><img class="fc-pop-bild" alt="" src="' +
+                  esc(BILD_BASIS + encodeURIComponent(c.token) + "/" + encodeURIComponent(c.bildId)) + '"></div>'
               : "";
             return '<div class="fc-pop-camp">' +
               bild +
@@ -191,7 +202,13 @@
     // graues Platzhalter-Kästchen aus, als sei die Vereinsseite kaputt. Ohne
     // Bild bleibt das Fenster vollständig benutzbar.
     Array.prototype.forEach.call(wurzel.querySelectorAll(".fc-pop-bild"), function (img) {
-      function weg() { if (img.parentNode) img.parentNode.removeChild(img); }
+      // Entfernt wird die ganze Huelle, nicht nur das Bild: allein zurueck
+      // bliebe sonst ein leerer Kasten samt seinem Abstand nach unten.
+      function weg() {
+        var box = img.parentNode;
+        if (box && box.className === "fc-pop-bildbox" && box.parentNode) box.parentNode.removeChild(box);
+        else if (box) box.removeChild(img);
+      }
       img.addEventListener("error", weg);
       // Falls der Fehler schon vor dem Anhängen des Lauschers eingetreten ist.
       if (img.complete && !img.naturalWidth) weg();

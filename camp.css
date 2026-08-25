@@ -206,8 +206,8 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 .fc-bild-zeile { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
 .fc-bild-vorschau {
   flex: 0 0 auto;
-  width: 108px;
-  min-height: 96px;
+  width: 160px;
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -217,7 +217,7 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
   background: var(--gray);
   overflow: hidden;
 }
-.fc-bild-vorschau img { max-width: 100%; max-height: 180px; display: block; border-radius: 4px; }
+.fc-bild-vorschau img { max-width: 100%; max-height: 280px; display: block; border-radius: 4px; }
 .fc-bild-leer { font-size: 12px; color: var(--muted); text-align: center; padding: 0 6px; }
 /* min-width: 0, sonst zieht der Hinweistext die Flex-Zeile über die Dialogbreite. */
 .fc-bild-rechts { flex: 1 1 200px; min-width: 0; }

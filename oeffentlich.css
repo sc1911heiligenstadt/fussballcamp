@@ -161,7 +161,7 @@ body.fc-oeffentlich {
 }
 #fc-popup-wurzel * { box-sizing: border-box; }
 #fc-popup-wurzel .fc-pop {
-  background: #fff; border-radius: 14px; max-width: 460px; width: 100%;
+  background: #fff; border-radius: 14px; max-width: 560px; width: 100%;
   max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.3); position: relative;
 }
 #fc-popup-wurzel .fc-pop-kopf { background: #1a56a0; color: #fff; padding: 18px 58px 18px 22px; border-radius: 14px 14px 0 0; }
@@ -171,9 +171,11 @@ body.fc-oeffentlich {
 #fc-popup-wurzel .fc-pop-camp:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 /* ⚠️ Steht doppelt: wirksam ist das Inline-CSS in popup.js, DIES hier ist die
    Fassung für popup-vorschau.html. Wer eine ändert, muss die andere mitziehen. */
+#fc-popup-wurzel .fc-pop-bildbox { margin: 0 -22px 12px; text-align: center; }
+#fc-popup-wurzel .fc-pop-camp:first-of-type .fc-pop-bildbox { margin-top: -18px; }
 #fc-popup-wurzel .fc-pop-bild {
-  display: block; max-width: 100%; max-height: 38vh;
-  width: auto; height: auto; margin: 0 auto 10px; border-radius: 8px;
+  display: inline-block; vertical-align: top;
+  max-width: 100%; max-height: 62vh; width: auto; height: auto;
 }
 #fc-popup-wurzel .fc-pop-name { font-size: 17px; font-weight: 700; color: #1a56a0; margin-bottom: 3px; }
 #fc-popup-wurzel .fc-pop-zeit { font-size: 13px; color: #6b7280; margin-bottom: 7px; }
@@ -206,15 +208,28 @@ body.fc-oeffentlich {
    Wie im Homepage-Fenster bewusst mit max-width UND max-height statt fester
    Maße: der Browser schrumpft das Bild dann von selbst auf das Kleinere von
    beidem und behält das Seitenverhältnis — ein Plakat bleibt ganz zu sehen,
-   ohne Balken und ohne Anschnitt. Die 420 px sind die Reißleine: ein
-   hochformatiges Plakat schöbe Name, Eckdaten und Formular sonst weit nach
-   unten, und am Handy sähe man beim Öffnen nur das Bild. */
+   ohne Balken und ohne Anschnitt.
+
+   ⚠️ Die Hülle zieht mit -22px das Polster der Karte wieder heraus, damit das
+   Plakat über die VOLLE Kartenbreite geht, und schließt oben bündig an die
+   Kartenkante an (deshalb der Radius nur oben). Am Handy ist die Breite die
+   bindende Grenze — ohne den Rücksprung bliebe das Bild 44 px schmaler, als es
+   sein könnte. `text-align: center` ist nötig, weil ein negativer Rand und
+   `margin: auto` sich gegenseitig ausschließen. */
+.fc-camp-bildbox {
+  margin: -22px -22px 16px;
+  text-align: center;
+  background: #eef1f6;
+  border-radius: var(--fc-radius) var(--fc-radius) 0 0;
+  overflow: hidden;
+}
 .fc-camp-bild {
-  display: block;
+  display: inline-block;
+  vertical-align: top;
   max-width: 100%;
-  max-height: 420px;
+  /* Reißleine: ein hochformatiges Plakat schöbe Name, Eckdaten und Formular
+     sonst weit nach unten, und man sähe beim Öffnen nur das Bild. */
+  max-height: 620px;
   width: auto;
   height: auto;
-  margin: 0 auto 14px;
-  border-radius: 8px;
 }
