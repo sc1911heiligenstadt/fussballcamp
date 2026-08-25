@@ -101,6 +101,7 @@
       'max-width:100%;max-height:62vh;width:auto;height:auto}',
       '#fc-popup-wurzel .fc-pop-name{font-size:17px;font-weight:700;color:#1a56a0;margin-bottom:3px}',
       '#fc-popup-wurzel .fc-pop-zeit{font-size:13px;color:#6b7280;margin-bottom:7px}',
+      '#fc-popup-wurzel .fc-pop-frueh{font-size:13px;font-weight:600;color:#2d8c4e;margin:-4px 0 7px}',
       '#fc-popup-wurzel .fc-pop-text{font-size:14px;margin-bottom:10px}',
       '#fc-popup-wurzel .fc-pop-frei{font-size:13px;color:#2d8c4e;font-weight:600;margin-bottom:10px}',
       '#fc-popup-wurzel .fc-pop-frei.voll{color:#c9941f}',
@@ -141,6 +142,18 @@
     return datum(von) + " bis " + datum(bis);
   }
 
+  // Der Frühbucher-Hinweis, wenn gerade einer gilt.
+  //
+  // ⚠️ Gerechnet wird hier NICHTS. Der Worker legt in `preis` schon den heute
+  // gültigen Betrag hin und in `preisRegulaer` den vollen. Ein Vergleich der
+  // beiden sagt, ob das Fenster gerade offen ist -- der Rechner des Besuchers
+  // kann auf einem anderen Tag stehen als der Server, und dann verspräche die
+  // Vereinsseite einen Preis, den die Anmeldung nicht mehr gibt.
+  function fruehHinweis(c) {
+    if (!c.preisFruehBis || !(c.preisRegulaer > c.preis)) return "";
+    return "Frühbucherpreis bis " + datum(c.preisFruehBis) + " — danach " + euro(c.preisRegulaer);
+  }
+
   function euro(cent) {
     return ((Number(cent) || 0) / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
   }
@@ -176,6 +189,7 @@
               '<div class="fc-pop-zeit">' + esc(bereich(c.vonDatum, c.bisDatum)) +
                 (c.ort ? " &middot; " + esc(c.ort) : "") +
                 (c.preis ? " &middot; " + esc(euro(c.preis)) : "") + '</div>' +
+              (fruehHinweis(c) ? '<div class="fc-pop-frueh">' + esc(fruehHinweis(c)) + '</div>' : "") +
               (c.kurzbeschreibung ? '<div class="fc-pop-text">' + esc(c.kurzbeschreibung) + '</div>' : "") +
               '<div class="fc-pop-frei' + (voll ? ' voll' : '') + '">' +
                 (voll ? "Ausgebucht &mdash; Anmeldung auf die Warteliste möglich"

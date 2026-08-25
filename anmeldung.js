@@ -82,7 +82,13 @@ function zeigeCamp() {
     { t: "Täglich", w: `${camp.taeglichVon || "?"} bis ${camp.taeglichBis || "?"} Uhr` },
     { t: "Wo", w: camp.ort || "wird noch bekannt gegeben" },
     { t: "Für wen", w: jahrgangText(camp) },
-    { t: "Beitrag", w: oEuro(camp.preis) + (camp.preisHinweis ? "" : "") }
+    // ⚠️ `camp.preis` ist hier schon der HEUTE gültige Betrag (der Worker legt
+    // ihn in der öffentlichen Sicht so hin). Der reguläre steht daneben, damit
+    // sichtbar ist, dass es gerade günstiger ist — und bis wann.
+    { t: "Beitrag", w: oEuro(camp.preis) +
+        (camp.preisFruehBis && camp.preisRegulaer > camp.preis
+          ? " — Frühbucherpreis, gilt bis " + oDatum(camp.preisFruehBis) + " (danach " + oEuro(camp.preisRegulaer) + ")"
+          : "") }
   ];
   if (camp.anmeldungBis) eck.push({ t: "Anmeldung bis", w: oDatum(camp.anmeldungBis) });
 

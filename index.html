@@ -293,7 +293,9 @@
           <label>Jahrgang von<input type="number" id="c-jahrgangvon" min="1990" max="2050" placeholder="2014" /></label>
           <label>Jahrgang bis<input type="number" id="c-jahrgangbis" min="1990" max="2050" placeholder="2019" /></label>
           <label>Plätze<input type="number" id="c-plaetze" min="1" max="500" /></label>
-          <label>Beitrag in Euro<input type="text" id="c-preis" inputmode="decimal" placeholder="60,00" /></label>
+          <label>Beitrag in Euro<input type="text" id="c-preis" inputmode="decimal" placeholder="180,00" /></label>
+          <label>Frühbucherpreis<input type="text" id="c-preisfrueh" inputmode="decimal" placeholder="160,00" /></label>
+          <label>Frühbucher bis<input type="date" id="c-preisfruehbis" /></label>
           <label>Anmeldung ab<input type="date" id="c-anmvon" /></label>
           <label>Anmeldung bis<input type="date" id="c-anmbis" /></label>
         </div>
@@ -320,6 +322,7 @@
         <label class="voll">Ausführlicher Text auf der Anmeldeseite
           <textarea id="c-beschreibung" rows="4" maxlength="2000" placeholder="Was passiert im Camp, was mitzubringen ist, wie der Tag abläuft …"></textarea>
         </label>
+        <p class="muted voll">Der Frühbucherpreis gilt bis <strong>einschließlich</strong> des gewählten Tages. Beide Felder gehören zusammen — steht nur eines davon da, gilt für alle der reguläre Beitrag. Wer sich im Frühbucherfenster anmeldet, behält den günstigeren Beitrag auch danach.</p>
         <label class="voll">Hinweis zum Beitrag
           <input type="text" id="c-preishinweis" maxlength="200" placeholder="Inklusive Mittagessen, Getränken und Campshirt." />
         </label>
@@ -397,8 +400,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="config.js?v=1.10"></script>
+  <script src="config.js?v=1.11"></script>
   <script src="db.js?v=1.1"></script>
-  <script src="app.js?v=1.5"></script>
+  <script src="app.js?v=1.6"></script>
 </body>
 </html>

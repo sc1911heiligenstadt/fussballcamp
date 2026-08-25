@@ -179,7 +179,8 @@ body.fc-oeffentlich {
 }
 #fc-popup-wurzel .fc-pop-name { font-size: 17px; font-weight: 700; color: #1a56a0; margin-bottom: 3px; }
 #fc-popup-wurzel .fc-pop-zeit { font-size: 13px; color: #6b7280; margin-bottom: 7px; }
-#fc-popup-wurzel .fc-pop-text { font-size: 14px; margin-bottom: 10px; }
+#fc-popup-wurzel .fc-pop-frueh { font-size: 13px; font-weight: 600; color: #2d8c4e; margin-top: 2px; }
+.fc-pop-text { font-size: 14px; margin-bottom: 10px; }
 #fc-popup-wurzel .fc-pop-frei { font-size: 13px; color: #2d8c4e; font-weight: 600; margin-bottom: 10px; }
 #fc-popup-wurzel .fc-pop-frei.voll { color: #c9941f; }
 #fc-popup-wurzel .fc-pop-btn {

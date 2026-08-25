@@ -344,7 +344,7 @@ function campKarte(c) {
       <div>
         <div class="ck-titel">${escapeHtml(c.name || "Ohne Namen")}</div>
         <div class="ck-sub">${datumBereich(c.vonDatum, c.bisDatum)} · täglich ${escapeHtml(c.taeglichVon || "?")}–${escapeHtml(c.taeglichBis || "?")}${c.ort ? " · " + escapeHtml(c.ort) : ""}</div>
-        <div class="ck-sub">${jahrgangText(c)} · Beitrag ${euro(c.preis)}${c.preisHinweis ? " · " + escapeHtml(c.preisHinweis) : ""}</div>
+        <div class="ck-sub">${jahrgangText(c)} · ${beitragText(c)}${c.preisHinweis ? " · " + escapeHtml(c.preisHinweis) : ""}</div>
       </div>
       <span class="ck-status" style="background:${escapeAttr(status.farbe)}">${escapeHtml(status.label)}</span>
     </div>
@@ -375,6 +375,32 @@ function statusKnoepfe(c) {
   if (c.status === "offen")       return knopf("geschlossen", "Anmeldung schließen", "warn");
   if (c.status === "geschlossen") return knopf("offen", "Wieder öffnen", "ghost") + " " + knopf("abgeschlossen", "Camp abschließen", "ghost");
   return knopf("geschlossen", "Wieder aufmachen", "ghost");
+}
+
+// Der Beitrag eines Camps in einem Satz — mit Frühbucherfenster, wenn es eines
+// gibt.
+//
+// ⚠️ `preisJetzt` kommt vom Worker, wird hier also NICHT selbst aus dem Datum
+// gerechnet. Der Browser des Nutzers kann auf einem anderen Tag stehen als der
+// Server, der den Betrag beim Anmelden festschreibt — und dann stünde in der
+// Verwaltung ein anderer Preis, als die Eltern zahlen.
+function beitragText(c) {
+  const jetzt = (c.preisJetzt === undefined || c.preisJetzt === null) ? c.preis : c.preisJetzt;
+  if (!c.preisFrueh || !c.preisFruehBis) return "Beitrag " + euro(c.preis);
+  const nochFrueh = jetzt === c.preisFrueh;
+  return nochFrueh
+    ? `Beitrag ${euro(c.preisFrueh)} bis ${datumDe(c.preisFruehBis)}, danach ${euro(c.preis)}`
+    : `Beitrag ${euro(c.preis)} (Frühbucher ${euro(c.preisFrueh)} lief am ${datumDe(c.preisFruehBis)} aus)`;
+}
+
+// Was DIESE Anmeldung schuldet — der beim Anmelden festgeschriebene Betrag.
+//
+// ⚠️ Der Rückfall auf den Camp-Preis gilt nur für Anmeldungen von vor dem
+// 2026-08-25, die noch keinen Betrag tragen. 0 ist ein gültiger Betrag, deshalb
+// ausdrücklich gegen undefined/null prüfen und nicht auf Wahrheitswert.
+function anmBetrag(camp, a) {
+  const roh = a ? a.betrag : undefined;
+  return (roh === undefined || roh === null) ? (camp.preis || 0) : roh;
 }
 
 // Steht dieses Camp im Vereinskalender? Der Übertrag passiert von allein — beim
@@ -460,6 +486,8 @@ function oeffneCampDialog(id) {
   setzeWert("c-jahrgangbis", campEntwurf.jahrgangBis || "");
   setzeWert("c-plaetze", campEntwurf.plaetze || "");
   setzeWert("c-preis", campEntwurf.preis ? centNachKomma(campEntwurf.preis) : "");
+  setzeWert("c-preisfrueh", campEntwurf.preisFrueh ? centNachKomma(campEntwurf.preisFrueh) : "");
+  setzeWert("c-preisfruehbis", campEntwurf.preisFruehBis || "");
   setzeWert("c-anmvon", campEntwurf.anmeldungVon);
   setzeWert("c-anmbis", campEntwurf.anmeldungBis);
   setzeWert("c-kurz", campEntwurf.kurzbeschreibung);
@@ -657,6 +685,8 @@ async function speichereCampAusDialog() {
   c.jahrgangBis = zahlOderNull("c-jahrgangbis");
   c.plaetze = zahlOderNull("c-plaetze") || 0;
   c.preis = kommaNachCent(wert("c-preis"));
+  c.preisFrueh = kommaNachCent(wert("c-preisfrueh"));
+  c.preisFruehBis = wert("c-preisfruehbis");
   c.anmeldungVon = wert("c-anmvon");
   c.anmeldungBis = wert("c-anmbis");
   c.kurzbeschreibung = wert("c-kurz").trim();
@@ -1055,9 +1085,12 @@ function zeichneAnmeldungen() {
 
   const bezahlt = alle.filter((a) => a.status === "angemeldet" && a.bezahlt).length;
   const offen = offeneBeitraege(camp).length;
-  const summe = alle.filter((a) => a.status === "angemeldet").length * (camp.preis || 0);
-  const eingegangen = bezahlt * (camp.preis || 0);
-  zus.textContent = `${alle.filter((a) => a.status === "angemeldet").length} angemeldet · ${camp.warteliste || 0} auf der Warteliste · ${bezahlt} bezahlt, ${offen} offen · ${euro(eingegangen)} von ${euro(summe)} eingegangen`;
+  // ⚠️ Je Anmeldung summieren, nicht Anzahl mal Camp-Preis: mit einem
+  // Frühbucherfenster schuldet nicht mehr jeder dasselbe.
+  const angemeldete = alle.filter((a) => a.status === "angemeldet");
+  const summe = angemeldete.reduce((s, a) => s + anmBetrag(camp, a), 0);
+  const eingegangen = angemeldete.filter((a) => a.bezahlt).reduce((s, a) => s + anmBetrag(camp, a), 0);
+  zus.textContent = `${angemeldete.length} angemeldet · ${camp.warteliste || 0} auf der Warteliste · ${bezahlt} bezahlt, ${offen} offen · ${euro(eingegangen)} von ${euro(summe)} eingegangen`;
 
   leer.classList.toggle("hidden", liste.length > 0);
   ziel.innerHTML = liste.map((a) => anmZeile(camp, a)).join("");
@@ -1157,7 +1190,8 @@ function anmDetails(camp, a) {
 
   const vz = verwendungszweck(camp, a);
   zeilen.push(`<h3>Beitrag</h3>`);
-  zeile("Betrag", euro(camp.preis));
+  zeile("Betrag", euro(anmBetrag(camp, a)) +
+    (camp.preisFrueh && anmBetrag(camp, a) === camp.preisFrueh ? " (Frühbucher)" : ""));
   zeile("Verwendungszweck", vz);
   zeile("Bezahlt", a.bezahlt ? "ja, vermerkt am " + datumDe(a.bezahltAm) : "nein");
 

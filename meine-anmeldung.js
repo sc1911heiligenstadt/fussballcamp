@@ -74,7 +74,11 @@ function zeige() {
     { t: "Wann", w: oDatumBereich(camp.vonDatum, camp.bisDatum) },
     { t: "Täglich", w: `${camp.taeglichVon || "?"} bis ${camp.taeglichBis || "?"} Uhr` },
     { t: "Wo", w: camp.ort || "wird noch bekannt gegeben" },
-    { t: "Beitrag", w: oEuro(camp.preis) }
+    // ⚠️ Der festgeschriebene Betrag aus dem Zahlungsblock, NICHT der aktuelle
+    // Camp-Preis: wer im Frühbucherfenster angemeldet hat, schuldet weiterhin den
+    // günstigeren Betrag, und genau der steht auch in seiner Bestätigungsmail.
+    { t: "Beitrag", w: oEuro(stand.zahlung && stand.zahlung.betrag !== undefined && stand.zahlung.betrag !== null
+        ? stand.zahlung.betrag : camp.preis) }
   ];
   document.getElementById("camp-eckdaten").innerHTML = eck.filter((e) => e.w)
     .map((e) => `<div class="fc-eck"><dt>${oEsc(e.t)}</dt><dd>${oEsc(e.w)}</dd></div>`).join("");

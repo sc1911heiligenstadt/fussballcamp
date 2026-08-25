@@ -199,6 +199,25 @@ const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
   {
+    version: "1.11",
+    groups: [
+      {
+        title: "Frühbucherpreis: bis Tag X günstiger",
+        items: [
+          "Im Camp-Dialog stehen jetzt zwei neue Felder: „Frühbucherpreis“ und „Frühbucher bis“. Beispiel: regulär 180,00 €, Frühbucher 160,00 € bis zum 30.09.",
+          "Der günstigere Beitrag gilt bis EINSCHLIESSLICH des gewählten Tages. Am Tag danach kostet es den regulären Beitrag.",
+          "Wichtig: Wer sich im Frühbucherfenster angemeldet hat, behält den günstigeren Beitrag — auch nach dem Stichtag. Der Betrag wird beim Anmelden festgehalten und ändert sich danach nicht mehr. Sonst stünde in der Bestätigungsmail einer Familie ein anderer Betrag als in deiner Liste.",
+          "Beide Felder gehören zusammen. Steht nur eines davon da, gilt für alle der reguläre Beitrag — so kann kein halb eingerichteter Rabatt unbemerkt danebenstehen.",
+          "Der Frühbucherpreis muss unter dem regulären liegen, sonst nimmt die App ihn nicht an.",
+          "Sichtbar ist er im Fenster auf der Vereins-Homepage, oben auf der Anmeldeseite und auf der Camp-Karte — überall mit dem Datum, bis wann er gilt.",
+          "In der Anmeldeliste wird die Beitragssumme jetzt Anmeldung für Anmeldung gerechnet, nicht mehr Anzahl mal Camp-Preis. Bei zwei verschiedenen Beträgen wäre die alte Rechnung falsch gewesen.",
+          "Bei einer Anmeldung mit Frühbucherpreis steht das in der Detailansicht dabei.",
+          "Camps ohne Frühbucherpreis verhalten sich genau wie bisher."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.10",
     groups: [
       {
