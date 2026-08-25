@@ -63,7 +63,15 @@ const FORMULAR_FELDER = [
   { id: "kindVorname",     gruppe: "kind",        label: "Vorname des Kindes",   typ: "text",   fest: true,  maxLen: 60 },
   { id: "kindNachname",    gruppe: "kind",        label: "Nachname des Kindes",  typ: "text",   fest: true,  maxLen: 60 },
   { id: "geburtsdatum",    gruppe: "kind",        label: "Geburtsdatum",         typ: "datum",  maxLen: 10, hinweis: "Damit die Gruppen nach Alter eingeteilt werden können." },
-  { id: "trikotgroesse",   gruppe: "kind",        label: "Konfektionsgröße",     typ: "auswahl", optionen: ["116", "128", "140", "152", "164", "176", "S", "M", "L", "XL"], hinweis: "Für das Camp-Trikot." },
+  // ⚠️ `gruppen` statt einer flachen Liste: mit 21 Einträgen ist der Sprung von
+  // 176 auf XS sonst nicht einzuordnen. `optionen` wird daraus abgeleitet (siehe
+  // unter FORMULAR_FELDER), nicht ein zweites Mal gepflegt.
+  { id: "trikotgroesse",   gruppe: "kind",        label: "Konfektionsgröße",     typ: "auswahl",
+    gruppen: [
+      { label: "Kindergrößen",      optionen: ["98", "104", "110", "116", "122", "128", "134", "140", "146", "152", "158", "164", "170", "176"] },
+      { label: "Erwachsenengrößen", optionen: ["XS", "S", "M", "L", "XL", "XXL", "3XL"] }
+    ],
+    hinweis: "Für das Camp-Trikot." },
   { id: "verein",          gruppe: "kind",        label: "Verein",               typ: "text",   maxLen: 80, hinweis: "Leer lassen, wenn das Kind in keinem Verein spielt." },
   { id: "position",        gruppe: "kind",        label: "Lieblingsposition",    typ: "auswahl", optionen: ["Torwart", "Abwehr", "Mittelfeld", "Sturm", "egal"] },
 
@@ -197,7 +205,45 @@ const DEFAULT_FELDER = {
 // die Darstellung; beide müssen zusammenpassen.
 const GITTER_AB_PX = 768;
 
+// ⚠️ `optionen` wird aus `gruppen` ABGELEITET, nie zweimal gepflegt. Zwei Listen
+// für dieselbe Sache laufen auseinander, sobald jemand eine Größe ergänzt — und
+// dann steht sie zwar im Formular, wird beim Anzeigen aber nicht mehr
+// wiedererkannt. Felder ohne `gruppen` bleiben unberührt.
+FORMULAR_FELDER.forEach((f) => {
+  if (Array.isArray(f.gruppen)) f.optionen = f.gruppen.reduce((alle, g) => alle.concat(g.optionen || []), []);
+});
+
 const APP_CHANGELOG = [
+  {
+    version: "1.13",
+    groups: [
+      {
+        title: "Zahlungsziel: eine Woche vor dem Camp",
+        items: [
+          "Bisher stand in der Bestätigungsmail „bitte überweise bis zum <erster Camp-Tag>“. Geld, das am Anreisetag eingeht, hilft bei der Planung nicht mehr.",
+          "Jetzt steht dort der Tag genau eine Woche vor dem ersten Camp-Tag. Beispiel: Camp beginnt am 20.10. → Zahlungsziel ist der 13.10.",
+          "Meldet sich jemand später an, als diese Frist liegt, steht stattdessen „möglichst umgehend“ — eine Frist zu nennen, die schon vorbei ist, wäre schlimmer als gar keine.",
+          "Auf der Bestätigungsseite steht derselbe Satz wie in der Mail.",
+          "Die Teilnahmebedingungen decken das ab: dort ist von „der in der Anmeldebestätigung genannten Zahlungsfrist“ die Rede."
+        ]
+      }
+    ]
+  },
+  {
+    version: "1.12",
+    groups: [
+      {
+        title: "Alle Konfektionsgrößen zur Auswahl",
+        items: [
+          "Bisher standen nur 116, 128, 140, 152, 164, 176 und S bis XL zur Wahl — die Zwischengrößen fehlten alle, und für kleinere Kinder gab es gar nichts Passendes.",
+          "Jetzt stehen dort alle Kindergrößen von 98 bis 176 in Zweierschritten (98, 104, 110, 116, 122, 128, 134, 140, 146, 152, 158, 164, 170, 176).",
+          "Bei den Erwachsenengrößen sind XS, XXL und 3XL dazugekommen.",
+          "Die Liste ist in „Kindergrößen“ und „Erwachsenengrößen“ unterteilt, damit man sich bei 21 Einträgen zurechtfindet.",
+          "Bereits eingegangene Anmeldungen bleiben unverändert — eine alte Größe steht weiterhin genauso da, wie sie eingetragen wurde."
+        ]
+      }
+    ]
+  },
   {
     version: "1.11",
     groups: [

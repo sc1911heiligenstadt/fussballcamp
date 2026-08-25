@@ -237,7 +237,7 @@ function zeigeFertig(a) {
   if (!aufWarteliste && a.zahlung && a.zahlung.iban) {
     zahl.innerHTML = `
       <h3>Der Beitrag</h3>
-      <p>Bitte überweise den Beitrag${a.zahlung.frist ? " bis zum " + oEsc(oDatum(a.zahlung.frist)) : ""} auf dieses Konto:</p>
+      <p>Bitte überweise den Beitrag${a.zahlung.frist ? " bis zum " + oEsc(oDatum(a.zahlung.frist)) : " möglichst umgehend"} auf dieses Konto:</p>
       <div class="fc-zahlung">
         <dl>
           <dt>Betrag</dt><dd>${oEsc(oEuro(a.zahlung.betrag))}</dd>

@@ -108,9 +108,16 @@ function feldHtml(f, konf, wert) {
   if (f.typ === "mehrzeilig") {
     eingabe = `<textarea id="${id}" data-feld="${oEsc(f.id)}" rows="2" maxlength="${f.maxLen || 500}"${req}>${oEsc(wert || "")}</textarea>`;
   } else if (f.typ === "auswahl") {
+    const opt = (o) => `<option value="${oEsc(o)}"${o === wert ? " selected" : ""}>${oEsc(o)}</option>`;
+    // ⚠️ Trägt das Feld `gruppen`, wird nach Gruppen gerendert — sonst flach wie
+    // bisher. Ein Feld wie "Lieblingsposition" braucht keine Untergliederung, und
+    // eine leere optgroup-Hülle darum wäre nur Lärm im Markup.
+    const inhalt = Array.isArray(f.gruppen)
+      ? f.gruppen.map((g) => `<optgroup label="${oEsc(g.label)}">${(g.optionen || []).map(opt).join("")}</optgroup>`).join("")
+      : (f.optionen || []).map(opt).join("");
     eingabe = `<select id="${id}" data-feld="${oEsc(f.id)}"${req}>
         <option value="">— bitte wählen —</option>
-        ${(f.optionen || []).map((o) => `<option value="${oEsc(o)}"${o === wert ? " selected" : ""}>${oEsc(o)}</option>`).join("")}
+        ${inhalt}
       </select>`;
   } else {
     const typ = f.typ === "datum" ? "date" : (f.typ === "email" ? "email" : "text");
