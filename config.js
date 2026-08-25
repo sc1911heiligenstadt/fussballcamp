@@ -199,6 +199,22 @@ const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
   {
+    version: "1.10",
+    groups: [
+      {
+        title: "Der Meldekasten sagt, WAS die Eltern geändert haben",
+        items: [
+          "Bisher stand dort nur „hat die Angaben geändert“ — du musstest die Anmeldung öffnen und suchen. Jetzt stehen die geänderten Felder beim Namen, zum Beispiel „hat geändert: Handy für Notfälle, Allergien“.",
+          "In der Anmeldeliste zeigt der Zeiger auf „von Eltern geändert“ dieselbe Liste.",
+          "Haben die Eltern die Teilnahmebedingungen neu bestätigt, steht auch das dabei.",
+          "Wenn die Eltern speichern, ohne etwas geändert zu haben, kommt jetzt gar keine Meldung mehr. Vorher meldete jedes Absenden eine Änderung — auch das bloße Nachsehen.",
+          "Meldungen, die vor dieser Änderung entstanden sind, zeigen weiterhin nur „hat die Angaben geändert“: für sie wurde damals nicht mitgeschrieben, welche Felder es waren.",
+          "Was NICHT gespeichert wird: der alte Wert. Nur welches Feld angefasst wurde. Ein aufbewahrter alter Wert wäre eine zweite Kopie derselben Angabe über ein Kind, die keine Löschung mehr erwischt."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.9",
     groups: [
       {

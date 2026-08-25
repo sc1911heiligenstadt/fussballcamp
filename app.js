@@ -199,7 +199,8 @@ function zeichneMeldebox() {
   camps().forEach((c) => {
     (c.anmeldungen || []).forEach((a) => {
       if (!a.elternAenderung) return;
-      posten.push({ campId: c.id, campName: c.name, anmeldungId: a.id, kind: kindName(a), was: a.elternAenderung });
+      posten.push({ campId: c.id, campName: c.name, anmeldungId: a.id, kind: kindName(a),
+                    was: a.elternAenderung, felder: Array.isArray(a.elternAenderungFelder) ? a.elternAenderungFelder : [] });
     });
   });
 
@@ -208,7 +209,7 @@ function zeichneMeldebox() {
   box.classList.remove("hidden");
   box.innerHTML = `
     <h3>Die Eltern haben etwas geändert</h3>
-    <ul>${posten.map((p) => `<li><strong>${escapeHtml(p.kind)}</strong> · ${escapeHtml(p.campName)} — ${escapeHtml(p.was === "abgesagt" ? "hat abgesagt" : "hat die Angaben geändert")}</li>`).join("")}</ul>
+    <ul>${posten.map((p) => `<li><strong>${escapeHtml(p.kind)}</strong> · ${escapeHtml(p.campName)} — ${escapeHtml(meldeSatz(p))}</li>`).join("")}</ul>
     <button type="button" class="btn small" id="btn-meldebox-gesehen">Zur Kenntnis genommen</button>`;
 
   document.getElementById("btn-meldebox-gesehen").addEventListener("click", async () => {
@@ -290,6 +291,31 @@ function zeichneCamps() {
     b.addEventListener("click", () => wechsleStatus(b.dataset.campStatus, b.dataset.zielStatus)));
   ziel.querySelectorAll("[data-link-kopieren]").forEach((b) =>
     b.addEventListener("click", () => kopiere(b.dataset.linkKopieren, "Anmeldelink kopiert.")));
+}
+
+// Feld-Id → die Beschriftung, die auch im Formular steht.
+//
+// ⚠️ `agb` und `zusatzantwort` stehen NICHT in FORMULAR_FELDER — sie sind keine
+// Formularfelder, werden aber gemeldet. Ohne die Sonderliste stünde im Kasten die
+// nackte Feld-Id.
+const SONDER_LABEL = {
+  agb: "Teilnahmebedingungen neu bestätigt",
+  zusatzantwort: "Antwort auf die Zusatzfrage"
+};
+function feldLabel(id) {
+  const f = FORMULAR_FELDER.find((x) => x.id === id);
+  return f ? f.label : (SONDER_LABEL[id] || id);
+}
+
+// Was im Meldekasten hinter dem Namen steht.
+//
+// ⚠️ Änderungen von vor dem 2026-08-25 tragen noch KEINE Feldliste. Dann bleibt es
+// beim alten Satz — eine leere Aufzählung sähe aus, als sei gar nichts geändert
+// worden, und das wäre schlechter als die alte, ungenaue Meldung.
+function meldeSatz(p) {
+  if (p.was === "abgesagt") return "hat abgesagt";
+  if (!p.felder.length) return "hat die Angaben geändert";
+  return "hat geändert: " + p.felder.map(feldLabel).join(", ");
 }
 
 function campKarte(c) {
@@ -1056,7 +1082,8 @@ function anmZeile(camp, a) {
       <span class="an-sub">angemeldet am ${datumDe(a.erstelltAm)}${a.status === "warteliste" ? ` · Warteliste Platz ${a.wartePlatz || "?"}` : ""}</span>
     </div>
     <div class="anm-marker">
-      ${a.elternAenderung ? `<span class="marker warteliste">${a.elternAenderung === "abgesagt" ? "Eltern haben abgesagt" : "von Eltern geändert"}</span>` : ""}
+      ${a.elternAenderung ? `<span class="marker warteliste"${a.elternAenderung === "geaendert" && Array.isArray(a.elternAenderungFelder) && a.elternAenderungFelder.length
+        ? ` title="${escapeAttr(a.elternAenderungFelder.map(feldLabel).join(", "))}"` : ""}>${a.elternAenderung === "abgesagt" ? "Eltern haben abgesagt" : "von Eltern geändert"}</span>` : ""}
       ${gesund ? `<span class="marker gesundheit">Gesundheit</span>` : ""}
       ${a.status === "warteliste" ? `<span class="marker warteliste">Warteliste</span>` : ""}
       ${a.status === "abgesagt" ? `<span class="marker">abgesagt</span>` : ""}
