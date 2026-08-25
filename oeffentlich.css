@@ -228,8 +228,19 @@ body.fc-oeffentlich {
   vertical-align: top;
   max-width: 100%;
   /* Reißleine: ein hochformatiges Plakat schöbe Name, Eckdaten und Formular
-     sonst weit nach unten, und man sähe beim Öffnen nur das Bild. */
+     sonst weit nach unten, und man sähe beim Öffnen nur das Bild.
+
+     ⚠️ Die Reißleine braucht den Bildschirm-Anteil, nicht nur die feste Zahl.
+     Ein quer gehaltenes Handy ist bloß 375 px hoch — dort füllten 620 px
+     eineinhalb Bildschirme mit Plakat, und der Camp-Name stand bei 719 px, also
+     außer Sicht (gemessen 2026-08-25). Mit 62vh, derselben Zahl wie im Fenster
+     auf der Vereinsseite, rückt er auf 389 px. Hochkant ändert sich nichts:
+     dort bindet ohnehin die Breite, nicht die Höhe.
+
+     Zwei Zeilen mit Absicht: ein Browser ohne min() überliest die zweite und
+     behält die 620 px. */
   max-height: 620px;
+  max-height: min(620px, 62vh);
   width: auto;
   height: auto;
 }

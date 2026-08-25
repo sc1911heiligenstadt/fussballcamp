@@ -199,6 +199,19 @@ const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
   {
+    version: "1.8",
+    groups: [
+      {
+        title: "Das Plakat am quer gehaltenen Handy",
+        items: [
+          "Auf der Anmeldeseite nimmt das Plakat jetzt höchstens knapp zwei Drittel der Bildschirmhöhe ein. Vorher war das eine feste Zahl — auf einem quer gehaltenen Handy wurde das Plakat damit anderthalb Bildschirme hoch, und man musste zweimal wischen, bis überhaupt der Name des Camps kam.",
+          "Hochkant ändert sich nichts: dort bestimmt ohnehin die Breite des Bildschirms, wie groß das Plakat wird.",
+          "Das Fenster auf der Vereins-Homepage hat schon vorher so gerechnet. Beide Stellen benutzen jetzt dieselbe Grenze."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.7",
     groups: [
       {
