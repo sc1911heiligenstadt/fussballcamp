@@ -24,6 +24,10 @@
 
   var GATEWAY = "https://landingpage.michel-brunner.workers.dev";
   var BASIS = "https://sc1911heiligenstadt.github.io/fussballcamp/";
+  // Das Werbeplakat eines Camps. ⚠️ Zweite Fassung derselben Adresse — die erste
+  // steht als campBildUrl() in config.js, die dritte im Worker. Dieses Skript
+  // läuft in der fremden Vereinsseite und kennt config.js nicht.
+  var BILD_BASIS = GATEWAY + "/camp-bild/";
   var SPEICHER = "fc_popup_zu";
   var RUHE_TAGE = 7;
 
@@ -76,6 +80,14 @@
       '#fc-popup-wurzel .fc-pop-body{padding:18px 22px 22px}',
       '#fc-popup-wurzel .fc-pop-camp{border-bottom:1px solid #dde1e8;padding-bottom:14px;margin-bottom:14px}',
       '#fc-popup-wurzel .fc-pop-camp:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}',
+      // Werbeplakat. ⚠️ Bewusst OHNE feste Höhe und ohne object-fit: mit
+      // max-width + max-height schrumpft der Browser das Bild von selbst auf
+      // das Kleinere von beidem und behält das Seitenverhältnis — ein Plakat
+      // bleibt also ganz zu sehen, ohne Balken und ohne Anschnitt. Die 38vh
+      // sind die Reißleine: ein hochformatiges Plakat schöbe sonst Name,
+      // Termin und den Anmelde-Knopf aus dem sichtbaren Bereich.
+      '#fc-popup-wurzel .fc-pop-bild{display:block;max-width:100%;max-height:38vh;',
+      'width:auto;height:auto;margin:0 auto 10px;border-radius:8px}',
       '#fc-popup-wurzel .fc-pop-name{font-size:17px;font-weight:700;color:#1a56a0;margin-bottom:3px}',
       '#fc-popup-wurzel .fc-pop-zeit{font-size:13px;color:#6b7280;margin-bottom:7px}',
       '#fc-popup-wurzel .fc-pop-text{font-size:14px;margin-bottom:10px}',
@@ -143,7 +155,12 @@
         '<div class="fc-pop-body">' +
           camps.map(function (c) {
             var voll = !!c.voll;
+            var bild = c.token && c.bildId
+              ? '<img class="fc-pop-bild" alt="" src="' +
+                  esc(BILD_BASIS + encodeURIComponent(c.token) + "/" + encodeURIComponent(c.bildId)) + '">'
+              : "";
             return '<div class="fc-pop-camp">' +
+              bild +
               '<div class="fc-pop-name">' + esc(c.name) + '</div>' +
               '<div class="fc-pop-zeit">' + esc(bereich(c.vonDatum, c.bisDatum)) +
                 (c.ort ? " &middot; " + esc(c.ort) : "") +
@@ -168,6 +185,17 @@
       document.removeEventListener("keydown", beiTaste);
     }
     function beiTaste(ev) { if (ev.key === "Escape") zu(false); }
+
+    // ⚠️ Ein Bild, das nicht lädt, wird ENTFERNT statt als kaputtes Symbol
+    // stehenzubleiben. Das Fenster hängt in einer fremden Seite: dort sieht ein
+    // graues Platzhalter-Kästchen aus, als sei die Vereinsseite kaputt. Ohne
+    // Bild bleibt das Fenster vollständig benutzbar.
+    Array.prototype.forEach.call(wurzel.querySelectorAll(".fc-pop-bild"), function (img) {
+      function weg() { if (img.parentNode) img.parentNode.removeChild(img); }
+      img.addEventListener("error", weg);
+      // Falls der Fehler schon vor dem Anhängen des Lauschers eingetreten ist.
+      if (img.complete && !img.naturalWidth) weg();
+    });
 
     wurzel.querySelector(".fc-pop-zu").addEventListener("click", function () { zu(false); });
     wurzel.querySelector(".fc-pop-spaeter").addEventListener("click", function () { zu(true); });

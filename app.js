@@ -387,7 +387,7 @@ function oeffneCampDialog(id) {
     : { id: "", name: "", ort: "", vonDatum: "", bisDatum: "", taeglichVon: "09:00", taeglichBis: "16:00",
         jahrgangVon: null, jahrgangBis: null, plaetze: 40, preis: 0, preisHinweis: "",
         anmeldungVon: "", anmeldungBis: "", kurzbeschreibung: "", beschreibung: "",
-        zusatzfrage: "", felder: Object.assign({}, DEFAULT_FELDER) };
+        zusatzfrage: "", bild: null, felder: Object.assign({}, DEFAULT_FELDER) };
 
   document.getElementById("camp-modal-titel").textContent = c ? "Camp bearbeiten" : "Neues Camp";
   setzeWert("c-name", campEntwurf.name);
@@ -408,6 +408,8 @@ function oeffneCampDialog(id) {
   setzeWert("c-zusatzfrage", campEntwurf.zusatzfrage);
 
   zeichneFeldwahl();
+  campBildZuruecksetzen();
+  zeichneCampBild();
   // Löschen nur bei einem bestehenden Camp ohne Anmeldungen — der Worker prüft
   // das noch einmal, aber ein Knopf, der immer 409 gibt, ist eine Falle.
   const del = document.getElementById("btn-camp-loeschen");
@@ -455,6 +457,134 @@ function feldZeile(f, stufe) {
     </div>`;
 }
 
+// ============================================================
+//  Bild fürs Camp
+// ============================================================
+
+// Ein eben gewähltes, noch NICHT hochgeladenes Bild: { blob, contentType,
+// vorschauUrl }. `campEntwurf.bild` trägt dagegen die Kennung dessen, was bereits
+// in Nextcloud liegt. Beides getrennt zu halten ist der Grund, warum „Abbrechen"
+// nichts hochlädt und „Entfernen" nichts kaputt macht.
+let campBildNeu = null;
+
+function campBildZuruecksetzen() {
+  if (campBildNeu && campBildNeu.vorschauUrl) URL.revokeObjectURL(campBildNeu.vorschauUrl);
+  campBildNeu = null;
+  const datei = document.getElementById("c-bild-datei");
+  // ⚠️ Ohne das Leeren feuert `change` beim erneuten Wählen DERSELBEN Datei
+  // nicht — der Browser sieht keinen Wertwechsel. Wer versehentlich entfernt
+  // hat, könnte das Bild dann nicht wieder auswählen.
+  if (datei) datei.value = "";
+}
+
+function zeichneCampBild() {
+  const ziel = document.getElementById("c-bild-vorschau");
+  if (!ziel) return;
+  const weg = document.getElementById("btn-camp-bild-weg");
+  const waehlen = document.getElementById("btn-camp-bild-waehlen");
+
+  const url = campBildNeu
+    ? campBildNeu.vorschauUrl
+    : campBildUrl(campEntwurf && campEntwurf.token, campEntwurf && campEntwurf.bild && campEntwurf.bild.id);
+
+  if (url) {
+    ziel.innerHTML = "";
+    const img = document.createElement("img");
+    img.alt = "Bild des Camps";
+    // ⚠️ Kein kaputtes Bildsymbol stehen lassen: dann wüsste niemand, ob gar
+    // kein Bild hinterlegt ist oder ob der Server gerade klemmt.
+    img.addEventListener("error", () => {
+      ziel.innerHTML = '<span class="fc-bild-leer">Bild lässt sich gerade nicht laden</span>';
+    });
+    img.src = url;
+    ziel.appendChild(img);
+  } else {
+    ziel.innerHTML = '<span class="fc-bild-leer">kein Bild</span>';
+  }
+  if (weg) weg.classList.toggle("hidden", !url);
+  if (waehlen) waehlen.textContent = url ? "Anderes Bild wählen" : "Bild auswählen";
+}
+
+// Ein Plakat aus Canva oder WhatsApp hat schnell 3000 Pixel Kantenlänge und
+// mehrere Megabyte. Fürs Fenster auf der Vereinsseite reichen 1400 Pixel — und
+// die Datei wandert bei jedem Aufruf der Homepage über die Leitung. Verkleinert
+// wird IM BROWSER, bevor irgendetwas das Gerät verlässt.
+function verkleinereCampBild(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.width;
+      let h = img.height;
+      if (!w || !h) { reject(new Error("Diese Datei ist kein Bild, das der Browser anzeigen kann.")); return; }
+      if (w > CAMP_BILD_MAX_KANTE || h > CAMP_BILD_MAX_KANTE) {
+        const f = CAMP_BILD_MAX_KANTE / Math.max(w, h);
+        w = Math.round(w * f);
+        h = Math.round(h * f);
+      }
+      const cv = document.createElement("canvas");
+      cv.width = w;
+      cv.height = h;
+      const ctx = cv.getContext("2d");
+      // Weißer Grund: ein transparentes PNG landete sonst als schwarze Fläche
+      // im JPEG — und Vereinslogos kommen fast immer transparent.
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      cv.toBlob((blob) => {
+        if (!blob) { reject(new Error("Das Bild konnte nicht verarbeitet werden.")); return; }
+        resolve({ blob, contentType: "image/jpeg" });
+      }, "image/jpeg", CAMP_BILD_QUALITAET);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Diese Datei ist kein Bild, das der Browser anzeigen kann."));
+    };
+    img.src = url;
+  });
+}
+
+function campBildBlobZuBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const s = String(r.result || "");
+      const komma = s.indexOf(",");
+      resolve(komma >= 0 ? s.slice(komma + 1) : s);
+    };
+    r.onerror = () => reject(new Error("Das Bild konnte nicht gelesen werden."));
+    r.readAsDataURL(blob);
+  });
+}
+
+// ⚠️ Der Worker verlangt eine echte UUID-Form (FILE_ID_RE). `crypto.randomUUID`
+// kennen die älteren iOS-Geräte der Flotte nicht — deshalb der Rückfallweg.
+function campBildUuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => {
+    const r = (Math.random() * 16) | 0;
+    return (ch === "x" ? r : ((r & 0x3) | 0x8)).toString(16);
+  });
+}
+
+async function campBildGewaehlt(file) {
+  if (!file) return;
+  try {
+    const { blob, contentType } = await verkleinereCampBild(file);
+    if (blob.size > CAMP_BILD_MAX_BYTES) {
+      toast("Das Bild ist auch nach dem Verkleinern noch zu groß. Bitte ein kleineres wählen.", true);
+      return;
+    }
+    if (campBildNeu && campBildNeu.vorschauUrl) URL.revokeObjectURL(campBildNeu.vorschauUrl);
+    campBildNeu = { blob, contentType, vorschauUrl: URL.createObjectURL(blob) };
+    zeichneCampBild();
+    toast("Bild übernommen — es geht mit dem Speichern hoch.");
+  } catch (e) {
+    toast((e && e.message) || "Das Bild konnte nicht gelesen werden.", true);
+  }
+}
+
 async function speichereCampAusDialog() {
   const c = campEntwurf;
   c.name = wert("c-name").trim();
@@ -485,7 +615,18 @@ async function speichereCampAusDialog() {
   if (!c.plaetze) return toast("Wie viele Plätze hat das Camp?", true);
 
   await mitFehler(async () => {
+    // ⚠️ Erst die Bilddatei, dann das Camp. Bricht es dazwischen ab, liegt
+    // höchstens eine Bilddatei ohne Camp herum — ohne den passenden Camp-
+    // Schlüssel ist sie gar nicht abrufbar. Andersherum stünde im Camp eine
+    // Kennung ohne Datei, und auf der Vereinsseite erschiene ein kaputtes Bild.
+    if (campBildNeu) {
+      const bildId = campBildUuid();
+      const daten = await campBildBlobZuBase64(campBildNeu.blob);
+      await ladeBildHoch(bildId, campBildNeu.contentType, daten);
+      c.bild = { id: bildId, contentType: campBildNeu.contentType };
+    }
     const antwort = await speichereCamp(c);
+    campBildZuruecksetzen();
     schliesse("camp-modal");
     await ladeUndZeichne();
     toast(antwort && antwort.tageGeaendert
@@ -1125,7 +1266,28 @@ function verdrahteBedienung() {
 
   document.getElementById("btn-camp-neu").addEventListener("click", () => oeffneCampDialog(null));
   document.getElementById("btn-camp-speichern").addEventListener("click", speichereCampAusDialog);
-  document.getElementById("btn-camp-abbrechen").addEventListener("click", () => schliesse("camp-modal"));
+  // ⚠️ Abbrechen räumt das eben gewählte Bild mit weg. Ohne das hinge es am
+  // nächsten geöffneten Camp und ginge dort beim Speichern mit hoch.
+  document.getElementById("btn-camp-abbrechen").addEventListener("click", () => {
+    campBildZuruecksetzen();
+    schliesse("camp-modal");
+  });
+
+  // Das Dateifeld selbst ist versteckt — ein unformatiertes <input type="file">
+  // sähe zwischen den übrigen Knöpfen aus wie ein Fremdkörper.
+  document.getElementById("btn-camp-bild-waehlen").addEventListener("click", () => {
+    document.getElementById("c-bild-datei").click();
+  });
+  document.getElementById("c-bild-datei").addEventListener("change", (ev) => {
+    campBildGewaehlt(ev.target.files && ev.target.files[0]);
+  });
+  document.getElementById("btn-camp-bild-weg").addEventListener("click", () => {
+    campBildZuruecksetzen();
+    // Wirksam wird das Entfernen erst beim Speichern — bis dahin liegt das alte
+    // Bild unverändert in Nextcloud, und Abbrechen nimmt alles zurück.
+    if (campEntwurf) campEntwurf.bild = null;
+    zeichneCampBild();
+  });
   document.getElementById("btn-camp-loeschen").addEventListener("click", async () => {
     if (!campEntwurf || !campEntwurf.id) return;
     if (!confirm(`„${campEntwurf.name}" wirklich löschen?`)) return;

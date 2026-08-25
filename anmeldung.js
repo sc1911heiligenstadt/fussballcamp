@@ -60,6 +60,20 @@ function zeigeCamp() {
   document.getElementById("camp-name").textContent = camp.name || "Fußballcamp";
   document.getElementById("camp-beschreibung").textContent = camp.beschreibung || "";
 
+  // Werbeplakat. ⚠️ Lädt es nicht, wird es ausgeblendet statt als kaputtes
+  // Symbol stehenzubleiben — die Anmeldung hängt nicht daran, und ein graues
+  // Platzhalter-Kästchen ganz oben ließe die Seite defekt aussehen.
+  const bild = document.getElementById("camp-bild");
+  const bildUrl = campBildUrl(camp.token, camp.bildId);
+  if (bildUrl) {
+    bild.onerror = () => bild.classList.add("fc-hidden");
+    bild.src = bildUrl;
+    bild.classList.remove("fc-hidden");
+  } else {
+    bild.removeAttribute("src");
+    bild.classList.add("fc-hidden");
+  }
+
   const eck = [
     { t: "Wann", w: oDatumBereich(camp.vonDatum, camp.bisDatum) },
     { t: "Täglich", w: `${camp.taeglichVon || "?"} bis ${camp.taeglichBis || "?"} Uhr` },

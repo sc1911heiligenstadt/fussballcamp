@@ -106,6 +106,17 @@ async function speichereCamp(camp) {
   return gatewayRequest({ action: "fussballcamp-camp-speichern", app: GATEWAY_APP_ID, camp });
 }
 
+// Das Werbeplakat ablegen, BEVOR das Camp gespeichert wird. Die Kennung erzeugt
+// der Client selbst und reicht sie danach mit `speichereCamp` nach.
+//
+// ⚠️ Reihenfolge bindend: erst die Datei, dann der Eintrag. Bricht es dazwischen
+// ab, liegt höchstens eine Bilddatei ohne Camp herum — die ist ohne den passenden
+// Camp-Schlüssel gar nicht abrufbar. Andersherum stünde im Camp eine Kennung ohne
+// Datei dahinter, und auf der Vereinsseite erschiene ein kaputtes Bild.
+async function ladeBildHoch(id, contentType, dataBase64) {
+  return gatewayRequest({ action: "fussballcamp-bild-put", app: GATEWAY_APP_ID, id, contentType, dataBase64 });
+}
+
 // Nur mit Administrieren-Recht, und nur solange das Camp keine Anmeldung trägt.
 async function loescheCamp(id) {
   return gatewayRequest({ action: "fussballcamp-camp-loeschen", app: GATEWAY_APP_ID, id });

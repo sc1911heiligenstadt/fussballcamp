@@ -8,6 +8,32 @@ const APP_VERSION = "1.0";
 // siehe FC_APP_URL in admin-worker.js.
 const APP_URL = "https://sc1911heiligenstadt.github.io/fussballcamp/";
 
+// ---------- Werbeplakat je Camp ----------
+//
+// Adresse des Bildes. Der Worker liefert es unter einem GET-Pfad aus, damit ein
+// <img src> es direkt laden kann und der Browser es behält. Die Bild-Kennung
+// steht MIT in der Adresse: ein ausgetauschtes Bild bekommt dadurch eine neue
+// Adresse und bleibt nie im Cache hängen.
+//
+// ⚠️ Dieselbe Adresse wird in `popup.js` noch einmal gebaut — das Skript läuft in
+// der fremden Vereinsseite und kennt diese Datei nicht. Wer eine ändert, zieht
+// die andere mit; die dritte Fassung steht im Worker (`handleFcBildGet`).
+const CAMP_BILD_BASIS = "https://landingpage.michel-brunner.workers.dev/camp-bild/";
+
+function campBildUrl(campToken, bildId) {
+  if (!campToken || !bildId) return "";
+  return CAMP_BILD_BASIS + encodeURIComponent(campToken) + "/" + encodeURIComponent(bildId);
+}
+
+// Verkleinert wird im Browser, BEVOR das Bild hochgeht. Michel lädt Plakate aus
+// WhatsApp oder direkt aus Canva hoch — das sind schnell 4 MB, und die müssten
+// sonst bei jedem Aufruf der Vereinsseite über die Leitung.
+const CAMP_BILD_MAX_KANTE = 1400;              // längste Kante in Pixeln
+const CAMP_BILD_QUALITAET = 0.82;              // JPEG-Qualität
+// ⚠️ Muss zu FC_MAX_BILD_BYTES im Worker passen. Steht hier nur, damit die App
+// eine verständliche Meldung zeigen kann statt eines 413 vom Server.
+const CAMP_BILD_MAX_BYTES = 3 * 1024 * 1024;
+
 // Zustände eines Camps. Die Reihenfolge ist zugleich der übliche Weg.
 //
 // ⚠️ Nur "offen" nimmt Anmeldungen an, und nur "offen" erscheint im Popup auf
@@ -172,6 +198,20 @@ const DEFAULT_FELDER = {
 const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
+  {
+    version: "1.7",
+    groups: [
+      {
+        title: "Ein Bild fürs Camp",
+        items: [
+          "Beim Anlegen und Bearbeiten eines Camps lässt sich jetzt ein Bild hochladen — zum Beispiel das Werbeplakat des Camps.",
+          "Das Bild erscheint im Fenster auf der Vereins-Homepage über den Angaben zum Camp und noch einmal oben auf der Anmeldeseite. Am Schnipsel für die Homepage musst du nichts ändern: er lädt weiterhin nur eine Datei, das Bild kommt von selbst mit.",
+          "Große Bilder werden im Browser verkleinert, bevor sie hochgehen (längste Kante 1400 Pixel). Ein Plakat aus WhatsApp oder Canva kannst du also einfach so auswählen.",
+          "Ein Camp ohne Bild sieht aus wie bisher. Ein Bild lässt sich jederzeit austauschen oder wieder entfernen; das alte wird dabei gelöscht."
+        ]
+      }
+    ]
+  },
   {
     version: "1.6",
     groups: [

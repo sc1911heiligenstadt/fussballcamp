@@ -169,6 +169,12 @@ body.fc-oeffentlich {
 #fc-popup-wurzel .fc-pop-body { padding: 18px 22px 22px; }
 #fc-popup-wurzel .fc-pop-camp { border-bottom: 1px solid #dde1e8; padding-bottom: 14px; margin-bottom: 14px; }
 #fc-popup-wurzel .fc-pop-camp:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+/* ⚠️ Steht doppelt: wirksam ist das Inline-CSS in popup.js, DIES hier ist die
+   Fassung für popup-vorschau.html. Wer eine ändert, muss die andere mitziehen. */
+#fc-popup-wurzel .fc-pop-bild {
+  display: block; max-width: 100%; max-height: 38vh;
+  width: auto; height: auto; margin: 0 auto 10px; border-radius: 8px;
+}
 #fc-popup-wurzel .fc-pop-name { font-size: 17px; font-weight: 700; color: #1a56a0; margin-bottom: 3px; }
 #fc-popup-wurzel .fc-pop-zeit { font-size: 13px; color: #6b7280; margin-bottom: 7px; }
 #fc-popup-wurzel .fc-pop-text { font-size: 14px; margin-bottom: 10px; }
@@ -194,4 +200,21 @@ body.fc-oeffentlich {
   display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px;
   background: none; border: none; color: #6b7280;
   font-size: 13px; text-decoration: underline; cursor: pointer; font-family: inherit; padding: 0 2px;
+}
+
+/* Werbeplakat des Camps auf der Anmeldeseite.
+   Wie im Homepage-Fenster bewusst mit max-width UND max-height statt fester
+   Maße: der Browser schrumpft das Bild dann von selbst auf das Kleinere von
+   beidem und behält das Seitenverhältnis — ein Plakat bleibt ganz zu sehen,
+   ohne Balken und ohne Anschnitt. Die 420 px sind die Reißleine: ein
+   hochformatiges Plakat schöbe Name, Eckdaten und Formular sonst weit nach
+   unten, und am Handy sähe man beim Öffnen nur das Bild. */
+.fc-camp-bild {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  width: auto;
+  height: auto;
+  margin: 0 auto 14px;
+  border-radius: 8px;
 }
