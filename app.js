@@ -43,6 +43,14 @@ async function startApp() {
 }
 
 function zeigeStartFehler(e) {
+  // ⚠️ Dieser Weg VERSTECKT die App nur (display:none) — alles zuletzt
+  // Gezeichnete bliebe dahinter stehen. Und genau hier landet ein Sitzungs- oder
+  // Rechteverlust im laufenden Betrieb: mitFehler() fängt NotLoggedInError ab und
+  // ruft uns. applyAdminVisibility() läuft dabei NICHT mehr — ladeUndZeichne() ist
+  // ja vorher abgebrochen. Also hier selbst räumen, sonst greift der Schutz aus
+  // raeumeWasNichtMehrErlaubtIst() ausgerechnet im ernsten Fall nicht.
+  raeumeWasNichtMehrErlaubtIst(false, false, false);
+
   const feld = document.getElementById("cloud-error");
   if (e instanceof NotLoggedInError) {
     document.getElementById("connect-message").textContent =
@@ -110,7 +118,6 @@ function campHatMich(camp) {
 function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
   const leere = (id) => { const el = document.getElementById(id); if (el) el.innerHTML = ""; };
   const leereText = (id) => { const el = document.getElementById(id); if (el) el.textContent = ""; };
-  const leereFeld = (id) => { const el = document.getElementById(id); if (el) el.value = ""; };
 
   if (!edit) {
     // Anmeldungen: Kindernamen, Geburtsdaten, Eltern-Mail, Beitragsstand.
@@ -118,13 +125,29 @@ function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
     leereText("anm-zusammenfassung");
     // Der Meldekasten nennt Kindernamen und was geändert wurde.
     leere("meldebox");
+    // ⚠️ Der offene Dialog ist der schlimmere Fall: er liegt nicht nur im DOM,
+    // er steht SICHTBAR auf dem Bildschirm. Der Titel ist der Kindname, der Rumpf
+    // trägt die vollen Angaben. Zumachen allein reicht deshalb nicht -- der
+    // Inhalt muss weg, sonst steht er beim nächsten Öffnen wieder da.
+    schliesse("anm-modal");
+    leereText("anm-modal-titel");
+    leere("anm-modal-body");
+    anmEntwurf = null;
   }
   if (!admin) {
     leere("aufraeum-box");
-    // Kontoverbindung und Ansprechpartner stehen in Formularfeldern, nicht im
-    // Markup — ein leeres innerHTML räumt sie NICHT weg.
-    ["e-kontoinhaber", "e-iban", "e-bic", "e-bank", "e-kontaktname", "e-kontaktemail",
-     "e-agb"].forEach(leereFeld);
+    // ⚠️ Kontoverbindung und Ansprechpartner stehen in Formularfeldern, nicht
+    // im Markup — ein leeres innerHTML räumt sie NICHT weg.
+    //
+    // ⚠️ Über den CONTAINER, nicht über eine Liste von Feld-Ids. Eine Liste
+    // veraltet lautlos: wer später ein Feld unter Verwaltung ergänzt, müsste
+    // daran denken, es hier nachzutragen — und genau dieses eine bliebe dann
+    // stehen. Zurück kommen die Werte ohnehin aus fuelleVerwaltung(), sobald das
+    // Recht wieder da ist.
+    document.querySelectorAll("#tab-verwaltung input, #tab-verwaltung textarea").forEach((el) => {
+      if (el.type === "checkbox" || el.type === "radio") el.checked = false;
+      else el.value = "";
+    });
     leere("agb-archiv-liste");
     const archivBlock = document.getElementById("agb-archiv-block");
     if (archivBlock) archivBlock.classList.add("hidden");

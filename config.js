@@ -215,6 +215,21 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.15",
+    groups: [
+      {
+        title: "Rechteverlust: auch der offene Dialog und der Anmeldebildschirm",
+        items: [
+          "Nachtrag zu 1.14. Dort wurde beim Rechteverlust der Bildschirm geräumt — aber nur, wenn die App danach noch normal weiterlief.",
+          "Steht gerade ein Anmelde-Dialog offen, wird er jetzt geschlossen und geleert. Vorher blieb der Name des Kindes samt allen Angaben SICHTBAR stehen, obwohl das Recht schon weg war.",
+          "Fällt die Sitzung ganz aus (abgemeldet, Passwort gewechselt, aus der Gruppe genommen), erscheint der Anmeldebildschirm. Auch dahinter wird jetzt geräumt — vorher stand dort alles weiter im Browser.",
+          "Die Felder unter Verwaltung werden nicht mehr einzeln aufgezählt, sondern als Ganzes geleert. Ein Feld, das später dazukommt, ist damit von allein mit abgedeckt.",
+          "Im Normalbetrieb ändert sich wieder nichts: Wer das Recht hat, sieht alles wie bisher."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.14",
     groups: [
       {
