@@ -199,6 +199,22 @@ const GITTER_AB_PX = 768;
 
 const APP_CHANGELOG = [
   {
+    version: "1.9",
+    groups: [
+      {
+        title: "Das Camp steht von allein im Vereinskalender",
+        items: [
+          "Sobald du ein Camp aus dem Entwurf holst („Anmeldung öffnen“), legt es sich selbst als Termin im Vereinskalender ab — mit Namen, Tagen, Ort, der täglichen Uhrzeit, den Jahrgängen und dem Anmeldelink. Du musst denselben Termin nicht mehr ein zweites Mal von Hand eintragen.",
+          "Damit steht das Camp auch bei allen, die den Vereinskalender in ihrem eigenen Kalender abonniert haben — also im Handy der Trainer.",
+          "Änderst du am Camp etwas, zieht der Termin nach. Stellst du es zurück auf Entwurf, ist er wieder weg. Ein Camp, dessen letzter Tag vorbei ist, verschwindet ebenfalls.",
+          "An der Camp-Karte steht, ob das Camp im Vereinskalender angekommen ist. Camps, die es schon vor dieser Änderung gab, kommen in der nächsten Nacht von selbst dazu.",
+          "Wenn du den Termin im Vereinskalender löschst, bleibt er gelöscht — er wird nicht wieder angelegt.",
+          "Ein mehrtägiges Camp steht bewusst ohne Uhrzeit im Kalender: sonst zeigen Kalenderprogramme einen einzigen Block von Montag früh bis Freitag nachmittag, also durch die Nächte hindurch. Die tägliche Zeit steht stattdessen in der Notiz des Termins."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.8",
     groups: [
       {

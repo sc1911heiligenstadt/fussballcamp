@@ -332,6 +332,7 @@ function campKarte(c) {
       <button type="button" class="btn tiny ghost" data-link-kopieren="${escapeAttr(link)}">kopieren</button>
       <a class="btn tiny ghost" href="${escapeAttr(link)}" target="_blank" rel="noopener">ansehen</a></div>` : ""}
 
+    ${kalenderZeile(c)}
     ${anmeldeFensterHinweis(c)}
 
     <div class="btn-row">
@@ -348,6 +349,34 @@ function statusKnoepfe(c) {
   if (c.status === "offen")       return knopf("geschlossen", "Anmeldung schließen", "warn");
   if (c.status === "geschlossen") return knopf("offen", "Wieder öffnen", "ghost") + " " + knopf("abgeschlossen", "Camp abschließen", "ghost");
   return knopf("geschlossen", "Wieder aufmachen", "ghost");
+}
+
+// Steht dieses Camp im Vereinskalender? Der Übertrag passiert von allein — beim
+// Speichern, beim Statuswechsel und im nächtlichen Lauf des Workers.
+//
+// ⚠️ Nur für Bearbeiter: für alle anderen ist das eine Verwaltungsauskunft ohne
+// Nutzen — sie sehen den Termin im Vereinskalender selbst.
+//
+// ⚠️ "kalenderUebertragen" heißt "es wurde ein Termin angelegt", nicht "er steht
+// dort noch". Wer ihn im Vereinskalender von Hand löscht, bleibt ihn los — der
+// Abgleich legt ihn bewusst nicht wieder an. Diese Zeile zeigt das dann falsch
+// an; den Kalender bei jedem Laden mitzulesen wäre ein zweiter Weg zum Server
+// für eine einzige Anzeigezeile.
+function kalenderZeile(c) {
+  if (!canEdit() || !c.kalenderSoll) return "";
+  return c.kalenderUebertragen
+    ? `<div class="ck-kalender ok">Steht im Vereinskalender</div>`
+    : `<div class="ck-kalender">Noch nicht im Vereinskalender — kommt beim nächsten Speichern oder über Nacht dazu.</div>`;
+}
+
+// ⚠️ Gemeldet wird NUR der Fehlerfall. „Steht jetzt im Kalender" bei jedem
+// Speichern wäre eine Meldung über etwas, das ohnehin passieren soll, und die
+// Karte zeigt es ja. Ein AUSGEBLIEBENER Übertrag dagegen fällt sonst niemandem
+// auf — genau die Art stiller Fehler, die man erst Wochen später bemerkt.
+function kalenderZusatz(antwort) {
+  return antwort && antwort.kalender === "fehler"
+    ? " Der Termin im Vereinskalender ließ sich gerade nicht schreiben — der nächtliche Lauf holt ihn nach."
+    : "";
 }
 
 // Warum ein Camp trotz Status "offen" keine Anmeldung annimmt — sonst sucht man
@@ -370,9 +399,14 @@ async function wechsleStatus(id, ziel) {
   if (ziel === "offen" && !camp.hatKonto &&
       !confirm("Es ist noch keine IBAN hinterlegt.\n\nDie Eltern bekommen dann keine Zahlungsangaben. Trotzdem öffnen?")) return;
   await mitFehler(async () => {
-    await setzeCampStatus(id, ziel);
+    const antwort = await setzeCampStatus(id, ziel);
     await ladeUndZeichne();
-    toast(ziel === "offen" ? "Das Camp steht jetzt auf der Homepage." : "Status geändert.");
+    let text = ziel === "offen" ? "Das Camp steht jetzt auf der Homepage." : "Status geändert.";
+    // Der Statuswechsel ist der Moment, in dem der Termin entsteht oder
+    // verschwindet — hier ist die Meldung eine Auskunft, keine Selbstdarstellung.
+    if (antwort && antwort.kalender === "angelegt") text += " Der Termin steht im Vereinskalender.";
+    if (antwort && antwort.kalender === "entfernt") text += " Der Termin im Vereinskalender ist wieder weg.";
+    toast(text + kalenderZusatz(antwort));
   });
 }
 
@@ -629,9 +663,9 @@ async function speichereCampAusDialog() {
     campBildZuruecksetzen();
     schliesse("camp-modal");
     await ladeUndZeichne();
-    toast(antwort && antwort.tageGeaendert
+    toast((antwort && antwort.tageGeaendert
       ? `Gespeichert. Die Camp-Tage wurden angepasst (${antwort.tageGeaendert}).`
-      : "Gespeichert.");
+      : "Gespeichert.") + kalenderZusatz(antwort));
   });
 }
 

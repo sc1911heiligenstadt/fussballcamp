@@ -67,6 +67,13 @@
   word-break: break-all;
 }
 
+/* Übertrag in den Vereinskalender: eine Zeile, kein Kasten — es ist eine
+   Zustandsauskunft, keine Aufgabe. Die Hinweiskästen darunter bleiben den
+   Dingen vorbehalten, bei denen jemand etwas tun muss. */
+.ck-kalender { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.ck-kalender.ok { color: var(--green); }
+.ck-kalender.ok::before { content: "✓ "; }
+
 /* ---------- Filterzeile ---------- */
 .filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .filter-row > label { font-size: 13px; color: var(--muted); }
