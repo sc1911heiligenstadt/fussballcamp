@@ -169,6 +169,7 @@
           <hr />
           <label class="inline-check"><input type="checkbox" id="e-zahlerinnerung" /> Erinnerung, wenn der Beitrag offen ist</label>
           <label class="feld-schmal">Tage nach der Anmeldung<input type="number" id="e-zahlerinnerungtage" min="1" max="120" /></label>
+          <p class="muted" style="margin:6px 0 10px;">Erinnert wird erst, wenn <strong>zusätzlich</strong> die Zahlungsfrist näher als drei Tage ist oder schon abgelaufen. Sonst käme bei einer Anmeldung lange vor dem Camp eine Zahlungsaufforderung, bevor überhaupt etwas fällig ist.</p>
           <div class="btn-row"><button type="button" class="btn small ghost" id="btn-test-zahlung">Jetzt auslösen</button></div>
           <p class="muted" id="lauf-info" style="margin-top:14px;"></p>
         </div>
@@ -404,7 +405,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="config.js?v=1.16"></script>
+  <script src="config.js?v=1.17"></script>
   <script src="db.js?v=1.1"></script>
   <script src="app.js?v=1.9"></script>
 </body>

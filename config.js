@@ -215,6 +215,32 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.17",
+    groups: [
+      {
+        title: "Absagen der Eltern werden jetzt per E-Mail bestätigt",
+        items: [
+          "Sagt eine Familie über ihren Link ab, bekommt sie sofort eine Bestätigung — vorher passierte nach dem Klick gar nichts, und niemand wusste, ob es angekommen ist.",
+          "Die Mail sagt auch, was mit einem schon gezahlten Beitrag passiert. Sie richtet sich dabei nach Punkt 4 der Teilnahmebedingungen: bis 28 Tage vorher voll, bis 7 Tage vorher zur Hälfte, danach keine Erstattung.",
+          "Sie verspricht bewusst nie einen konkreten Betrag zurück, sondern nennt die Regel und kündigt an, dass ihr euch meldet. Über die Rückzahlung entscheidet weiterhin ein Mensch.",
+          "Bei einem Freiplatz steht gar nichts über Geld drin.",
+          "Ein zweiter Klick auf „Absagen“ schickt keine zweite Mail.",
+          "Die Absage-Mail trägt keinen Änderungs-Link mehr: Nach einer Absage lässt sich die Anmeldung ohnehin nicht mehr ändern. Stattdessen steht dort, dass man sich bei euch melden soll.",
+          "Sagt ihr selbst in der Verwaltung ab, geht weiterhin keine Mail raus — das war so nicht bestellt."
+        ]
+      },
+      {
+        title: "Die Zahlungserinnerung kommt nicht mehr Monate zu früh",
+        items: [
+          "Bisher hing sie allein an „X Tage nach der Anmeldung“. Wer sich drei Monate vor dem Camp angemeldet hat, bekam nach zwei Wochen eine Zahlungsaufforderung — obwohl der Beitrag erst sieben Tage vor Camp-Beginn fällig ist.",
+          "Jetzt müssen zwei Dinge zutreffen: Die eingestellten Tage seit der Anmeldung sind um, UND die Zahlungsfrist ist nah (drei Tage davor) oder schon vorbei. Die spätere von beiden entscheidet.",
+          "Ist die Frist bereits abgelaufen, geht die Erinnerung erst recht raus.",
+          "An der Einstellung unter Verwaltung ändert sich nichts — sie ist weiterhin die erste der beiden Bedingungen."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.16",
     groups: [
       {
