@@ -403,10 +403,33 @@
     </div>
   </div>
 
+  <!-- Absage durch die Verwaltung. Ersetzt das frühere prompt() — ein prompt
+       kann kein Häkchen, und ohne Häkchen erfuhren die Eltern von einer hier
+       eingetragenen Absage nie etwas. Liegt ÜBER dem Anmeldungs-Dialog, deshalb
+       der eigene z-index. -->
+  <div class="modal-overlay hidden" id="absage-modal" style="z-index:110;">
+    <div class="modal schmal">
+      <h2>Anmeldung absagen</h2>
+      <div class="modal-body">
+        <p class="muted" id="absage-wen" style="margin-bottom:14px;"></p>
+        <label class="voll">Grund der Absage
+          <input type="text" id="absage-grund" maxlength="300" placeholder="z. B. Eltern haben angerufen" />
+        </label>
+        <p class="muted" style="margin:4px 0 14px;">Steht nur intern. Er geht auch dann nicht an die Eltern, wenn du unten die Benachrichtigung anhakst.</p>
+        <label class="inline-check"><input type="checkbox" id="absage-mail" checked /> Eltern per E-Mail benachrichtigen</label>
+        <p class="muted" id="absage-mail-hinweis" style="margin:6px 0 0;"></p>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn warn" id="btn-absage-ausfuehren">Absagen</button>
+        <button type="button" class="btn ghost" id="btn-absage-abbrechen">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script src="config.js?v=1.17"></script>
-  <script src="db.js?v=1.1"></script>
-  <script src="app.js?v=1.9"></script>
+  <script src="db.js?v=1.2"></script>
+  <script src="app.js?v=1.10"></script>
 </body>
 </html>

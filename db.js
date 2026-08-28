@@ -195,8 +195,15 @@ async function rueckeNach(campId, anmeldungId) {
 
 // Absagen durch die Verwaltung. Der Platz wird frei; das Nachrücken bleibt ein
 // eigener, bewusster Klick (Michel-Entscheidung) und passiert NICHT automatisch.
-async function sageAb(campId, anmeldungId, grund) {
-  return gatewayRequest({ action: "fussballcamp-absagen", app: GATEWAY_APP_ID, campId, anmeldungId, grund: grund || "" });
+// ⚠️ `mail` wird als echtes true/false geschickt, nie weggelassen: der Worker
+// verschickt nur bei ausdrücklichem `true`. Ein fehlendes Feld hieße dort
+// "nicht benachrichtigen" — was richtig ist, aber dann käme die Entscheidung
+// nicht von der Bedienenden, sondern aus einem vergessenen Parameter.
+async function sageAb(campId, anmeldungId, grund, mail) {
+  return gatewayRequest({
+    action: "fussballcamp-absagen", app: GATEWAY_APP_ID,
+    campId, anmeldungId, grund: grund || "", mail: mail === true
+  });
 }
 
 // Endgültiges Entfernen einer einzelnen Anmeldung (Administrieren) — etwa nach

@@ -143,6 +143,16 @@ function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
     schliesse("anm-modal");
     leereText("anm-modal-titel");
     leere("anm-modal-body");
+    // ⚠️ Der Absage-Dialog liegt DARÜBER und trägt denselben Personenbezug:
+    // Kindname in `absage-wen`, die Eltern-Mailadresse im Hinweis darunter, dazu
+    // der intern gemeinte Absagegrund im Textfeld. Ihn zu vergessen wäre genau
+    // der Fehler, der beim Anmeldungs-Dialog schon einmal drinsteckte — und ein
+    // `<input>` räumt kein innerHTML weg, der Wert muss einzeln fallen.
+    schliesse("absage-modal");
+    leereText("absage-wen");
+    leereText("absage-mail-hinweis");
+    const absageGrund = document.getElementById("absage-grund");
+    if (absageGrund) absageGrund.value = "";
     anmEntwurf = null;
   }
   if (!admin) {
@@ -1259,6 +1269,34 @@ function oeffneAnmDialog(campId, anmeldungId) {
   oeffne("anm-modal");
 }
 
+// Der Absage-Dialog der Verwaltung. Bewusst kein prompt() mehr: ein prompt kann
+// kein Häkchen, und ohne Häkchen erfuhren die Eltern von einer hier eingetragenen
+// Absage überhaupt nichts.
+function oeffneAbsageDialog() {
+  if (!anmEntwurf) return;
+  const camp = findeCamp(anmEntwurf.campId);
+  const a = camp ? (camp.anmeldungen || []).find((x) => x.id === anmEntwurf.id) : null;
+  if (!a) return;
+
+  document.getElementById("absage-wen").textContent =
+    `${kindName(a)} — der Platz wird dadurch frei. Nachrücken lassen musst du selbst.`;
+  document.getElementById("absage-grund").value = "";
+
+  // ⚠️ Ohne hinterlegte Adresse kann nichts rausgehen. Das Häkchen wird dann
+  // ausgeschaltet UND gesperrt — aber mit einem Satz daneben: ein gesperrtes
+  // Kästchen schluckt den Klick sonst kommentarlos, und wer es anhakt, verlässt
+  // sich auf eine Mail, die nie kommt.
+  const hatAdresse = !!String(a.elternEmail || "").trim();
+  const feld = document.getElementById("absage-mail");
+  feld.checked = hatAdresse;
+  feld.disabled = !hatAdresse;
+  document.getElementById("absage-mail-hinweis").textContent = hatAdresse
+    ? "Die Bestätigung geht an " + a.elternEmail + ". Sie nennt das Camp und was mit dem Beitrag passiert — nicht den Grund."
+    : "Für diese Anmeldung ist keine E-Mail-Adresse hinterlegt, es kann also nichts verschickt werden.";
+
+  oeffne("absage-modal");
+}
+
 function anmDetails(camp, a) {
   const zeilen = [];
   const zeile = (label, wert) => { if (wert !== "" && wert !== null && wert !== undefined && wert !== false) zeilen.push(`<div class="detail-zeile"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(String(wert))}</dd></div>`); };
@@ -1624,14 +1662,28 @@ function verdrahteBedienung() {
   document.getElementById("anm-suche").addEventListener("input", zeichneAnmeldungen);
   document.getElementById("btn-anm-speichern").addEventListener("click", speichereAnmAusDialog);
   document.getElementById("btn-anm-abbrechen").addEventListener("click", () => schliesse("anm-modal"));
-  document.getElementById("btn-anm-absagen").addEventListener("click", async () => {
-    const grund = prompt("Grund der Absage (steht nur intern, geht nicht an die Eltern):", "");
-    if (grund === null) return;
+  document.getElementById("btn-anm-absagen").addEventListener("click", oeffneAbsageDialog);
+  document.getElementById("btn-absage-abbrechen").addEventListener("click", () => schliesse("absage-modal"));
+  document.getElementById("btn-absage-ausfuehren").addEventListener("click", async () => {
+    if (!anmEntwurf) return;
+    const grund = document.getElementById("absage-grund").value;
+    const mailFeld = document.getElementById("absage-mail");
+    const willMail = mailFeld.checked && !mailFeld.disabled;
     await mitFehler(async () => {
-      await sageAb(anmEntwurf.campId, anmEntwurf.id, grund);
+      const r = await sageAb(anmEntwurf.campId, anmEntwurf.id, grund, willMail);
+      schliesse("absage-modal");
       schliesse("anm-modal");
       await ladeUndZeichne();
-      toast("Abgesagt. Der Platz ist frei — nachrücken lassen musst du selbst.");
+      // ⚠️ Ein Fehlschlag beim Versand wird ANGESAGT, nicht geschluckt. Die
+      // Absage steht dann trotzdem — wer sich auf eine Zustellung verlässt, die
+      // es nie gab, ruft bei der Familie nicht mehr an.
+      if (willMail && r && r.sent === false) {
+        toast("Abgesagt — die Benachrichtigung ging aber NICHT raus. Bitte selbst Bescheid geben.", true);
+      } else if (willMail) {
+        toast("Abgesagt. Die Eltern haben eine Bestätigung bekommen. Nachrücken lassen musst du selbst.");
+      } else {
+        toast("Abgesagt. Der Platz ist frei — nachrücken lassen musst du selbst.");
+      }
     });
   });
   document.getElementById("btn-anm-loeschen").addEventListener("click", async () => {
