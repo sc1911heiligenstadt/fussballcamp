@@ -504,6 +504,74 @@ function anmBetrag(camp, a) {
   return (roh === undefined || roh === null) ? (camp.preis || 0) : roh;
 }
 
+// ---------- Was nach einer Absage zurückgeht (Punkt 4 der Bedingungen) ----------
+
+// Der Tag im BERLINER Kalender, auf dem ein Zeitstempel liegt.
+//
+// ⚠️ Nicht `iso.slice(0, 10)`: `geaendertAm` ist UTC. Eine Absage um 00:30 Uhr
+// Berliner Zeit steht dort mit dem VORTAG — und genau an der 28-Tage-Grenze
+// entscheidet dieser eine Tag über 100 % oder 50 %. Der Worker rechnet mit
+// derselben Umrechnung (`fcHeuteBerlin`), sonst kämen Mail und Dialog auf
+// verschiedene Tage.
+function berlinTag(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+}
+
+// Ganze Tage zwischen zwei ISO-Tagen (YYYY-MM-DD).
+//
+// ⚠️ Anker auf `T12:00:00Z`, nicht auf Mitternacht — sonst kippt die Rechnung an
+// der Sommerzeitgrenze um einen Tag. Gleiche Vorsichtsmaßnahme wie beim
+// Zahlungsziel im Worker.
+function tageZwischenIso(vonIso, bisIso) {
+  if (!vonIso || !bisIso) return null;
+  const a = new Date(String(vonIso) + "T12:00:00Z");
+  const b = new Date(String(bisIso) + "T12:00:00Z");
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return null;
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+// Hat DIESE Anmeldung die Familie selbst abgesagt?
+//
+// ⚠️ Nur dann gilt Punkt 4. Siehe FC_ABSAGE_GRUND_ELTERN in config.js.
+function absageVonEltern(a) {
+  return a.status === "abgesagt" && String(a.absageGrund || "") === FC_ABSAGE_GRUND_ELTERN;
+}
+
+// Welche Erstattungsstufe Punkt 4 für diese Absage vorsieht: 100, 50 oder 0.
+//
+// ⚠️ Maßgeblich ist der EINGANG DER ABSAGE, nicht der heutige Tag — so steht es
+// wörtlich in Punkt 4, und nur so nennt dieser Dialog dieselbe Quote, die schon
+// in der Absage-Mail der Familie stand. Würde hier mit „heute" gerechnet, sänke
+// die Zahl mit jedem Tag, den die Verwaltung den Vorgang später aufschlägt: aus
+// den zugesagten 100 % würden stillschweigend 50 %, und die Familie bekäme
+// weniger, als ihr schriftlich bestätigt wurde.
+//
+// ⚠️ `null` heißt „keine Aussage möglich" und ist NICHT dasselbe wie 0 — sonst
+// behauptete der Dialog bei einem Camp ohne Anfangsdatum „keine Erstattung".
+function erstattungsStufe(camp, a) {
+  const absageTag = berlinTag(a.geaendertAm);
+  const tage = tageZwischenIso(absageTag, camp.vonDatum);
+  if (tage === null) return null;
+  if (tage >= FC_ERSTATTUNG_VOLL_AB_TAGEN) return 100;
+  if (tage >= FC_ERSTATTUNG_HALB_AB_TAGEN) return 50;
+  return 0;
+}
+
+// Der Betrag in Cent, der nach Punkt 4 zurückzuüberweisen ist.
+//
+// ⚠️ Nur was tatsächlich EINGEGANGEN ist, kann zurückgehen. Ohne den Haken
+// „bezahlt" ist der Rückzahlbetrag 0 — nicht etwa die Quote auf einen Beitrag,
+// den nie jemand überwiesen hat.
+// ⚠️ `Math.round`, nicht abschneiden: bei einem ungeraden Cent-Betrag ginge
+// sonst der kleinste Cent verloren.
+function erstattungCent(camp, a, stufe) {
+  if (!a.bezahlt || stufe === null) return null;
+  return Math.round(anmBetrag(camp, a) * stufe / 100);
+}
+
 // Steht dieses Camp im Vereinskalender? Der Übertrag passiert von allein — beim
 // Speichern, beim Statuswechsel und im nächtlichen Lauf des Workers.
 //
@@ -1323,6 +1391,69 @@ function anmDetails(camp, a) {
     (camp.preisFrueh && anmBetrag(camp, a) === camp.preisFrueh ? " (Frühbucher)" : ""));
   zeile("Verwendungszweck", vz);
   zeile("Bezahlt", a.bezahlt ? "ja, vermerkt am " + datumDe(a.bezahltAm) : "nein");
+
+  // ---------- Was nach einer Absage zurückgeht ----------
+  //
+  // Steht hier, weil derjenige, der überweist, genau diesen Bildschirm offen
+  // hat. Ohne die Zeile müsste er Absagedatum, Camp-Beginn und die Staffel aus
+  // Punkt 4 im Kopf gegeneinander rechnen — und das an einer Grenze, an der ein
+  // einziger Tag den halben Beitrag ausmacht.
+  //
+  // ⚠️ Die Zahl ist eine ABLESEHILFE, keine Anweisung. Punkt 4 lässt dem Verein
+  // ausdrücklich Spielraum (Neuvergabe des Platzes, Kulanz); entschieden wird
+  // von Hand. Deshalb steht darunter, was der Familie per Mail zugesagt wurde,
+  // und nicht bloß ein Betrag ohne Herkunft.
+  if (a.status === "abgesagt") {
+    zeilen.push(`<h3>Absage und Erstattung</h3>`);
+    zeile("Absage eingegangen", datumZeitDe(a.geaendertAm) || "nicht erfasst");
+
+    const betrag = anmBetrag(camp, a);
+    const gross = (label, text) =>
+      zeilen.push(`<div class="detail-zeile"><dt>${escapeHtml(label)}</dt><dd><strong>${escapeHtml(text)}</strong></dd></div>`);
+
+    if (!absageVonEltern(a)) {
+      // ⚠️ Hier bewusst KEINE Quote. Der Absage-Knopf der Verwaltung deckt zwei
+      // verschiedene Fälle ab — die Familie ruft an und ihr tragt es ein
+      // (Punkt 4), oder der Verein selbst sagt ab (Punkt 11, volle Erstattung).
+      // Welcher davon vorliegt, weiß die App nicht.
+      gross("Zurückzuüberweisen", "von Hand klären");
+      zeile("Warum", "Diese Absage habt ihr selbst eingetragen. Punkt 4 gilt nur, wenn die Familie storniert; sagt der Verein ab, greift Punkt 11 und der Beitrag geht in voller Höhe zurück."
+        + (a.bezahlt ? " Eingegangen sind " + euro(betrag) + "." : " Ein Beitrag ist nicht eingegangen."));
+    } else if (betrag === 0) {
+      gross("Zurückzuüberweisen", "nichts");
+      zeile("Warum", "Für diesen Platz war kein Beitrag zu zahlen.");
+    } else {
+      const stufe = erstattungsStufe(camp, a);
+      const tage = tageZwischenIso(berlinTag(a.geaendertAm), camp.vonDatum);
+      if (tage !== null) {
+        zeile("Vorlauf", tage === 1 ? "1 Tag vor Camp-Beginn" : `${tage} Tage vor Camp-Beginn`);
+      }
+
+      if (stufe === null) {
+        // ⚠️ Nicht als 0 ausgeben. „Keine Angabe möglich" und „keine Erstattung"
+        // sind zwei verschiedene Aussagen, und die zweite kostet die Familie Geld.
+        gross("Zurückzuüberweisen", "nicht bestimmbar");
+        zeile("Warum", a.geaendertAm
+          ? "Dem Camp fehlt das Anfangsdatum — ohne das lässt sich die Frist aus Punkt 4 nicht rechnen. Bitte von Hand klären."
+          : "Zu dieser Absage ist kein Datum erfasst — ohne das lässt sich die Frist aus Punkt 4 nicht rechnen. Bitte von Hand klären.");
+      } else {
+        zeile("Erstattung nach Punkt 4", stufe === 100 ? "voller Beitrag (100 %)"
+          : stufe === 50 ? "die Hälfte des Beitrages (50 %)" : "keine Erstattung (0 %)");
+        if (a.bezahlt) {
+          gross("Zurückzuüberweisen", euro(erstattungCent(camp, a, stufe))
+            + (stufe === 100 ? "" : ` von ${euro(betrag)}`));
+        } else {
+          gross("Zurückzuüberweisen", "nichts");
+          zeile("Warum", "Ein Beitrag ist bei euch nie eingegangen — es kann also auch nichts zurückgehen.");
+        }
+        // Punkt 4 erlaubt den Verzicht ausdrücklich. Ohne diesen Satz liest sich
+        // die Zahl darüber wie eine feste Rechnung.
+        if (stufe !== 100 && a.bezahlt) {
+          zeile("Spielraum", "Punkt 4 erlaubt euch, bei kurzfristiger Neuvergabe des Platzes ganz oder teilweise auf die Einbehaltung zu verzichten. Der Familie wurde per Mail nur die Regel genannt, nie ein Betrag.");
+        }
+      }
+    }
+  }
 
   // Der Nachweis, worauf sich diese Familie eingelassen hat. Ein Eintrag ohne
   // `agbAm` stammt aus der Zeit vor den Teilnahmebedingungen — das steht dann

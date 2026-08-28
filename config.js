@@ -200,6 +200,36 @@ const DEFAULT_FELDER = {
   bemerkung: "optional"
 };
 
+// ---------- Erstattung nach Punkt 4 der Teilnahmebedingungen ----------
+//
+// Die Staffel, nach der sich richtet, wie viel Beitrag der Verein nach einer
+// Absage der Familie zurückzahlt. Punkt 4 lautet:
+//   bis einschließlich 28 Tage vor Campbeginn   -> 100 % des Beitrages
+//   27 bis einschließlich 7 Tage vor Campbeginn ->  50 % des Beitrages
+//   ab 6 Tage vor Campbeginn                    -> keine Erstattung
+//
+// ⚠️ Der Rechtstext ist die Quelle, nicht diese Zahlen. Und sie stehen ein
+// ZWEITES Mal im Worker (`FC_ERSTATTUNG_VOLL_AB_TAGEN` / `_HALB_AB_TAGEN` in
+// admin-worker.js): dort entscheiden sie, was in der Absage-Mail an die Eltern
+// steht, hier, was der Verwaltung im Dialog angezeigt wird. Wer eine Seite
+// ändert, MUSS die andere mitziehen — sonst nennt die Mail der Familie eine
+// andere Quote als der Bildschirm, von dem aus überwiesen wird.
+const FC_ERSTATTUNG_VOLL_AB_TAGEN = 28;
+const FC_ERSTATTUNG_HALB_AB_TAGEN = 7;
+
+// ⚠️ Genau der Text, den der Worker in `absageGrund` schreibt, wenn die ELTERN
+// über ihren Link absagen (`handleFcMeineAbsagen`). Er ist der einzige Marker,
+// der eine Eltern-Absage dauerhaft von einer Absage der Verwaltung trennt:
+// `elternAenderung` räumt „Zur Kenntnis genommen" wieder weg, und der Verlauf
+// mit seinem `quelle`-Feld verlässt den Server nie.
+//
+// ⚠️ Diese Unterscheidung ist keine Feinheit: Punkt 4 heißt „Rücktritt und
+// Stornierung durch TEILNEHMENDE" und gilt nur, wenn die Familie storniert.
+// Sagt der Verein ab, greift Punkt 11 (Erstattung grundsätzlich in voller
+// Höhe). Der Absage-Knopf in der Verwaltung deckt beide Fälle ab — welcher
+// vorliegt, weiß die App nicht, also darf sie dort keine Quote behaupten.
+const FC_ABSAGE_GRUND_ELTERN = "von den Eltern abgesagt";
+
 // Ab dieser Fensterbreite zeigt die Belegung das Gitter, darunter die
 // Kartenliste. Der Wert steht doppelt — hier für die Logik, in style.css für
 // die Darstellung; beide müssen zusammenpassen.
@@ -214,6 +244,23 @@ FORMULAR_FELDER.forEach((f) => {
 });
 
 const APP_CHANGELOG = [
+  {
+    version: "1.18",
+    groups: [
+      {
+        title: "Bei einer Absage steht jetzt da, wie viel Geld zurückgeht",
+        items: [
+          "Öffnet ihr eine abgesagte Anmeldung, steht unten der neue Abschnitt „Absage und Erstattung“: wann die Absage eingegangen ist, wie viele Tage vor Camp-Beginn das war, welche Stufe aus Punkt 4 der Teilnahmebedingungen greift — und der Betrag, den ihr zurücküberweisen müsst.",
+          "Gerechnet wird mit dem Tag, an dem die Absage eingegangen ist, nicht mit dem heutigen. So steht dort auch drei Wochen später noch genau die Quote, die der Familie in der Absage-Mail zugesagt wurde.",
+          "Zurück kann nur, was auch angekommen ist: ohne den Haken „bezahlt“ steht dort „nichts“ und der Grund dazu.",
+          "Bei einem Freiplatz steht nichts über Geld.",
+          "Fehlt dem Camp das Anfangsdatum, steht dort „nicht bestimmbar“ — ausdrücklich nicht „keine Erstattung“. Das sind zwei verschiedene Dinge, und das zweite kostet die Familie Geld.",
+          "Habt ihr die Absage selbst eingetragen, wird keine Quote genannt, sondern „von Hand klären“. Punkt 4 gilt nur, wenn die Familie storniert; sagt der Verein ab, greift Punkt 11 und der Beitrag geht in voller Höhe zurück. Welcher Fall vorliegt, kann die App nicht wissen.",
+          "Der Betrag ist eine Ablesehilfe, keine Anweisung: Punkt 4 erlaubt euch, bei kurzfristiger Neuvergabe des Platzes ganz oder teilweise zu verzichten. Dieser Hinweis steht direkt darunter."
+        ]
+      }
+    ]
+  },
   {
     version: "1.17",
     groups: [
