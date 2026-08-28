@@ -21,6 +21,17 @@ let jobEntwurf = null;
 let anmEntwurf = null;
 let personZiel = null;
 
+// Die Kontoverbindung ist die einzige Stelle dieser App, an der ein Vertipper
+// Geld kostet: sie steht in jeder Bestätigungsmail und auf der Bestätigungsseite,
+// und die Eltern überweisen dorthin. Deshalb sind die vier Felder gesperrt und
+// müssen vor einer Änderung erst freigegeben werden.
+//
+// ⚠️ Der Merker lebt NUR im Speicher und fängt bei jedem Neuladen wieder bei
+// `false` an. Ein in localStorage aufgehobener Merker bliebe auf einem geteilten
+// Rechner hängen, und das Schloss wäre ab dem zweiten Besuch nur noch Zierde.
+let kontoFrei = false;
+const KONTO_FELDER = ["e-kontoinhaber", "e-iban", "e-bic", "e-bank"];
+
 // ============================================================
 //  Start
 // ============================================================
@@ -148,6 +159,10 @@ function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
       if (el.type === "checkbox" || el.type === "radio") el.checked = false;
       else el.value = "";
     });
+    // ⚠️ Eine offene Freigabe muss mit weg. Sonst stünde das Schloss nach
+    // einem Rechteverlust weiter auf offen, und der nächste Nutzer an demselben
+    // Browser fände die Kontofelder entsperrt vor.
+    setzeKontoSchloss(false);
     leere("agb-archiv-liste");
     const archivBlock = document.getElementById("agb-archiv-block");
     if (archivBlock) archivBlock.classList.add("hidden");
@@ -1309,13 +1324,79 @@ async function speichereAnmAusDialog() {
 //  Verwaltung
 // ============================================================
 
-function fuelleVerwaltung() {
-  if (!canAdmin()) return;
-  const e = (daten && daten.einstellungen) || DEFAULT_EINSTELLUNGEN;
+// ---------- Schloss an der Kontoverbindung ----------
+
+// Sperrt oder öffnet die vier Kontofelder. `zurueck` setzt beim Zusperren die
+// gespeicherten Werte wieder ein — sonst bliebe eine halb getippte IBAN im Feld
+// stehen und sähe aus, als wäre sie gespeichert.
+function setzeKontoSchloss(frei, zurueck) {
+  kontoFrei = !!frei;
+  KONTO_FELDER.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.readOnly = !kontoFrei;
+  });
+  const zeile = document.getElementById("konto-schloss");
+  const status = document.getElementById("konto-schloss-status");
+  const knopf = document.getElementById("btn-konto-freigeben");
+  if (zeile) zeile.classList.toggle("offen", kontoFrei);
+  if (status) {
+    status.textContent = kontoFrei
+      ? "🔓 Freigegeben — Änderungen werden mit dem nächsten Speichern übernommen."
+      : "🔒 Gesperrt — die Felder lassen sich erst nach einer Freigabe ändern.";
+  }
+  if (knopf) knopf.textContent = kontoFrei ? "Freigabe zurücknehmen" : "Zum Ändern freigeben";
+  if (!kontoFrei && zurueck) fuelleKontofelder();
+}
+
+function fuelleKontofelder() {
+  const e = (daten && daten.einstellungen) || {};
   setzeWert("e-kontoinhaber", e.kontoinhaber || "");
   setzeWert("e-iban", e.iban || "");
   setzeWert("e-bic", e.bic || "");
   setzeWert("e-bank", e.bank || "");
+}
+
+function kontoFreigabeUmschalten() {
+  if (kontoFrei) return setzeKontoSchloss(false, true);
+  const ok = confirm(
+    "Kontoverbindung zum Ändern freigeben?\n\n"
+    + "Diese Angaben stehen in JEDER Bestätigungsmail an die Eltern und auf der "
+    + "Bestätigungsseite. Eine falsche IBAN leitet die Beiträge auf ein fremdes Konto.\n\n"
+    + "Bereits verschickte Mails ändern sich nicht — wer die alte IBAN bekommen hat, "
+    + "überweist weiter dorthin.\n\n"
+    + "Nur freigeben, wenn du die neue Kontoverbindung schriftlich vorliegen hast."
+  );
+  if (ok) setzeKontoSchloss(true);
+}
+
+// IBAN-Prüfung mit Prüfziffer (Modulo 97, ISO 13616), nicht nur nach Form.
+//
+// ⚠️ Das ist der eigentliche Schutz. Die reine Formprüfung (zwei Buchstaben,
+// dann Ziffern und Buchstaben) lässt jeden Zahlendreher durch — und genau der
+// ist der Fall, der hier passiert und Geld kostet. Die Prüfziffer fängt ihn.
+//
+// ⚠️ Schrittweise Modulo statt einer großen Zahl: eine 34-stellige IBAN wird als
+// Zahl länger, als Number sicher rechnen kann, und BigInt gibt es auf den alten
+// iPhones in der Flotte nicht ([[f-alte-ios]]).
+function ibanPruefzifferOk(iban) {
+  const um = iban.slice(4) + iban.slice(0, 4);
+  let rest = 0;
+  for (let i = 0; i < um.length; i++) {
+    const z = um.charAt(i);
+    const stelle = z >= "0" && z <= "9" ? z : String(z.charCodeAt(0) - 55);
+    for (let k = 0; k < stelle.length; k++) rest = (rest * 10 + Number(stelle.charAt(k))) % 97;
+  }
+  return rest === 1;
+}
+
+function fuelleVerwaltung() {
+  if (!canAdmin()) return;
+  const e = (daten && daten.einstellungen) || DEFAULT_EINSTELLUNGEN;
+  // ⚠️ Nach jedem Neuzeichnen wieder zugesperrt — und ladeUndZeichne() läuft
+  // nach jedem Speichern. Die Freigabe gilt damit für genau einen
+  // Speichervorgang und nicht für den Rest des Tages.
+  fuelleKontofelder();
+  setzeKontoSchloss(false);
   setzeWert("e-kontaktname", e.kontaktName || "");
   setzeWert("e-kontaktemail", e.kontaktEmail || "");
   document.getElementById("e-starterinnerung").checked = e.startErinnerung !== false;
@@ -1390,11 +1471,31 @@ function einbauCode() {
 }
 
 async function speichereVerwaltung() {
+  // ⚠️ Gesperrte Kontofelder werden NICHT aus der Maske gelesen, sondern aus dem
+  // zuletzt geladenen Stand übernommen. Sonst hinge die Kontoverbindung an dem,
+  // was gerade im readonly-Feld steht — und das ist nach einem Rechteverlust
+  // leer, weil raeumeWasNichtMehrErlaubtIst alle Felder unter Verwaltung leert.
+  // Ein Speichern hätte die IBAN dann stillschweigend gelöscht.
+  const kontoAlt = (daten && daten.einstellungen) || {};
+  const konto = kontoFrei
+    ? {
+        kontoinhaber: wert("e-kontoinhaber").trim(),
+        iban: wert("e-iban").replace(/\s+/g, "").toUpperCase(),
+        bic: wert("e-bic").trim().toUpperCase(),
+        bank: wert("e-bank").trim()
+      }
+    : {
+        kontoinhaber: kontoAlt.kontoinhaber || "",
+        iban: kontoAlt.iban || "",
+        bic: kontoAlt.bic || "",
+        bank: kontoAlt.bank || ""
+      };
+
   const e = {
-    kontoinhaber: wert("e-kontoinhaber").trim(),
-    iban: wert("e-iban").replace(/\s+/g, "").toUpperCase(),
-    bic: wert("e-bic").trim().toUpperCase(),
-    bank: wert("e-bank").trim(),
+    kontoinhaber: konto.kontoinhaber,
+    iban: konto.iban,
+    bic: konto.bic,
+    bank: konto.bank,
     kontaktName: wert("e-kontaktname").trim(),
     kontaktEmail: wert("e-kontaktemail").trim(),
     agbText: wert("e-agb"),
@@ -1405,6 +1506,32 @@ async function speichereVerwaltung() {
     aufraeumenNachMonaten: zahlOderNull("e-aufraeumen") || 6
   };
   if (e.iban && !/^[A-Z]{2}[0-9A-Z]{13,32}$/.test(e.iban)) return toast("Die IBAN sieht nicht richtig aus.", true);
+  // ⚠️ Die Form allein sagt nichts. Ein Zahlendreher sieht formal einwandfrei aus
+  // und ist genau der Fehler, der hier passiert. Die Prüfziffer fängt ihn.
+  if (e.iban && !ibanPruefzifferOk(e.iban)) {
+    return toast("Diese IBAN gibt es so nicht — die Prüfziffer passt nicht. Bitte Stelle für Stelle vergleichen.", true);
+  }
+
+  // Eine geänderte Kontoverbindung wird nicht nebenbei mitgespeichert: einmal
+  // alt gegen neu gegenüberstellen. Gleiches Muster wie bei den
+  // Teilnahmebedingungen weiter unten.
+  if (kontoFrei) {
+    const vorher = [kontoAlt.kontoinhaber || "", kontoAlt.iban || "", kontoAlt.bic || "", kontoAlt.bank || ""].join("|");
+    const nachher = [e.kontoinhaber, e.iban, e.bic, e.bank].join("|");
+    if (vorher !== nachher) {
+      const zeile = (a, b) => (a === b ? "  " + (b || "(leer)") : "  " + (a || "(leer)") + "\n  ⟶ " + (b || "(leer)"));
+      const ok = confirm(
+        "Kontoverbindung wirklich ändern?\n\n"
+        + "Kontoinhaber:\n" + zeile(kontoAlt.kontoinhaber || "", e.kontoinhaber) + "\n\n"
+        + "IBAN:\n" + zeile(kontoAlt.iban || "", e.iban) + "\n\n"
+        + "BIC:\n" + zeile(kontoAlt.bic || "", e.bic) + "\n\n"
+        + "Bank:\n" + zeile(kontoAlt.bank || "", e.bank) + "\n\n"
+        + "Ab dem Speichern steht die neue Verbindung in jeder neuen Bestätigungsmail. "
+        + "Schon verschickte Mails ändern sich nicht."
+      );
+      if (!ok) return;
+    }
+  }
   if (e.kontaktEmail && !e.kontaktEmail.includes("@")) return toast("Die Kontakt-E-Mail sieht nicht richtig aus.", true);
 
   // Eine Änderung an den Bedingungen ist kein Nebenbei-Speichern: sie verlangt
@@ -1541,6 +1668,7 @@ function verdrahteBedienung() {
     toast("Vorschlag übernommen — noch nicht gespeichert.");
   });
   document.getElementById("btn-einstellungen-speichern").addEventListener("click", speichereVerwaltung);
+  document.getElementById("btn-konto-freigeben").addEventListener("click", kontoFreigabeUmschalten);
   document.getElementById("btn-code-kopieren").addEventListener("click", () => kopiere(einbauCode(), "Schnipsel kopiert."));
   document.getElementById("btn-popup-vorschau").addEventListener("click", () => window.open(APP_URL + "popup-vorschau.html", "_blank", "noopener"));
   document.getElementById("btn-test-start").addEventListener("click", async () => {

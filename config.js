@@ -215,6 +215,22 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.16",
+    groups: [
+      {
+        title: "Kontoverbindung: gesperrt, bis du sie freigibst",
+        items: [
+          "Kontoinhaber, IBAN, BIC und Bank sind jetzt gesperrt und grau. Ein Klick daneben oder ein versehentlicher Tastendruck ändert nichts mehr.",
+          "Zum Ändern erst auf „Zum Ändern freigeben“ — dazu kommt eine Rückfrage, die erklärt, was daran hängt. Danach sind die vier Felder normal beschreibbar und der Kasten wird gelb.",
+          "Vor dem Speichern siehst du alt und neu nebeneinander und musst noch einmal bestätigen.",
+          "Nach dem Speichern schnappt das Schloss von allein wieder zu. Die Freigabe gilt für genau eine Änderung.",
+          "Neu ist auch die Prüfziffer: Eine IBAN mit Zahlendreher wird jetzt abgelehnt. Vorher wurde nur die Form geprüft, und ein Dreher sah dabei völlig normal aus.",
+          "Speicherst du den Reiter, ohne freizugeben, bleibt die Kontoverbindung unverändert stehen — auch dann, wenn die Felder gerade leer aussehen."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.15",
     groups: [
       {

@@ -6,7 +6,7 @@
 <title>⚽ Fußballcamp</title>
 <meta name="theme-color" content="#1a56a0" />
 <link rel="stylesheet" href="style.css?v=1.0" />
-<link rel="stylesheet" href="camp.css?v=1.4" />
+<link rel="stylesheet" href="camp.css?v=1.5" />
 </head>
 <body>
 
@@ -139,11 +139,15 @@
         <div class="card">
           <h2>Kontoverbindung</h2>
           <p class="muted" style="margin-bottom:14px;">Steht in der Bestätigungsmail und auf der Bestätigungsseite. Ohne IBAN wissen die Eltern nicht, wohin der Beitrag soll — die App weist dann in der Camp-Übersicht darauf hin.</p>
-          <div class="feld-gitter">
-            <label>Kontoinhaber<input type="text" id="e-kontoinhaber" maxlength="120" /></label>
-            <label>IBAN<input type="text" id="e-iban" maxlength="40" placeholder="DE00 0000 0000 0000 0000 00" /></label>
-            <label>BIC<input type="text" id="e-bic" maxlength="20" /></label>
-            <label>Bank<input type="text" id="e-bank" maxlength="80" /></label>
+          <div class="schloss-zeile" id="konto-schloss">
+            <span class="schloss-status" id="konto-schloss-status">🔒 Gesperrt — die Felder lassen sich erst nach einer Freigabe ändern.</span>
+            <button type="button" class="btn small ghost" id="btn-konto-freigeben">Zum Ändern freigeben</button>
+          </div>
+          <div class="feld-gitter" id="konto-gitter">
+            <label>Kontoinhaber<input type="text" id="e-kontoinhaber" maxlength="120" readonly /></label>
+            <label>IBAN<input type="text" id="e-iban" maxlength="40" placeholder="DE00 0000 0000 0000 0000 00" readonly /></label>
+            <label>BIC<input type="text" id="e-bic" maxlength="20" readonly /></label>
+            <label>Bank<input type="text" id="e-bank" maxlength="80" readonly /></label>
           </div>
         </div>
 
@@ -400,8 +404,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="config.js?v=1.15"></script>
+  <script src="config.js?v=1.16"></script>
   <script src="db.js?v=1.1"></script>
-  <script src="app.js?v=1.8"></script>
+  <script src="app.js?v=1.9"></script>
 </body>
 </html>

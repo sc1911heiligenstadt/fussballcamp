@@ -230,3 +230,18 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 .fc-bild-rechts { flex: 1 1 200px; min-width: 0; }
 .fc-bild-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
 .fc-bild-rechts p { margin: 0; }
+
+/* ---------- Schloss an der Kontoverbindung ---------- */
+/* Die Felder sind absichtlich readonly und sehen auch so aus. Ein Feld, das
+   editierbar aussieht und es nicht ist, liest sich sonst wie ein Fehler. */
+.schloss-zeile {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  padding: 10px 12px; margin-bottom: 14px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--gray);
+}
+.schloss-status { font-size: 13px; color: var(--muted); font-weight: 600; }
+.schloss-zeile.offen { border-color: var(--gold); background: var(--gold-light); }
+.schloss-zeile.offen .schloss-status { color: var(--gold); }
+#konto-gitter input[readonly] {
+  background: var(--gray); color: var(--muted); cursor: not-allowed;
+}
