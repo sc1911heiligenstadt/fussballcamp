@@ -245,6 +245,22 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.19",
+    groups: [
+      {
+        title: "Absagen: du entscheidest je Fall, ob die Eltern eine E-Mail bekommen",
+        items: [
+          "Der Knopf „Absagen“ öffnet jetzt ein richtiges Fenster statt der kleinen Abfrage. Darin: der Grund, ein Häkchen „Eltern per E-Mail benachrichtigen“ und die beiden Knöpfe.",
+          "Das Häkchen ist von vornherein gesetzt. Der Normalfall ist ja, dass die Familie es erfahren soll — für eine Dublette oder einen Testeintrag nimmst du es einfach raus.",
+          "Ist bei der Anmeldung keine E-Mail-Adresse hinterlegt, ist das Häkchen grau und aus, und daneben steht warum. So hakst du nichts an, das gar nicht verschickt werden kann.",
+          "Der Absagegrund bleibt intern. Er geht auch dann nicht mit, wenn du die Benachrichtigung anhakst.",
+          "Die Mail nennt Camp, Termin und was mit dem Beitrag passiert. Sie behauptet dabei nicht, ihr hättet selbst abgesagt — und sie nennt bewusst keine Erstattungsquote, weil Punkt 4 nur bei einer Stornierung durch die Familie gilt.",
+          "Geht die Mail nicht raus, sagt die App das deutlich. Die Absage steht trotzdem — du musst dann selbst Bescheid geben."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.18",
     groups: [
       {
