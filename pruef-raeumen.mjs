@@ -114,6 +114,15 @@ function lade(blockRaeume, blockFehler) {
     "let teilnehmerCache = {}; let anmEntwurf = { campId: 'c1', id: 'a1' };\n" +
     "class NotLoggedInError extends Error {}\n" +
     "function schliesse(id) { const e = document.getElementById(id); if (e) e.classList.add('hidden'); }\n" +
+    // ⚠️ Attrappen für alles, was raeumeWasNichtMehrErlaubtIst SONST noch ruft.
+    // Am 30.08.2026 fiel der Prüfstand um, weil eine andere Sitzung
+    // setzeKontoSchloss() ergänzt hat. Die Liste holt man sich mit:
+    //   sed -n '/function raeumeWasNichtMehrErlaubtIst/,/^}/p' app.js
+    // Wer hier eine Attrappe ergänzt, prüft, ob die neue Zeile eine eigene
+    // Zusage braucht — eine Attrappe macht sie sonst still wirkungslos.
+    "let kontoSchlossZuletzt = null;\n" +
+    "function setzeKontoSchloss(an) { kontoSchlossZuletzt = an; }\n" +
+    "function fuelleVerwaltung() {}\n" +
     blockRaeume + blockFehler +
     "return { raeumeWasNichtMehrErlaubtIst, zeigeStartFehler,\n" +
     "         fuelleCache: () => { teilnehmerCache = { c1: [{ kind: 'Mia Musterkind' }] }; },\n" +
@@ -216,8 +225,14 @@ function quelltext() {
   return [
     ["F1 Der Raeum-Aufruf haengt in applyAdminVisibility", /applyAdminVisibility\(\)[\s\S]{0,800}?raeumeWasNichtMehrErlaubtIst\(edit, admin, betreuer\);/.test(Q)],
     ["F2 Und im Fehlerweg mit allen Rechten auf false", Q.includes("raeumeWasNichtMehrErlaubtIst(false, false, false);")],
+    // ⚠️ Die zweite Haelfte NUR im Rumpf der Raeum-Funktion suchen, nicht in der
+    // ganzen Datei. Am 30.08.2026 wurde sie zu Unrecht rot: eine andere Sitzung
+    // hat ein Konto-Schloss mit einer eigenen KONTO_FELDER-Liste gebaut, in der
+    // dieselben Ids voellig legitim stehen. Ein zu weiter Suchraum meldet einen
+    // Rueckfall, den es nicht gibt — genau die Falle wie beim Wort "verwaist".
     ["F3 Die Verwaltungsfelder gehen ueber den Container, nicht ueber eine Id-Liste",
-      Q.includes('querySelectorAll("#tab-verwaltung input, #tab-verwaltung textarea")') && !Q.includes('"e-kontoinhaber", "e-iban"')],
+      Q.includes('querySelectorAll("#tab-verwaltung input, #tab-verwaltung textarea")')
+      && !/\["e-kontoinhaber"/.test(BLOCK_RAEUME)],
     ["F4 Alle geraeumten Ids gibt es auch wirklich im HTML",
       LISTEN_IDS.every((id) => HTML.includes('id="' + id + '"'))]
   ];
