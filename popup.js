@@ -1,0 +1,270 @@
+// Das Fenster auf der Vereins-Homepage.
+//
+// Wird dort EINMAL als <script src="…/popup.js" async> eingebaut und danach nie
+// wieder angefasst. Welches Camp erscheint, holt sich dieses Skript zur Laufzeit
+// vom Worker — der Status in der App entscheidet, nicht die Homepage.
+//
+// ⚠️ Drei Dinge, die dieses Skript NICHT tun darf, weil es in einer FREMDEN
+// Seite läuft:
+//
+//   1. Kein globales CSS. Alle Regeln hängen an #fc-popup-wurzel; ein
+//      `* { box-sizing: border-box }` würde das Layout der ganzen Vereinsseite
+//      umbauen. Das CSS steht deshalb hier inline und nicht in oeffentlich.css.
+//   2. Keine Cookies. Ob jemand das Fenster weggeklickt hat, merkt sich
+//      localStorage — sonst bräuchte es eine Einwilligung im Cookie-Banner.
+//   3. Nie einen Fehler nach außen lassen. Klemmt der Worker, passiert gar
+//      nichts; eine kaputte Vereinsseite wäre der schlechtere Tausch.
+//
+// ⚠️ Damit das Fenster überhaupt erscheint, muss es in Borlabs Cookie
+// freigegeben sein: Borlabs blockt fremde Skripte, und dieses kommt von
+// sc1911heiligenstadt.github.io.
+
+(function () {
+  "use strict";
+
+  var GATEWAY = "https://landingpage.michel-brunner.workers.dev";
+  var BASIS = "https://sc1911heiligenstadt.github.io/fussballcamp/";
+  // Das Werbeplakat eines Camps. ⚠️ Zweite Fassung derselben Adresse — die erste
+  // steht als campBildUrl() in config.js, die dritte im Worker. Dieses Skript
+  // läuft in der fremden Vereinsseite und kennt config.js nicht.
+  var BILD_BASIS = GATEWAY + "/camp-bild/";
+  var SPEICHER = "fc_popup_zu";
+  var RUHE_TAGE = 7;
+
+  // Zweimal eingebaut (etwa in Kopf- und Fußbereich der Vorlage) darf nicht
+  // zwei Fenster erzeugen.
+  if (window.__fcPopupLaeuft) return;
+  window.__fcPopupLaeuft = true;
+
+  function bereit(fn) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+    else fn();
+  }
+
+  // Der Merkzettel hält fest, WELCHE Camps weggeklickt wurden. Ein neues Camp
+  // ploppt dadurch wieder auf, auch wenn die Ruhefrist des alten noch läuft —
+  // sonst verpasst man das nächste Camp, weil man das letzte weggeklickt hat.
+  function gemerkt() {
+    try {
+      var roh = window.localStorage.getItem(SPEICHER);
+      if (!roh) return { bis: 0, ids: [] };
+      var o = JSON.parse(roh);
+      return { bis: Number(o.bis) || 0, ids: Array.isArray(o.ids) ? o.ids : [] };
+    } catch (_) { return { bis: 0, ids: [] }; }
+  }
+
+  function merken(ids) {
+    try {
+      window.localStorage.setItem(SPEICHER, JSON.stringify({
+        bis: Date.now() + RUHE_TAGE * 86400000,
+        ids: ids
+      }));
+    } catch (_) { /* privater Modus ohne Speicher — dann eben jedes Mal wieder */ }
+  }
+
+  function stilEinbauen() {
+    if (document.getElementById("fc-popup-stil")) return;
+    var s = document.createElement("style");
+    s.id = "fc-popup-stil";
+    s.textContent = [
+      '#fc-popup-wurzel{position:fixed;inset:0;z-index:99999;background:rgba(20,26,40,.6);',
+      'display:flex;align-items:center;justify-content:center;padding:16px;',
+      'font-family:"Segoe UI",system-ui,sans-serif;line-height:1.5;color:#1e2330}',
+      '#fc-popup-wurzel *{box-sizing:border-box;margin:0;padding:0}',
+      // 560 statt 460 px: am Rechner ist das Plakat sonst nur halb so gross wie
+      // auf dem Handy, wo ohnehin die Fensterbreite bestimmt.
+      '#fc-popup-wurzel .fc-pop{background:#fff;border-radius:14px;max-width:560px;width:100%;',
+      'max-height:calc(100vh - 32px);overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.3);position:relative}',
+      // Rechtes Polster 58 statt 46 px: der Schliessen-Knopf ist auf Fingerbreite
+      // gewachsen und laege sonst ueber der Ueberschrift.
+      '#fc-popup-wurzel .fc-pop-kopf{background:#1a56a0;color:#fff;padding:18px 58px 18px 22px;border-radius:14px 14px 0 0}',
+      '#fc-popup-wurzel .fc-pop-kopf h2{font-size:19px;margin:0;color:#fff;font-weight:600}',
+      '#fc-popup-wurzel .fc-pop-body{padding:18px 22px 22px}',
+      '#fc-popup-wurzel .fc-pop-camp{border-bottom:1px solid #dde1e8;padding-bottom:14px;margin-bottom:14px}',
+      '#fc-popup-wurzel .fc-pop-camp:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}',
+      // Werbeplakat. ⚠️ Bewusst OHNE feste Höhe und ohne object-fit: mit
+      // max-width + max-height schrumpft der Browser das Bild von selbst auf
+      // das Kleinere von beidem und behält das Seitenverhältnis — ein Plakat
+      // bleibt also ganz zu sehen, ohne Balken und ohne Anschnitt. Die 62vh
+      // sind die Reißleine: ein hochformatiges Plakat schöbe sonst Name,
+      // Termin und den Anmelde-Knopf aus dem sichtbaren Bereich.
+      //
+      // ⚠️ Die Hülle zieht mit -22px das seitliche Polster des Körpers wieder
+      // heraus, damit das Plakat über die VOLLE Fensterbreite geht. Am Handy
+      // ist die Breite die bindende Grenze — ohne das bliebe das Bild 44 px
+      // schmaler, als es sein könnte. Sie braucht `text-align:center`, weil
+      // ein negativer Rand und `margin:auto` sich gegenseitig ausschließen.
+      '#fc-popup-wurzel .fc-pop-bildbox{margin:0 -22px 12px;text-align:center}',
+      // Beim ERSTEN Camp schliesst das Plakat buendig an den blauen Kopf an.
+      '#fc-popup-wurzel .fc-pop-camp:first-of-type .fc-pop-bildbox{margin-top:-18px}',
+      '#fc-popup-wurzel .fc-pop-bild{display:inline-block;vertical-align:top;',
+      'max-width:100%;max-height:62vh;width:auto;height:auto}',
+      '#fc-popup-wurzel .fc-pop-name{font-size:17px;font-weight:700;color:#1a56a0;margin-bottom:3px}',
+      '#fc-popup-wurzel .fc-pop-zeit{font-size:13px;color:#6b7280;margin-bottom:7px}',
+      '#fc-popup-wurzel .fc-pop-frueh{font-size:13px;font-weight:600;color:#2d8c4e;margin:-4px 0 7px}',
+      '#fc-popup-wurzel .fc-pop-text{font-size:14px;margin-bottom:10px}',
+      '#fc-popup-wurzel .fc-pop-frei{font-size:13px;color:#2d8c4e;font-weight:600;margin-bottom:10px}',
+      '#fc-popup-wurzel .fc-pop-frei.voll{color:#c9941f}',
+      '#fc-popup-wurzel .fc-pop-btn{display:inline-block;background:#2d8c4e;color:#fff;border:none;',
+      'border-radius:8px;padding:11px 20px;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer}',
+      '#fc-popup-wurzel .fc-pop-btn:hover{filter:brightness(1.08)}',
+      // 44 x 44 px. Vorher war das Kreuz 31 x 30 px gross und am Handy kaum zu
+      // treffen (gemessen 2026-08-21). Nur die Flaeche waechst, das Zeichen
+      // bleibt gleich gross.
+      '#fc-popup-wurzel .fc-pop-zu{position:absolute;top:10px;right:10px;background:none;border:none;',
+      'color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:0;width:44px;height:44px;',
+      'display:flex;align-items:center;justify-content:center}',
+      // War 17 px hoch. inline-flex statt block: die Tippflaeche wird 44 px hoch,
+      // bleibt aber so schmal wie der Text — ein versehentlicher Tipp wuerde das
+      // Fenster fuer sieben Tage stummschalten.
+      '#fc-popup-wurzel .fc-pop-spaeter{display:inline-flex;align-items:center;min-height:44px;',
+      'margin-top:2px;background:none;border:none;color:#6b7280;font-size:13px;',
+      'text-decoration:underline;cursor:pointer;font-family:inherit;padding:0 2px}'
+    ].join("");
+    document.head.appendChild(s);
+  }
+
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  function datum(iso) {
+    if (!iso) return "";
+    var t = String(iso).slice(0, 10).split("-");
+    return t.length === 3 ? t[2] + "." + t[1] + "." + t[0] : String(iso);
+  }
+
+  function bereich(von, bis) {
+    if (!von) return "";
+    if (!bis || bis === von) return datum(von);
+    return datum(von) + " bis " + datum(bis);
+  }
+
+  // Der Frühbucher-Hinweis, wenn gerade einer gilt.
+  //
+  // ⚠️ Gerechnet wird hier NICHTS. Der Worker legt in `preis` schon den heute
+  // gültigen Betrag hin und in `preisRegulaer` den vollen. Ein Vergleich der
+  // beiden sagt, ob das Fenster gerade offen ist -- der Rechner des Besuchers
+  // kann auf einem anderen Tag stehen als der Server, und dann verspräche die
+  // Vereinsseite einen Preis, den die Anmeldung nicht mehr gibt.
+  function fruehHinweis(c) {
+    if (!c.preisFruehBis || !(c.preisRegulaer > c.preis)) return "";
+    return "Frühbucherpreis bis " + datum(c.preisFruehBis) + " — danach " + euro(c.preisRegulaer);
+  }
+
+  function euro(cent) {
+    return ((Number(cent) || 0) / 100).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+  }
+
+  function zeigen(camps) {
+    stilEinbauen();
+
+    var wurzel = document.createElement("div");
+    wurzel.id = "fc-popup-wurzel";
+    wurzel.setAttribute("role", "dialog");
+    wurzel.setAttribute("aria-modal", "true");
+    wurzel.setAttribute("aria-label", "Anmeldung zum Fußballcamp");
+
+    var ids = camps.map(function (c) { return c.token; });
+    var mehrere = camps.length > 1;
+
+    wurzel.innerHTML =
+      '<div class="fc-pop">' +
+        '<div class="fc-pop-kopf">' +
+          '<h2>' + (mehrere ? "Unsere Fußballcamps" : "Unser Fußballcamp") + '</h2>' +
+          '<button type="button" class="fc-pop-zu" aria-label="Schließen">&times;</button>' +
+        '</div>' +
+        '<div class="fc-pop-body">' +
+          camps.map(function (c) {
+            var voll = !!c.voll;
+            var bild = c.token && c.bildId
+              ? '<div class="fc-pop-bildbox"><img class="fc-pop-bild" alt="" src="' +
+                  esc(BILD_BASIS + encodeURIComponent(c.token) + "/" + encodeURIComponent(c.bildId)) + '"></div>'
+              : "";
+            return '<div class="fc-pop-camp">' +
+              bild +
+              '<div class="fc-pop-name">' + esc(c.name) + '</div>' +
+              '<div class="fc-pop-zeit">' + esc(bereich(c.vonDatum, c.bisDatum)) +
+                (c.ort ? " &middot; " + esc(c.ort) : "") +
+                (c.preis ? " &middot; " + esc(euro(c.preis)) : "") + '</div>' +
+              (fruehHinweis(c) ? '<div class="fc-pop-frueh">' + esc(fruehHinweis(c)) + '</div>' : "") +
+              (c.kurzbeschreibung ? '<div class="fc-pop-text">' + esc(c.kurzbeschreibung) + '</div>' : "") +
+              '<div class="fc-pop-frei' + (voll ? ' voll' : '') + '">' +
+                (voll ? "Ausgebucht &mdash; Anmeldung auf die Warteliste möglich"
+                      : (c.frei !== undefined && c.frei <= 10 ? "Nur noch " + c.frei + (c.frei === 1 ? " Platz" : " Plätze") + " frei"
+                                                              : "Anmeldung offen")) +
+              '</div>' +
+              '<a class="fc-pop-btn" href="' + esc(BASIS + "anmeldung.html?c=" + encodeURIComponent(c.token)) + '">' +
+                (voll ? "Auf die Warteliste" : "Jetzt anmelden") + '</a>' +
+            '</div>';
+          }).join("") +
+          '<button type="button" class="fc-pop-spaeter">Nicht mehr anzeigen</button>' +
+        '</div>' +
+      '</div>';
+
+    function zu(dauerhaft) {
+      if (dauerhaft) merken(ids);
+      if (wurzel.parentNode) wurzel.parentNode.removeChild(wurzel);
+      document.removeEventListener("keydown", beiTaste);
+    }
+    function beiTaste(ev) { if (ev.key === "Escape") zu(false); }
+
+    // ⚠️ Ein Bild, das nicht lädt, wird ENTFERNT statt als kaputtes Symbol
+    // stehenzubleiben. Das Fenster hängt in einer fremden Seite: dort sieht ein
+    // graues Platzhalter-Kästchen aus, als sei die Vereinsseite kaputt. Ohne
+    // Bild bleibt das Fenster vollständig benutzbar.
+    Array.prototype.forEach.call(wurzel.querySelectorAll(".fc-pop-bild"), function (img) {
+      // Entfernt wird die ganze Huelle, nicht nur das Bild: allein zurueck
+      // bliebe sonst ein leerer Kasten samt seinem Abstand nach unten.
+      function weg() {
+        var box = img.parentNode;
+        if (box && box.className === "fc-pop-bildbox" && box.parentNode) box.parentNode.removeChild(box);
+        else if (box) box.removeChild(img);
+      }
+      img.addEventListener("error", weg);
+      // Falls der Fehler schon vor dem Anhängen des Lauschers eingetreten ist.
+      if (img.complete && !img.naturalWidth) weg();
+    });
+
+    wurzel.querySelector(".fc-pop-zu").addEventListener("click", function () { zu(false); });
+    wurzel.querySelector(".fc-pop-spaeter").addEventListener("click", function () { zu(true); });
+    // Klick auf den dunklen Rand schließt — aber nur dort, nicht auf dem Fenster.
+    wurzel.addEventListener("click", function (ev) { if (ev.target === wurzel) zu(false); });
+    document.addEventListener("keydown", beiTaste);
+
+    document.body.appendChild(wurzel);
+  }
+
+  function los() {
+    var merk = gemerkt();
+
+    // POST statt GET: der Worker nimmt seine Aktionen als JSON im Körper
+    // entgegen. Kein Authorization-Kopf — diese eine Aktion ist öffentlich.
+    fetch(GATEWAY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "fussballcamp-oeffentlich" })
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (antwort) {
+        if (!antwort || !Array.isArray(antwort.camps) || !antwort.camps.length) return;
+
+        // Nur Camps zeigen, die noch nicht weggeklickt wurden — oder deren
+        // Ruhefrist abgelaufen ist.
+        var frist = Date.now() < merk.bis;
+        var zeigbar = antwort.camps.filter(function (c) {
+          return !(frist && merk.ids.indexOf(c.token) !== -1);
+        });
+        if (!zeigbar.length) return;
+
+        // Kurz warten: sonst springt das Fenster auf, bevor die Seite selbst
+        // steht, und wirkt wie ein Werbebanner.
+        setTimeout(function () { try { zeigen(zeigbar); } catch (_) { /* still */ } }, 1200);
+      })
+      .catch(function () { /* Worker nicht erreichbar — dann eben kein Fenster */ });
+  }
+
+  bereit(function () { try { los(); } catch (_) { /* still */ } });
+})();

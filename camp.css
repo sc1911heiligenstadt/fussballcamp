@@ -1,0 +1,247 @@
+/* Ergänzungen zu style.css (aus der Spieltagscrew übernommen).
+   ⚠️ Hier steht NUR, was dort fehlt — Farben, Knöpfe, Karten, Dialoge und die
+   Gitter-Tabelle kommen unverändert von dort. Wer eine Regel doppelt anlegt,
+   bekommt beim nächsten Flotten-Sweep zwei Wahrheiten. */
+
+/* ---------- Rechte-Marker ----------
+   Reine Markierungen für applyAdminVisibility(); die Sichtbarkeit macht .hidden
+   aus style.css. Bewusst ohne eigene CSS-Regel — ein `display:none` hier würde
+   sich mit .hidden ins Gehege kommen. */
+
+/* ---------- Knopf-Spielarten, die style.css nicht kennt ---------- */
+.btn.ghost { background: var(--white); color: var(--blue); border: 1px solid var(--border); }
+.btn.ghost:hover { background: var(--blue-light); border-color: var(--blue-light); }
+.btn.warn { background: var(--gold); color: var(--white); }
+.btn.warn:hover { filter: brightness(0.93); }
+
+/* ---------- Meldebox ----------
+   Der Kasten ganz oben in der Camp-Übersicht. Auffällig, weil eine Absage der
+   Eltern sonst untergeht: sie ändern über ihren Link, ohne dass jemand eine
+   Mail bekommt. */
+.meldebox {
+  background: var(--gold-light); border: 1px solid var(--gold); border-left-width: 4px;
+  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 18px;
+}
+.meldebox h3 { font-size: 15px; color: var(--text); margin-bottom: 8px; }
+.meldebox ul { margin: 0 0 10px 18px; font-size: 14px; }
+.meldebox li { margin-bottom: 4px; }
+.meldebox.aufraeum { background: var(--blue-light); border-color: var(--blue); }
+
+/* ---------- Camp-Karten ---------- */
+.camp-liste { display: flex; flex-direction: column; gap: 14px; }
+.camp-karte {
+  border: 1px solid var(--border); border-left: 4px solid var(--border);
+  border-radius: var(--radius); padding: 16px 18px; background: var(--white);
+}
+.camp-karte.offen { border-left-color: var(--green); }
+.camp-karte.entwurf { border-left-color: var(--muted); background: #fafbfc; }
+.camp-karte.geschlossen { border-left-color: var(--gold); }
+.camp-karte.abgeschlossen { border-left-color: #374151; opacity: 0.85; }
+
+.ck-kopf { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.ck-titel { font-size: 17px; font-weight: 600; color: var(--blue); }
+.ck-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.ck-status {
+  font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 10px;
+  color: var(--white); white-space: nowrap;
+}
+
+/* Die Zahlenreihe einer Camp-Karte. minmax(0,1fr) statt 1fr, damit eine lange
+   Zahl die Spalte nicht aufbläht und das Gitter aus der Karte schiebt. */
+.ck-zahlen { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 108px)); gap: 10px; margin-bottom: 12px; }
+.ck-zahl { background: var(--gray); border-radius: 8px; padding: 8px 10px; }
+.ck-zahl .z-wert { font-size: 19px; font-weight: 700; color: var(--blue); }
+.ck-zahl .z-label { font-size: 11px; color: var(--muted); }
+.ck-zahl.warn .z-wert { color: var(--red); }
+.ck-zahl.ok .z-wert { color: var(--green); }
+
+.ck-balken { height: 8px; border-radius: 4px; background: var(--gray); overflow: hidden; margin-bottom: 12px; }
+.ck-balken > span { display: block; height: 100%; background: var(--green); }
+.ck-balken > span.voll { background: var(--gold); }
+
+.ck-link { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; }
+.ck-link code {
+  background: var(--gray); border-radius: 6px; padding: 3px 8px; font-size: 12px;
+  /* Der Anmeldelink ist lang und hat keine Leerzeichen — ohne das sprengt er am
+     Handy die Karte nach rechts. */
+  word-break: break-all;
+}
+
+/* Übertrag in den Vereinskalender: eine Zeile, kein Kasten — es ist eine
+   Zustandsauskunft, keine Aufgabe. Die Hinweiskästen darunter bleiben den
+   Dingen vorbehalten, bei denen jemand etwas tun muss. */
+.ck-kalender { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.ck-kalender.ok { color: var(--green); }
+.ck-kalender.ok::before { content: "✓ "; }
+
+/* ---------- Filterzeile ---------- */
+.filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.filter-row > label { font-size: 13px; color: var(--muted); }
+.filter-row select, .filter-row input[type="search"] {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;
+  font-family: inherit; background: var(--white); color: var(--text);
+  /* 16px am Handy, sonst zoomt iOS beim Antippen in das Feld hinein. */
+  max-width: 100%;
+}
+@media (max-width: 640px) {
+  .filter-row select, .filter-row input[type="search"] { font-size: 16px; width: 100%; }
+  .filter-row { gap: 8px; }
+}
+.inline-check { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+.inline-check input { width: 17px; height: 17px; }
+
+/* ---------- Formularfelder in Dialogen und Verwaltung ---------- */
+.feld-gitter { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; margin-bottom: 14px; }
+.feld-gitter > label, label.voll, label.feld-schmal {
+  display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600;
+}
+label.voll { margin-bottom: 14px; }
+label.feld-schmal { max-width: 220px; margin-bottom: 10px; }
+.feld-gitter input, .feld-gitter select, label.voll input, label.voll select, label.voll textarea, label.feld-schmal input,
+#tab-verwaltung textarea {
+  padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 15px; font-family: inherit; color: var(--text); background: var(--white); width: 100%;
+}
+@media (max-width: 640px) {
+  .feld-gitter input, .feld-gitter select, label.voll input, label.voll select, label.voll textarea, label.feld-schmal input { font-size: 16px; }
+}
+label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64px; }
+.modal-body h3 { font-size: 15px; color: var(--blue); margin: 18px 0 6px; }
+.modal.schmal { max-width: 460px; }
+.modal > h2 { color: var(--blue); font-size: 18px; padding: 18px 22px 0; }
+.modal > .btn-row { padding: 16px 22px; border-top: 1px solid var(--border); flex-shrink: 0; }
+#tab-verwaltung hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+/* ---------- Feldkonfiguration im Camp-Dialog ---------- */
+.feld-gruppe { margin-bottom: 14px; }
+.feld-gruppe > h4 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+.feld-zeile {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 5px; font-size: 14px;
+}
+.feld-zeile.fest { background: var(--gray); color: var(--muted); }
+.feld-zeile .fz-name { flex: 1 1 200px; }
+.feld-zeile .fz-hinweis { display: block; font-size: 11px; color: var(--muted); font-weight: 400; }
+.feld-zeile select { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; background: var(--white); color: var(--text); }
+
+/* ---------- Anmeldungs- und Teilnehmerliste ---------- */
+.anm-zeile {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: var(--white);
+}
+.anm-zeile.warteliste { border-style: dashed; background: #fafbfc; }
+.anm-zeile.abgesagt { opacity: 0.6; text-decoration-color: var(--muted); }
+.anm-zeile.neu-geaendert { border-left: 4px solid var(--gold); }
+.anm-name { flex: 1 1 190px; font-weight: 600; }
+.anm-name .an-sub { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+.anm-marker { display: flex; gap: 5px; flex-wrap: wrap; }
+.marker {
+  font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 9px;
+  background: var(--gray); color: var(--muted); white-space: nowrap;
+}
+.marker.bezahlt { background: var(--green-light); color: var(--green); }
+.marker.offen { background: var(--red-light); color: var(--red); }
+.marker.warteliste { background: var(--gold-light); color: var(--gold); }
+.marker.gesundheit { background: var(--blue-light); color: var(--blue); }
+/* Für Angaben, die FEHLEN und gebraucht werden — nicht für einen schlechten
+   Zustand. Beispiel: bei einem Kind ist nicht beantwortet, ob es allein nach
+   Hause darf. Rot, weil genau das am letzten Camptag auffallen muss. */
+.marker.warn { background: var(--red-light); color: var(--red); }
+.anm-aktionen { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* Abgelöste Fassungen der Teilnahmebedingungen (Verwaltung).
+   ⚠️ `pre-wrap` statt `pre`: der Rechtstext hat sehr lange Zeilen, und ein
+   nicht umbrechendes <pre> zieht in einer Flex-Spalte die ganze Karte auf.
+   `overflow-x` bleibt als Netz für Zeilen ohne Leerzeichen. */
+.agb-fassung { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; }
+.agb-fassung > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--blue); }
+.agb-alt {
+  white-space: pre-wrap; word-break: break-word; overflow-x: auto;
+  font-family: inherit; font-size: 13px; line-height: 1.5; color: var(--muted);
+  max-height: 320px; overflow-y: auto; margin-top: 10px;
+}
+
+/* Der Detail-Block einer Anmeldung im Dialog. */
+.detail-zeile { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.detail-zeile > dt { flex: 0 0 190px; color: var(--muted); font-size: 13px; }
+.detail-zeile > dd { flex: 1 1 auto; white-space: pre-line; word-break: break-word; }
+@media (max-width: 560px) {
+  .detail-zeile { flex-direction: column; gap: 2px; }
+  .detail-zeile > dt { flex-basis: auto; }
+}
+
+/* ---------- Info-Tabelle ---------- */
+.info-tabelle { width: 100%; border-collapse: collapse; font-size: 14px; }
+.info-tabelle th { text-align: left; vertical-align: top; padding: 8px 14px 8px 0; color: var(--blue); white-space: nowrap; width: 1%; }
+.info-tabelle td { padding: 8px 0; border-bottom: 1px solid var(--border); }
+@media (max-width: 560px) {
+  .info-tabelle th, .info-tabelle td { display: block; width: auto; padding: 4px 0; }
+  .info-tabelle th { border: none; }
+}
+.version-line { text-align: center; margin: 18px 0; font-size: 12px; }
+
+/* ---------- Kurznachricht unten ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(16px);
+  background: var(--text); color: var(--white); padding: 11px 20px; border-radius: 999px;
+  font-size: 14px; box-shadow: var(--shadow); z-index: 200; max-width: calc(100vw - 32px); text-align: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s, transform 0.18s;
+}
+.toast.sichtbar { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.fehler { background: var(--red); }
+
+/* ---------- Drucken ----------
+   Die Betreuer-Liste und der Aufgabenplan gehen aufs Papier: am Platz hat
+   niemand das Handy in der Hand. */
+@media print {
+  header, nav, .filter-row, .btn, .btn-row, .meldebox, .summary-cards { display: none !important; }
+  body { background: var(--white); }
+  main { padding: 0; }
+  .card { box-shadow: none; border: none; padding: 0; }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+  .anm-zeile, .camp-karte { break-inside: avoid; }
+}
+
+/* ---------- Bild fürs Camp (Dialog) ----------
+   Die Vorschau steht neben den Knöpfen, nicht darüber: ein Plakat ist hoch, und
+   über die volle Dialogbreite gezogen schöbe es die Feldliste darunter aus dem
+   Blick. ⚠️ `max-height` an der Vorschau ist Pflicht — ohne sie wächst ein
+   hochformatiges Plakat auf 400+ px und der Dialog scrollt am Handy endlos. */
+.fc-bildfeld { margin-bottom: 14px; }
+.fc-bild-titel { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.fc-bild-zeile { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+.fc-bild-vorschau {
+  flex: 0 0 auto;
+  width: 160px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--gray);
+  overflow: hidden;
+}
+.fc-bild-vorschau img { max-width: 100%; max-height: 280px; display: block; border-radius: 4px; }
+.fc-bild-leer { font-size: 12px; color: var(--muted); text-align: center; padding: 0 6px; }
+/* min-width: 0, sonst zieht der Hinweistext die Flex-Zeile über die Dialogbreite. */
+.fc-bild-rechts { flex: 1 1 200px; min-width: 0; }
+.fc-bild-knoepfe { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.fc-bild-rechts p { margin: 0; }
+
+/* ---------- Schloss an der Kontoverbindung ---------- */
+/* Die Felder sind absichtlich readonly und sehen auch so aus. Ein Feld, das
+   editierbar aussieht und es nicht ist, liest sich sonst wie ein Fehler. */
+.schloss-zeile {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  padding: 10px 12px; margin-bottom: 14px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--gray);
+}
+.schloss-status { font-size: 13px; color: var(--muted); font-weight: 600; }
+.schloss-zeile.offen { border-color: var(--gold); background: var(--gold-light); }
+.schloss-zeile.offen .schloss-status { color: var(--gold); }
+#konto-gitter input[readonly] {
+  background: var(--gray); color: var(--muted); cursor: not-allowed;
+}

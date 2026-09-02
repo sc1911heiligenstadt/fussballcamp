@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚽ Fußballcamp</title>
+<meta name="theme-color" content="#1a56a0" />
+<link rel="stylesheet" href="style.css?v=1.0" />
+<link rel="stylesheet" href="camp.css?v=1.0" />
+</head>
+<body>
+
+  <div class="connect-screen" id="connect-screen">
+    <div class="card">
+      <h2>⚽ Fußballcamp</h2>
+      <p id="connect-message">Bitte über die Tools-Übersicht anmelden, um die Camps zu sehen.</p>
+      <div class="btn-row">
+        <a class="btn" href="https://sc1911heiligenstadt.github.io/ToolsUebersicht/">Zur Tools-Übersicht</a>
+      </div>
+      <p class="muted" id="cloud-error" style="margin-top:14px;"></p>
+    </div>
+  </div>
+
+  <div id="app-shell" style="display:none;">
+    <header>
+      <h1>⚽ Fußballcamp</h1>
+      <a href="https://sc1911heiligenstadt.github.io/ToolsUebersicht/" class="back-to-dashboard">← Zurück zum Dashboard</a>
+      <div class="header-right">
+        <button class="btn small editor-only hidden" id="btn-camp-neu">+ Camp anlegen</button>
+        <span class="header-status" id="save-status"></span>
+        <span class="header-user" id="header-user"></span>
+        <img class="header-logo" src="https://sc1911heiligenstadt.github.io/logo.svg" alt="1. SC 1911 Heiligenstadt e.V." />
+      </div>
+    </header>
+
+    <nav>
+      <button data-tab="camps" class="active">Camps</button>
+      <button data-tab="jobs">Aufgaben</button>
+      <button data-tab="teilnehmer" class="betreuer-only hidden" id="tab-btn-teilnehmer">Teilnehmer</button>
+      <button data-tab="anmeldungen" class="editor-only hidden">Anmeldungen</button>
+      <div class="nav-right">
+        <button data-tab="verwaltung" class="admin-only hidden">Verwaltung</button>
+        <button data-tab="info">Info</button>
+      </div>
+    </nav>
+
+    <main>
+
+      <!-- ---------- Camps ---------- -->
+      <section class="tab-section active" id="tab-camps">
+        <div class="summary-cards" id="summary-cards"></div>
+
+        <!-- Meldebox: von Eltern geänderte oder abgesagte Anmeldungen. Steht ganz
+             oben, weil eine Absage sonst tagelang unbemerkt bleibt — die Eltern
+             ändern selbst, ohne dass eine Mail an den Verein geht. -->
+        <div class="meldebox hidden editor-only" id="meldebox"></div>
+
+        <!-- Aufräum-Hinweis: Camps, deren Frist abgelaufen ist. Die App löscht
+             nie von allein; hier steht nur der Knopf. -->
+        <div class="meldebox aufraeum hidden admin-only" id="aufraeum-box"></div>
+
+        <div class="card">
+          <h2>Camps</h2>
+          <p class="muted" style="margin-bottom:14px;" id="camps-hinweis"></p>
+          <div class="camp-liste" id="camp-liste"></div>
+          <div class="empty-state hidden" id="camps-empty">Es ist noch kein Camp angelegt.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Aufgaben / Jobs ---------- -->
+      <section class="tab-section" id="tab-jobs">
+        <div class="card">
+          <h2>Aufgaben im Camp</h2>
+          <div class="filter-row">
+            <label for="jobs-camp">Camp</label>
+            <select id="jobs-camp"></select>
+            <label class="inline-check"><input type="checkbox" id="jobs-nur-offen" /> nur unbesetzte zeigen</label>
+            <button type="button" class="btn small editor-only hidden" id="btn-job-neu">+ Aufgabe anlegen</button>
+            <button type="button" class="btn small ghost" id="btn-jobs-drucken">Plan drucken</button>
+          </div>
+          <p class="muted" id="jobs-hinweis" style="margin:10px 0 14px;"></p>
+
+          <div class="gitter-wrap" id="jobs-gitter-wrap">
+            <table class="gitter" id="jobs-gitter"></table>
+          </div>
+          <div class="karten-wrap" id="jobs-karten"></div>
+
+          <div class="empty-state hidden" id="jobs-empty">Für dieses Camp ist noch keine Aufgabe angelegt.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Teilnehmer (Betreuer-Sicht) ---------- -->
+      <section class="tab-section" id="tab-teilnehmer">
+        <div class="card">
+          <h2>Teilnehmer</h2>
+          <div class="hinweis" id="teilnehmer-recht-hinweis"></div>
+          <div class="filter-row">
+            <label for="teilnehmer-camp">Camp</label>
+            <select id="teilnehmer-camp"></select>
+            <button type="button" class="btn small ghost" id="btn-teilnehmer-drucken">Liste drucken</button>
+          </div>
+          <div id="teilnehmer-liste"></div>
+          <div class="empty-state hidden" id="teilnehmer-empty">Für dieses Camp liegt keine Anmeldung vor.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Anmeldungen (Bearbeiten) ---------- -->
+      <section class="tab-section" id="tab-anmeldungen">
+        <div class="card">
+          <h2>Anmeldungen</h2>
+          <div class="filter-row">
+            <label for="anm-camp">Camp</label>
+            <select id="anm-camp"></select>
+            <label for="anm-status">Zeigen</label>
+            <select id="anm-status">
+              <option value="aktiv">angemeldet + Warteliste</option>
+              <option value="angemeldet">nur angemeldet</option>
+              <option value="warteliste">nur Warteliste</option>
+              <option value="offen">nur Beitrag offen</option>
+              <option value="abgesagt">nur abgesagt</option>
+              <option value="alle">alle</option>
+            </select>
+            <input type="search" id="anm-suche" placeholder="Name suchen …" />
+          </div>
+          <div class="filter-row">
+            <button type="button" class="btn small ghost" id="btn-anm-export">Als Excel-Datei</button>
+            <button type="button" class="btn small ghost" id="btn-anm-drucken">Liste drucken</button>
+            <button type="button" class="btn small ghost admin-only hidden" id="btn-anm-zahlerinnerung">Zahlungserinnerung an alle Offenen</button>
+          </div>
+          <p class="muted" id="anm-zusammenfassung" style="margin:10px 0 14px;"></p>
+          <div id="anm-liste"></div>
+          <div class="empty-state hidden" id="anm-empty">Keine Anmeldung passt zu diesem Filter.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Verwaltung (Administrieren) ---------- -->
+      <section class="tab-section" id="tab-verwaltung">
+
+        <div class="card">
+          <h2>Kontoverbindung</h2>
+          <p class="muted" style="margin-bottom:14px;">Steht in der Bestätigungsmail und auf der Bestätigungsseite. Ohne IBAN wissen die Eltern nicht, wohin der Beitrag soll — die App weist dann in der Camp-Übersicht darauf hin.</p>
+          <div class="schloss-zeile" id="konto-schloss">
+            <span class="schloss-status" id="konto-schloss-status">🔒 Gesperrt — die Felder lassen sich erst nach einer Freigabe ändern.</span>
+            <button type="button" class="btn small ghost" id="btn-konto-freigeben">Zum Ändern freigeben</button>
+          </div>
+          <div class="feld-gitter" id="konto-gitter">
+            <label>Kontoinhaber<input type="text" id="e-kontoinhaber" maxlength="120" readonly /></label>
+            <label>IBAN<input type="text" id="e-iban" maxlength="40" placeholder="DE00 0000 0000 0000 0000 00" readonly /></label>
+            <label>BIC<input type="text" id="e-bic" maxlength="20" readonly /></label>
+            <label>Bank<input type="text" id="e-bank" maxlength="80" readonly /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Ansprechpartner</h2>
+          <p class="muted" style="margin-bottom:14px;">Steht in jeder Mail an die Eltern als Rückweg für Rückfragen. Der Absender der Mails selbst bleibt die Vereinsadresse.</p>
+          <div class="feld-gitter">
+            <label>Name<input type="text" id="e-kontaktname" maxlength="120" /></label>
+            <label>E-Mail<input type="email" id="e-kontaktemail" maxlength="160" /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Erinnerungen</h2>
+          <p class="muted" style="margin-bottom:14px;">Laufen nachts mit. Beide lassen sich zusätzlich von Hand auslösen, um zu sehen, was herauskommt.</p>
+          <label class="inline-check"><input type="checkbox" id="e-starterinnerung" /> Erinnerung vor dem Camp an die Eltern</label>
+          <label class="feld-schmal">Tage vorher<input type="number" id="e-starterinnerungtage" min="1" max="60" /></label>
+          <div class="btn-row"><button type="button" class="btn small ghost" id="btn-test-start">Jetzt auslösen</button></div>
+          <hr />
+          <label class="inline-check"><input type="checkbox" id="e-zahlerinnerung" /> Erinnerung, wenn der Beitrag offen ist</label>
+          <label class="feld-schmal">Tage nach der Anmeldung<input type="number" id="e-zahlerinnerungtage" min="1" max="120" /></label>
+          <p class="muted" style="margin:6px 0 10px;">Erinnert wird erst, wenn <strong>zusätzlich</strong> die Zahlungsfrist näher als drei Tage ist oder schon abgelaufen. Sonst käme bei einer Anmeldung lange vor dem Camp eine Zahlungsaufforderung, bevor überhaupt etwas fällig ist.</p>
+          <div class="btn-row"><button type="button" class="btn small ghost" id="btn-test-zahlung">Jetzt auslösen</button></div>
+          <p class="muted" id="lauf-info" style="margin-top:14px;"></p>
+        </div>
+
+        <div class="card">
+          <h2>Aufräum-Frist</h2>
+          <p class="muted" style="margin-bottom:14px;">Nach wie vielen Monaten ein abgeschlossenes Camp zum Aufräumen vorgeschlagen wird. Gelöscht wird <strong>nie</strong> von allein — die App zeigt nur einen Hinweis mit Knopf.</p>
+          <label class="feld-schmal">Monate<input type="number" id="e-aufraeumen" min="1" max="60" /></label>
+        </div>
+
+        <div class="card">
+          <h2>Teilnahmebedingungen</h2>
+          <div class="hinweis hidden" id="agb-vorgabe-hinweis">
+            <strong>Hier steht die mitgelieferte Fassung „Stand August 2026" mit 18 Punkten.</strong>
+            Solange du nichts änderst, gilt genau dieser Text. Du kannst ihn hier
+            überschreiben und speichern — ein Programm-Update braucht es dafür nicht.
+          </div>
+          <p class="muted" style="margin-bottom:14px;">
+            Steht im Anmeldeformular zum Aufklappen, mit einem eigenen Pflicht-Häkchen.
+            Ohne dieses Häkchen nimmt der Server keine Anmeldung an.
+            <strong>Leerzeile trennt Absätze</strong>, eine Zeile mit <code>*</code> davor
+            wird ein Aufzählungspunkt, eine Zeile wie <code>3. Überschrift</code> eine Zwischenüberschrift.
+          </p>
+          <textarea id="e-agb" rows="14" maxlength="30000" spellcheck="true"></textarea>
+          <p class="muted" style="margin-top:10px;font-size:13px;">
+            <strong>Eine Änderung wirkt nicht rückwirkend.</strong> Bei jeder Anmeldung ist
+            festgehalten, welcher Fassung zugestimmt wurde; für frühere Anmeldungen bleibt
+            die damalige Fassung erhalten und steht unten unter <em>Frühere Fassungen</em>.
+            Eltern, die ihre Anmeldung danach über den Link aus der Mail ändern, müssen der
+            neuen Fassung einmal zustimmen.
+          </p>
+          <details class="hidden" id="agb-archiv-block" style="margin-top:14px;">
+            <summary>Frühere Fassungen</summary>
+            <div id="agb-archiv-liste"></div>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Job-Katalog</h2>
+          <p class="muted" style="margin-bottom:14px;">Die Vorlage für neue Camps. Beim Anlegen eines Camps werden diese Aufgaben als eigene Kopie auf jeden Camp-Tag übernommen — eine spätere Änderung hier fasst bestehende Camps <strong>nicht</strong> an.</p>
+          <div class="job-row-header">
+            <span>Aufgabe</span><span>Beschreibung</span><span>Anzahl</span><span>von</span><span>bis</span><span></span>
+          </div>
+          <div id="katalog-liste"></div>
+          <div class="btn-row">
+            <button type="button" class="btn small" id="btn-katalog-neu">+ Zeile</button>
+            <button type="button" class="btn small ghost hidden" id="btn-katalog-vorschlag">Vorschlag übernehmen</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Fenster auf der Vereins-Homepage</h2>
+          <div class="hinweis ok">
+            <strong>Das ist bereits eingebaut — du musst hier nichts tun.</strong>
+            Auf <code>www.sc1911-heiligenstadt.de</code> läuft dafür das Plugin
+            <strong>„SC 1911 Camp-Fenster"</strong>. Es lädt den Schnipsel unten auf jeder Seite.
+            Sobald ein Camp hier auf <em>„Anmeldung offen"</em> steht, erscheint es dort von selbst;
+            steht keines offen, passiert gar nichts.
+          </div>
+          <p class="muted" style="margin-bottom:14px;">Der Schnipsel steht hier nur noch zum Nachschlagen — etwa, wenn die Vereinsseite einmal umzieht oder das Fenster zusätzlich woanders erscheinen soll.</p>
+          <textarea id="einbau-code" rows="3" readonly></textarea>
+          <div class="btn-row">
+            <button type="button" class="btn small" id="btn-code-kopieren">Schnipsel kopieren</button>
+            <button type="button" class="btn small ghost" id="btn-popup-vorschau">Vorschau ansehen</button>
+          </div>
+          <p class="muted" style="margin-top:14px;font-size:13px;">
+            <strong>Fenster abschalten:</strong> in WordPress unter <em>Plugins</em> bei
+            „SC 1911 Camp-Fenster" auf <em>Deaktivieren</em> klicken. Die Vereinsseite bleibt dabei
+            unverändert. Schneller geht es meist über diese App: ein Camp auf
+            <em>„Anmeldung schließen"</em> setzen nimmt es sofort aus dem Fenster.
+          </p>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn success" id="btn-einstellungen-speichern">Einstellungen speichern</button>
+        </div>
+      </section>
+
+      <!-- ---------- Info ---------- -->
+      <section class="tab-section" id="tab-info">
+        <div class="card">
+          <h2>Was dieses Werkzeug macht</h2>
+          <p>Hier werden die <strong>Fußballcamps</strong> des Vereins angelegt, auf der Vereins-Homepage beworben, die Anmeldungen der Kinder gesammelt und die Aufgaben für die Helfer verteilt.</p>
+          <p class="muted">Nicht zu verwechseln mit dem <strong>Schulsport</strong>-Werkzeug: dort wird nachgewiesen, wann eine AG oder ein Camp stattgefunden hat und wie viele Kinder da waren. Hier geht es um Anmeldung, Beitrag und Helfer davor.</p>
+        </div>
+
+        <div class="card">
+          <h2>Wer darf was</h2>
+          <table class="info-tabelle">
+            <tr><th>Sehen</th><td>Camps, Camp-Tage und Aufgaben. <strong>Keine</strong> Kinderdaten.</td></tr>
+            <tr><th>Betreuer</th><td>Wer an einem Camp auf mindestens einer Aufgabe steht, sieht für dieses Camp eine kurze Teilnehmerliste: Name, Alter, Allergien, Medikamente, Notfallnummer. Ohne Anschrift, ohne Beitragsstand.</td></tr>
+            <tr><th>Bearbeiten</th><td>Camps pflegen, Anmeldungen einsehen und ändern, Beiträge abhaken, nachrücken lassen, Listen ausgeben, sich auf Aufgaben eintragen.</td></tr>
+            <tr><th>Administrieren</th><td>Kontoverbindung, Job-Katalog, Erinnerungen, Löschen, Aufräumen und der Schnipsel für die Homepage.</td></tr>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>Was mit den Daten passiert</h2>
+          <p>Die Anmeldungen enthalten <strong>Gesundheitsangaben von Kindern</strong>. Sie liegen in der Vereins-Nextcloud und verlassen den Server nur an Bearbeiter und an die Betreuer des jeweiligen Camps.</p>
+          <p>Nach dem Camp läuft eine Frist. Danach schlägt die App das Aufräumen vor: Namen, Anschriften und Gesundheitsangaben werden gelöscht, die reinen Zahlen bleiben für die Statistik. <strong>Die App löscht nie von allein.</strong></p>
+        </div>
+
+        <div class="card">
+          <h2>Änderungen</h2>
+          <div id="changelog"></div>
+        </div>
+
+        <p class="muted version-line">Version <span id="app-version"></span></p>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ---------- Dialog: Camp anlegen und bearbeiten ---------- -->
+  <div class="modal-overlay hidden" id="camp-modal">
+    <div class="modal">
+      <h2 id="camp-modal-titel">Neues Camp</h2>
+      <div class="modal-body">
+        <div class="feld-gitter">
+          <label>Name<input type="text" id="c-name" maxlength="100" placeholder="Herbstcamp 2026" /></label>
+          <label>Ort<input type="text" id="c-ort" maxlength="120" placeholder="Sportplatz Am Sonnenstein" /></label>
+          <label>Erster Tag<input type="date" id="c-von" /></label>
+          <label>Letzter Tag<input type="date" id="c-bis" /></label>
+          <label>täglich von<input type="time" id="c-zeitvon" /></label>
+          <label>täglich bis<input type="time" id="c-zeitbis" /></label>
+          <label>Jahrgang von<input type="number" id="c-jahrgangvon" min="1990" max="2050" placeholder="2014" /></label>
+          <label>Jahrgang bis<input type="number" id="c-jahrgangbis" min="1990" max="2050" placeholder="2019" /></label>
+          <label>Plätze<input type="number" id="c-plaetze" min="1" max="500" /></label>
+          <label>Beitrag in Euro<input type="text" id="c-preis" inputmode="decimal" placeholder="180,00" /></label>
+          <label>Frühbucherpreis<input type="text" id="c-preisfrueh" inputmode="decimal" placeholder="160,00" /></label>
+          <label>Frühbucher bis<input type="date" id="c-preisfruehbis" /></label>
+          <label>Anmeldung ab<input type="date" id="c-anmvon" /></label>
+          <label>Anmeldung bis<input type="date" id="c-anmbis" /></label>
+        </div>
+        <label class="voll">Kurztext fürs Homepage-Fenster
+          <input type="text" id="c-kurz" maxlength="200" placeholder="Fünf Tage Fußball in den Herbstferien — für Jahrgänge 2014 bis 2019." />
+        </label>
+        <!-- Bild fürs Camp. Steht bewusst direkt unter dem Kurztext: beides ist
+             das, was draußen erscheint — im Fenster auf der Vereinsseite und
+             oben auf der Anmeldeseite. -->
+        <div class="fc-bildfeld">
+          <span class="fc-bild-titel">Bild fürs Camp <span class="muted">(freiwillig)</span></span>
+          <div class="fc-bild-zeile">
+            <div class="fc-bild-vorschau" id="c-bild-vorschau"><span class="fc-bild-leer">kein Bild</span></div>
+            <div class="fc-bild-rechts">
+              <div class="fc-bild-knoepfe">
+                <button type="button" class="btn ghost small" id="btn-camp-bild-waehlen">Bild auswählen</button>
+                <button type="button" class="btn ghost small hidden" id="btn-camp-bild-weg">Bild entfernen</button>
+              </div>
+              <p class="muted" id="c-bild-hinweis">Zum Beispiel das Werbeplakat des Camps. Es erscheint im Fenster auf der Vereins-Homepage und oben auf der Anmeldeseite. Große Bilder werden vor dem Hochladen verkleinert.</p>
+            </div>
+          </div>
+          <input type="file" id="c-bild-datei" accept="image/*" class="hidden" />
+        </div>
+        <label class="voll">Ausführlicher Text auf der Anmeldeseite
+          <textarea id="c-beschreibung" rows="4" maxlength="2000" placeholder="Was passiert im Camp, was mitzubringen ist, wie der Tag abläuft …"></textarea>
+        </label>
+        <p class="muted voll">Der Frühbucherpreis gilt bis <strong>einschließlich</strong> des gewählten Tages. Beide Felder gehören zusammen — steht nur eines davon da, gilt für alle der reguläre Beitrag. Wer sich im Frühbucherfenster anmeldet, behält den günstigeren Beitrag auch danach.</p>
+        <label class="voll">Hinweis zum Beitrag
+          <input type="text" id="c-preishinweis" maxlength="200" placeholder="Inklusive Mittagessen, Getränken und Campshirt." />
+        </label>
+
+        <h3>Welche Felder soll das Anmeldeformular fragen?</h3>
+        <p class="muted">Vor- und Nachname des Kindes, Name und E-Mail der Erziehungsberechtigten sowie die Datenschutz-Einwilligung sind immer dabei und lassen sich nicht abschalten.</p>
+        <div id="c-felder"></div>
+
+        <label class="voll">Eigene Zusatzfrage <span class="muted">(freiwillig, erscheint am Ende des Formulars)</span>
+          <input type="text" id="c-zusatzfrage" maxlength="200" placeholder="z. B. In welche Gruppe soll dein Kind zu einem Freund?" />
+        </label>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn success" id="btn-camp-speichern">Speichern</button>
+        <button type="button" class="btn ghost" id="btn-camp-abbrechen">Abbrechen</button>
+        <button type="button" class="btn danger admin-only hidden" id="btn-camp-loeschen">Camp löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Dialog: Aufgabe ---------- -->
+  <div class="modal-overlay hidden" id="job-modal">
+    <div class="modal schmal">
+      <h2 id="job-modal-titel">Neue Aufgabe</h2>
+      <div class="modal-body">
+        <div class="feld-gitter">
+          <label>Aufgabe<input type="text" id="j-name" maxlength="80" /></label>
+          <label>Anzahl Personen<input type="number" id="j-anzahl" min="1" max="50" value="1" /></label>
+          <label>von<input type="time" id="j-von" /></label>
+          <label>bis<input type="time" id="j-bis" /></label>
+        </div>
+        <label class="voll">Beschreibung<input type="text" id="j-beschreibung" maxlength="200" /></label>
+        <label class="voll">Tag<select id="j-tag"></select></label>
+        <label class="inline-check"><input type="checkbox" id="j-alletage" /> auf <strong>allen</strong> Tagen dieses Camps anlegen</label>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn success" id="btn-job-speichern">Speichern</button>
+        <button type="button" class="btn ghost" id="btn-job-abbrechen">Abbrechen</button>
+        <button type="button" class="btn danger hidden" id="btn-job-loeschen">Aufgabe löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Dialog: Anmeldung ansehen und ändern ---------- -->
+  <div class="modal-overlay hidden" id="anm-modal">
+    <div class="modal">
+      <h2 id="anm-modal-titel">Anmeldung</h2>
+      <div class="modal-body" id="anm-modal-body"></div>
+      <div class="btn-row">
+        <button type="button" class="btn success" id="btn-anm-speichern">Speichern</button>
+        <button type="button" class="btn ghost" id="btn-anm-abbrechen">Schließen</button>
+        <button type="button" class="btn warn" id="btn-anm-absagen">Absagen</button>
+        <button type="button" class="btn danger admin-only hidden" id="btn-anm-loeschen">Endgültig löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Dialog: Person auf Aufgabe setzen ---------- -->
+  <div class="modal-overlay hidden" id="person-modal">
+    <div class="modal schmal">
+      <h2>Wen eintragen?</h2>
+      <div class="modal-body">
+        <label class="voll">Person mit Vereinskonto<select id="p-person"></select></label>
+        <p class="muted">— oder —</p>
+        <label class="voll">Freier Name <span class="muted">(Helfer ohne Vereinskonto)</span>
+          <input type="text" id="p-freiername" maxlength="80" placeholder="Vor- und Nachname" />
+        </label>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn success" id="btn-person-setzen">Eintragen</button>
+        <button type="button" class="btn ghost" id="btn-person-abbrechen">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Absage durch die Verwaltung. Ersetzt das frühere prompt() — ein prompt
+       kann kein Häkchen, und ohne Häkchen erfuhren die Eltern von einer hier
+       eingetragenen Absage nie etwas. Liegt ÜBER dem Anmeldungs-Dialog, deshalb
+       der eigene z-index. -->
+  <div class="modal-overlay hidden" id="absage-modal" style="z-index:110;">
+    <div class="modal schmal">
+      <h2>Anmeldung absagen</h2>
+      <div class="modal-body">
+        <p class="muted" id="absage-wen" style="margin-bottom:14px;"></p>
+        <label class="voll">Grund der Absage
+          <input type="text" id="absage-grund" maxlength="300" placeholder="z. B. Eltern haben angerufen" />
+        </label>
+        <p class="muted" style="margin:4px 0 14px;">Steht nur intern. Er geht auch dann nicht an die Eltern, wenn du unten die Benachrichtigung anhakst.</p>
+        <label class="inline-check"><input type="checkbox" id="absage-mail" checked /> Eltern per E-Mail benachrichtigen</label>
+        <p class="muted" id="absage-mail-hinweis" style="margin:6px 0 0;"></p>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn warn" id="btn-absage-ausfuehren">Absagen</button>
+        <button type="button" class="btn ghost" id="btn-absage-abbrechen">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="config.js?v=1.0"></script>
+  <script src="db.js?v=1.0"></script>
+  <script src="app.js?v=1.0"></script>
+</body>
+</html>

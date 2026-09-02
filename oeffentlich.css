@@ -1,0 +1,247 @@
+/* Oberfläche der Seiten OHNE Login: Anmeldung, eigene Anmeldung ändern und das
+   Fenster auf der Vereins-Homepage.
+   ⚠️ Bewusst EIGENSTÄNDIG und nicht style.css: die Eltern sehen kein
+   Verwaltungswerkzeug, sondern eine schlichte Seite. Und popup.js bindet Teile
+   davon in eine fremde Seite ein — was dort landet, darf die Homepage nicht
+   umfärben. */
+
+:root {
+  --fc-blau: #1a56a0;
+  --fc-blau-hell: #e8f0fb;
+  --fc-gruen: #2d8c4e;
+  --fc-gruen-hell: #e8f5ec;
+  --fc-rot: #c0392b;
+  --fc-rot-hell: #fdecea;
+  --fc-gold: #c9941f;
+  --fc-gold-hell: #fbf2e1;
+  --fc-rand: #dde1e8;
+  --fc-text: #1e2330;
+  --fc-grau: #6b7280;
+  --fc-radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body.fc-oeffentlich {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: #eef1f6;
+  color: var(--fc-text);
+  line-height: 1.5;
+  padding: 0 0 48px;
+}
+.fc-hidden { display: none !important; }
+
+.fc-kopf {
+  background: var(--fc-blau); color: #fff; padding: 20px 20px 24px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.fc-kopf img { height: 44px; width: auto; }
+.fc-kopf h1 { font-size: 21px; font-weight: 600; }
+.fc-kopf .fc-verein { font-size: 13px; opacity: 0.9; }
+
+.fc-blatt { max-width: 680px; margin: -12px auto 0; padding: 0 16px; }
+.fc-karte {
+  background: #fff; border-radius: var(--fc-radius); box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 22px; margin-bottom: 18px;
+}
+.fc-karte h2 { font-size: 19px; color: var(--fc-blau); margin-bottom: 10px; }
+.fc-karte h3 { font-size: 15px; color: var(--fc-blau); margin: 18px 0 6px; }
+.fc-karte p { margin-bottom: 10px; }
+.fc-karte p:last-child { margin-bottom: 0; }
+
+/* Der Änderungslink auf der Bestätigungsseite steht in voller Länge da, damit
+   man ihn abtippen oder weitergeben kann — er hat aber keine Leerzeichen. Ohne
+   den Umbruch lief er am Handy über den rechten Rand hinaus und schob die ganze
+   Seite mit: bei 375 px war er 412 px breit, die Seite 76 px zu breit
+   (gemessen 2026-08-21). Gilt genauso für eine URL im Rechtstext. */
+.fc-karte a, .fc-details { overflow-wrap: anywhere; }
+.fc-grau { color: var(--fc-grau); font-size: 14px; }
+.fc-vorzeile { white-space: pre-line; }
+
+/* Eckdaten des Camps */
+.fc-eckdaten { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 12px; margin: 14px 0; }
+.fc-eck { background: var(--fc-blau-hell); border-radius: 8px; padding: 10px 12px; }
+.fc-eck dt { font-size: 11px; color: var(--fc-grau); text-transform: uppercase; letter-spacing: 0.04em; }
+.fc-eck dd { font-size: 15px; font-weight: 600; margin-top: 2px; }
+
+/* Hinweiskästen */
+.fc-hinweis { background: var(--fc-blau-hell); border-left: 4px solid var(--fc-blau); border-radius: 8px; padding: 12px 14px; margin: 14px 0; font-size: 14px; }
+.fc-hinweis.warn { background: var(--fc-gold-hell); border-left-color: var(--fc-gold); }
+.fc-hinweis.fehler { background: var(--fc-rot-hell); border-left-color: var(--fc-rot); }
+.fc-hinweis.ok { background: var(--fc-gruen-hell); border-left-color: var(--fc-gruen); }
+.fc-hinweis strong { display: block; margin-bottom: 4px; }
+
+/* Formular */
+.anm-gruppe { border: none; margin-bottom: 20px; }
+.anm-gruppe > legend { font-size: 13px; color: var(--fc-grau); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; }
+.anm-gruppen-hinweis { font-size: 13px; color: var(--fc-grau); margin-bottom: 10px; }
+.anm-feld { margin-bottom: 13px; }
+.anm-feld > label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.anm-feld input[type="text"], .anm-feld input[type="email"], .anm-feld input[type="date"],
+.anm-feld select, .anm-feld textarea {
+  width: 100%; padding: 11px 12px; border: 1px solid var(--fc-rand); border-radius: 8px;
+  /* 16px, sonst zoomt iOS beim Antippen in das Feld hinein. */
+  font-size: 16px; font-family: inherit; color: var(--fc-text); background: #fff;
+}
+.anm-feld textarea { resize: vertical; min-height: 56px; }
+.anm-feld input:focus, .anm-feld select:focus, .anm-feld textarea:focus {
+  outline: 2px solid var(--fc-blau); outline-offset: 1px; border-color: var(--fc-blau);
+}
+.anm-feld.haken > label { display: flex; align-items: flex-start; gap: 9px; font-weight: 400; font-size: 15px; cursor: pointer; }
+.anm-feld.haken input { width: 21px; height: 21px; flex-shrink: 0; margin-top: 1px; }
+.anm-hinweis { display: block; font-size: 12px; color: var(--fc-grau); margin-top: 3px; }
+.pflicht-stern { color: var(--fc-rot); }
+
+/* Ja/Nein: zwei Knöpfe nebeneinander, damit "noch nichts gewählt" sichtbar ist.
+   Die Knöpfe sind mindestens 44 px hoch — Fingerbreite, siehe Handy-Messung. */
+.janein-frage { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.janein-knoepfe { display: flex; gap: 10px; }
+.janein-knopf {
+  flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; padding: 8px 12px; cursor: pointer;
+  border: 2px solid var(--fc-rand); border-radius: 8px; background: #fff;
+  font-size: 15px; font-weight: 600; color: var(--fc-grau);
+}
+.janein-knopf input { width: 20px; height: 20px; flex-shrink: 0; margin: 0; }
+/* :has() fehlt auf alten iOS-Fassungen. Dann bleibt der Rahmen grau — der
+   Radio-Knopf selbst zeigt die Wahl trotzdem, die Färbung ist nur Zugabe. */
+.janein-knopf:has(input:checked) { border-color: var(--fc-blau); background: #eef4fc; color: var(--fc-blau); }
+.janein-knopf:has(input:focus-visible) { outline: 2px solid var(--fc-blau); outline-offset: 2px; }
+
+/* Knöpfe */
+.fc-btn {
+  display: inline-block; background: var(--fc-blau); color: #fff; border: none; border-radius: 8px;
+  padding: 13px 22px; font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer;
+  text-decoration: none; text-align: center;
+}
+.fc-btn:hover { filter: brightness(1.08); }
+.fc-btn:disabled { opacity: 0.55; cursor: default; }
+.fc-btn.gruen { background: var(--fc-gruen); }
+.fc-btn.hell { background: #fff; color: var(--fc-blau); border: 1px solid var(--fc-rand); }
+.fc-btn.rot { background: var(--fc-rot); }
+.fc-btn.breit { display: block; width: 100%; }
+.fc-btn-reihe { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+/* Zahlungsangaben auf der Bestätigungsseite */
+.fc-zahlung { background: var(--fc-gruen-hell); border: 1px solid var(--fc-gruen); border-radius: var(--fc-radius); padding: 16px 18px; margin: 16px 0; }
+.fc-zahlung dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 15px; }
+.fc-zahlung dt { color: var(--fc-grau); font-size: 13px; }
+.fc-zahlung dd { font-weight: 600; word-break: break-word; }
+@media (max-width: 480px) {
+  .fc-zahlung dl { grid-template-columns: 1fr; gap: 2px; }
+  .fc-zahlung dd { margin-bottom: 8px; }
+}
+
+.fc-fuss { max-width: 680px; margin: 0 auto; padding: 0 16px; font-size: 12px; color: var(--fc-grau); text-align: center; }
+.fc-fuss a { color: var(--fc-grau); }
+
+/* Ausklappbare Datenschutz-Information — vollständig da, aber sie soll das
+   Formular nicht unter sich begraben. */
+.fc-details { border: 1px solid var(--fc-rand); border-radius: 8px; padding: 10px 14px; margin: 14px 0; font-size: 13px; }
+.fc-details > summary { cursor: pointer; font-weight: 600; color: var(--fc-blau); }
+.fc-details > div { margin-top: 10px; }
+.fc-details p { margin-bottom: 8px; }
+.fc-details ul { margin: 0 0 8px 18px; }
+/* Zwischenüberschriften der Teilnahmebedingungen („3. Teilnehmerbeitrag …“).
+   Baut agbHtml() aus einer nummerierten Zeile; ohne Regel erbt h4 die
+   Browser-Vorgabe und stünde größer da als die Überschrift der Karte darüber. */
+.fc-details h4 { font-size: 13px; font-weight: 700; margin: 14px 0 6px; }
+.fc-details h4:first-child { margin-top: 0; }
+/* Der Rechtstext ist lang — in sich scrollen lassen, statt die Seite zu strecken. */
+#agb-text { max-height: 45vh; overflow-y: auto; }
+
+/* ---------- Das Fenster auf der Vereins-Homepage ----------
+   ⚠️ Alle Regeln hier hängen an #fc-popup-wurzel. popup.js baut das in eine
+   FREMDE Seite ein — eine Regel auf body oder h2 würde dort die Vereinsseite
+   umfärben. */
+#fc-popup-wurzel {
+  position: fixed; inset: 0; z-index: 99999;
+  background: rgba(20, 26, 40, 0.6);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+  font-family: "Segoe UI", system-ui, sans-serif; line-height: 1.5; color: #1e2330;
+}
+#fc-popup-wurzel * { box-sizing: border-box; }
+#fc-popup-wurzel .fc-pop {
+  background: #fff; border-radius: 14px; max-width: 560px; width: 100%;
+  max-height: calc(100vh - 32px); overflow-y: auto; box-shadow: 0 8px 40px rgba(0,0,0,0.3); position: relative;
+}
+#fc-popup-wurzel .fc-pop-kopf { background: #1a56a0; color: #fff; padding: 18px 58px 18px 22px; border-radius: 14px 14px 0 0; }
+#fc-popup-wurzel .fc-pop-kopf h2 { font-size: 19px; margin: 0; color: #fff; }
+#fc-popup-wurzel .fc-pop-body { padding: 18px 22px 22px; }
+#fc-popup-wurzel .fc-pop-camp { border-bottom: 1px solid #dde1e8; padding-bottom: 14px; margin-bottom: 14px; }
+#fc-popup-wurzel .fc-pop-camp:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+/* ⚠️ Steht doppelt: wirksam ist das Inline-CSS in popup.js, DIES hier ist die
+   Fassung für popup-vorschau.html. Wer eine ändert, muss die andere mitziehen. */
+#fc-popup-wurzel .fc-pop-bildbox { margin: 0 -22px 12px; text-align: center; }
+#fc-popup-wurzel .fc-pop-camp:first-of-type .fc-pop-bildbox { margin-top: -18px; }
+#fc-popup-wurzel .fc-pop-bild {
+  display: inline-block; vertical-align: top;
+  max-width: 100%; max-height: 62vh; width: auto; height: auto;
+}
+#fc-popup-wurzel .fc-pop-name { font-size: 17px; font-weight: 700; color: #1a56a0; margin-bottom: 3px; }
+#fc-popup-wurzel .fc-pop-zeit { font-size: 13px; color: #6b7280; margin-bottom: 7px; }
+#fc-popup-wurzel .fc-pop-frueh { font-size: 13px; font-weight: 600; color: #2d8c4e; margin-top: 2px; }
+.fc-pop-text { font-size: 14px; margin-bottom: 10px; }
+#fc-popup-wurzel .fc-pop-frei { font-size: 13px; color: #2d8c4e; font-weight: 600; margin-bottom: 10px; }
+#fc-popup-wurzel .fc-pop-frei.voll { color: #c9941f; }
+#fc-popup-wurzel .fc-pop-btn {
+  display: inline-block; background: #2d8c4e; color: #fff; border: none; border-radius: 8px;
+  padding: 11px 20px; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+/* 44 x 44 px: das Kreuz war 31 x 30 px gross und damit mit dem Finger kaum zu
+   treffen (gemessen 2026-08-21). Die Flaeche waechst, das Zeichen bleibt gleich
+   gross. Das rechte Polster im Kopf ist deshalb auf 58 px erhoeht — sonst
+   laege der groessere Knopf ueber der Ueberschrift. */
+#fc-popup-wurzel .fc-pop-zu {
+  position: absolute; top: 10px; right: 10px; background: none; border: none;
+  color: #fff; font-size: 26px; line-height: 1; cursor: pointer; padding: 0;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+}
+/* War 17 px hoch. inline-flex statt block: die Tippflaeche wird 44 px hoch,
+   bleibt aber so breit wie der Text — ein versehentlicher Tipp wuerde das
+   Fenster fuer sieben Tage stummschalten. */
+#fc-popup-wurzel .fc-pop-spaeter {
+  display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px;
+  background: none; border: none; color: #6b7280;
+  font-size: 13px; text-decoration: underline; cursor: pointer; font-family: inherit; padding: 0 2px;
+}
+
+/* Werbeplakat des Camps auf der Anmeldeseite.
+   Wie im Homepage-Fenster bewusst mit max-width UND max-height statt fester
+   Maße: der Browser schrumpft das Bild dann von selbst auf das Kleinere von
+   beidem und behält das Seitenverhältnis — ein Plakat bleibt ganz zu sehen,
+   ohne Balken und ohne Anschnitt.
+
+   ⚠️ Die Hülle zieht mit -22px das Polster der Karte wieder heraus, damit das
+   Plakat über die VOLLE Kartenbreite geht, und schließt oben bündig an die
+   Kartenkante an (deshalb der Radius nur oben). Am Handy ist die Breite die
+   bindende Grenze — ohne den Rücksprung bliebe das Bild 44 px schmaler, als es
+   sein könnte. `text-align: center` ist nötig, weil ein negativer Rand und
+   `margin: auto` sich gegenseitig ausschließen. */
+.fc-camp-bildbox {
+  margin: -22px -22px 16px;
+  text-align: center;
+  background: #eef1f6;
+  border-radius: var(--fc-radius) var(--fc-radius) 0 0;
+  overflow: hidden;
+}
+.fc-camp-bild {
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+  /* Reißleine: ein hochformatiges Plakat schöbe Name, Eckdaten und Formular
+     sonst weit nach unten, und man sähe beim Öffnen nur das Bild.
+
+     ⚠️ Die Reißleine braucht den Bildschirm-Anteil, nicht nur die feste Zahl.
+     Ein quer gehaltenes Handy ist bloß 375 px hoch — dort füllten 620 px
+     eineinhalb Bildschirme mit Plakat, und der Camp-Name stand bei 719 px, also
+     außer Sicht (gemessen 2026-08-25). Mit 62vh, derselben Zahl wie im Fenster
+     auf der Vereinsseite, rückt er auf 389 px. Hochkant ändert sich nichts:
+     dort bindet ohnehin die Breite, nicht die Höhe.
+
+     Zwei Zeilen mit Absicht: ein Browser ohne min() überliest die zweite und
+     behält die 620 px. */
+  max-height: 620px;
+  max-height: min(620px, 62vh);
+  width: auto;
+  height: auto;
+}

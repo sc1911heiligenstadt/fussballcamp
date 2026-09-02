@@ -1,0 +1,12 @@
+# Lokales Claude-Projektgedaechtnis, nicht Teil des oeffentlichen Repos
+CLAUDE.md
+
+# Lokale Daten-Dumps und Sicherungen (Konsolen-Datenreparatur, Seeds) --
+# enthalten echte Vereinsdaten und gehoeren nie in das oeffentliche Repo
+seed*.json
+*.seed.json
+*.backup.*
+
+# Die Plugin-ZIP wird aus wordpress-plugin/sc1911-camp-fenster/ erzeugt --
+# ein gebautes Artefakt, das nicht mitversioniert wird.
+wordpress-plugin/*.zip
