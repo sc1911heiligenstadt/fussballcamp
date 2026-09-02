@@ -245,392 +245,97 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
-    version: "1.19",
-    groups: [
-      {
-        title: "Absagen: du entscheidest je Fall, ob die Eltern eine E-Mail bekommen",
-        items: [
-          "Der Knopf „Absagen“ öffnet jetzt ein richtiges Fenster statt der kleinen Abfrage. Darin: der Grund, ein Häkchen „Eltern per E-Mail benachrichtigen“ und die beiden Knöpfe.",
-          "Das Häkchen ist von vornherein gesetzt. Der Normalfall ist ja, dass die Familie es erfahren soll — für eine Dublette oder einen Testeintrag nimmst du es einfach raus.",
-          "Ist bei der Anmeldung keine E-Mail-Adresse hinterlegt, ist das Häkchen grau und aus, und daneben steht warum. So hakst du nichts an, das gar nicht verschickt werden kann.",
-          "Der Absagegrund bleibt intern. Er geht auch dann nicht mit, wenn du die Benachrichtigung anhakst.",
-          "Die Mail nennt Camp, Termin und was mit dem Beitrag passiert. Sie behauptet dabei nicht, ihr hättet selbst abgesagt — und sie nennt bewusst keine Erstattungsquote, weil Punkt 4 nur bei einer Stornierung durch die Familie gilt.",
-          "Geht die Mail nicht raus, sagt die App das deutlich. Die Absage steht trotzdem — du musst dann selbst Bescheid geben."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.18",
-    groups: [
-      {
-        title: "Bei einer Absage steht jetzt da, wie viel Geld zurückgeht",
-        items: [
-          "Öffnet ihr eine abgesagte Anmeldung, steht unten der neue Abschnitt „Absage und Erstattung“: wann die Absage eingegangen ist, wie viele Tage vor Camp-Beginn das war, welche Stufe aus Punkt 4 der Teilnahmebedingungen greift — und der Betrag, den ihr zurücküberweisen müsst.",
-          "Gerechnet wird mit dem Tag, an dem die Absage eingegangen ist, nicht mit dem heutigen. So steht dort auch drei Wochen später noch genau die Quote, die der Familie in der Absage-Mail zugesagt wurde.",
-          "Zurück kann nur, was auch angekommen ist: ohne den Haken „bezahlt“ steht dort „nichts“ und der Grund dazu.",
-          "Bei einem Freiplatz steht nichts über Geld.",
-          "Fehlt dem Camp das Anfangsdatum, steht dort „nicht bestimmbar“ — ausdrücklich nicht „keine Erstattung“. Das sind zwei verschiedene Dinge, und das zweite kostet die Familie Geld.",
-          "Habt ihr die Absage selbst eingetragen, wird keine Quote genannt, sondern „von Hand klären“. Punkt 4 gilt nur, wenn die Familie storniert; sagt der Verein ab, greift Punkt 11 und der Beitrag geht in voller Höhe zurück. Welcher Fall vorliegt, kann die App nicht wissen.",
-          "Der Betrag ist eine Ablesehilfe, keine Anweisung: Punkt 4 erlaubt euch, bei kurzfristiger Neuvergabe des Platzes ganz oder teilweise zu verzichten. Dieser Hinweis steht direkt darunter."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.17",
-    groups: [
-      {
-        title: "Absagen der Eltern werden jetzt per E-Mail bestätigt",
-        items: [
-          "Sagt eine Familie über ihren Link ab, bekommt sie sofort eine Bestätigung — vorher passierte nach dem Klick gar nichts, und niemand wusste, ob es angekommen ist.",
-          "Die Mail sagt auch, was mit einem schon gezahlten Beitrag passiert. Sie richtet sich dabei nach Punkt 4 der Teilnahmebedingungen: bis 28 Tage vorher voll, bis 7 Tage vorher zur Hälfte, danach keine Erstattung.",
-          "Sie verspricht bewusst nie einen konkreten Betrag zurück, sondern nennt die Regel und kündigt an, dass ihr euch meldet. Über die Rückzahlung entscheidet weiterhin ein Mensch.",
-          "Bei einem Freiplatz steht gar nichts über Geld drin.",
-          "Ein zweiter Klick auf „Absagen“ schickt keine zweite Mail.",
-          "Die Absage-Mail trägt keinen Änderungs-Link mehr: Nach einer Absage lässt sich die Anmeldung ohnehin nicht mehr ändern. Stattdessen steht dort, dass man sich bei euch melden soll.",
-          "Sagt ihr selbst in der Verwaltung ab, geht weiterhin keine Mail raus — das war so nicht bestellt."
-        ]
-      },
-      {
-        title: "Die Zahlungserinnerung kommt nicht mehr Monate zu früh",
-        items: [
-          "Bisher hing sie allein an „X Tage nach der Anmeldung“. Wer sich drei Monate vor dem Camp angemeldet hat, bekam nach zwei Wochen eine Zahlungsaufforderung — obwohl der Beitrag erst sieben Tage vor Camp-Beginn fällig ist.",
-          "Jetzt müssen zwei Dinge zutreffen: Die eingestellten Tage seit der Anmeldung sind um, UND die Zahlungsfrist ist nah (drei Tage davor) oder schon vorbei. Die spätere von beiden entscheidet.",
-          "Ist die Frist bereits abgelaufen, geht die Erinnerung erst recht raus.",
-          "An der Einstellung unter Verwaltung ändert sich nichts — sie ist weiterhin die erste der beiden Bedingungen."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.16",
-    groups: [
-      {
-        title: "Kontoverbindung: gesperrt, bis du sie freigibst",
-        items: [
-          "Kontoinhaber, IBAN, BIC und Bank sind jetzt gesperrt und grau. Ein Klick daneben oder ein versehentlicher Tastendruck ändert nichts mehr.",
-          "Zum Ändern erst auf „Zum Ändern freigeben“ — dazu kommt eine Rückfrage, die erklärt, was daran hängt. Danach sind die vier Felder normal beschreibbar und der Kasten wird gelb.",
-          "Vor dem Speichern siehst du alt und neu nebeneinander und musst noch einmal bestätigen.",
-          "Nach dem Speichern schnappt das Schloss von allein wieder zu. Die Freigabe gilt für genau eine Änderung.",
-          "Neu ist auch die Prüfziffer: Eine IBAN mit Zahlendreher wird jetzt abgelehnt. Vorher wurde nur die Form geprüft, und ein Dreher sah dabei völlig normal aus.",
-          "Speicherst du den Reiter, ohne freizugeben, bleibt die Kontoverbindung unverändert stehen — auch dann, wenn die Felder gerade leer aussehen."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.15",
-    groups: [
-      {
-        title: "Rechteverlust: auch der offene Dialog und der Anmeldebildschirm",
-        items: [
-          "Nachtrag zu 1.14. Dort wurde beim Rechteverlust der Bildschirm geräumt — aber nur, wenn die App danach noch normal weiterlief.",
-          "Steht gerade ein Anmelde-Dialog offen, wird er jetzt geschlossen und geleert. Vorher blieb der Name des Kindes samt allen Angaben SICHTBAR stehen, obwohl das Recht schon weg war.",
-          "Fällt die Sitzung ganz aus (abgemeldet, Passwort gewechselt, aus der Gruppe genommen), erscheint der Anmeldebildschirm. Auch dahinter wird jetzt geräumt — vorher stand dort alles weiter im Browser.",
-          "Die Felder unter Verwaltung werden nicht mehr einzeln aufgezählt, sondern als Ganzes geleert. Ein Feld, das später dazukommt, ist damit von allein mit abgedeckt.",
-          "Im Normalbetrieb ändert sich wieder nichts: Wer das Recht hat, sieht alles wie bisher."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.14",
-    groups: [
-      {
-        title: "Durchsicht: zwei Sachen richtiggestellt",
-        items: [
-          "Fällt jemandem ein Recht weg, während er die App offen hat, wird jetzt auch weggeräumt, was schon auf dem Bildschirm steht. Vorher wurden die Reiter nur versteckt — die zuletzt geladenen Anmeldungen samt Kindernamen und die Kontoverbindung blieben im Browser stehen.",
-          "Betroffen waren die Anmeldeliste, der Meldekasten, die Teilnehmerliste der Betreuer und die Felder unter Verwaltung.",
-          "Im Normalbetrieb ändert sich dadurch nichts: Wer das Recht hat, sieht alles wie bisher.",
-          "Die Zahlen oben auf der Startseite sagen bei genau eins jetzt „1 Camp mit offener Anmeldung“ und „1 freier Platz“ statt „1 Camps“ und „1 freie Plätze“."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.13",
-    groups: [
-      {
-        title: "Zahlungsziel: eine Woche vor dem Camp",
-        items: [
-          "Bisher stand in der Bestätigungsmail „bitte überweise bis zum <erster Camp-Tag>“. Geld, das am Anreisetag eingeht, hilft bei der Planung nicht mehr.",
-          "Jetzt steht dort der Tag genau eine Woche vor dem ersten Camp-Tag. Beispiel: Camp beginnt am 20.10. → Zahlungsziel ist der 13.10.",
-          "Meldet sich jemand später an, als diese Frist liegt, steht stattdessen „möglichst umgehend“ — eine Frist zu nennen, die schon vorbei ist, wäre schlimmer als gar keine.",
-          "Auf der Bestätigungsseite steht derselbe Satz wie in der Mail.",
-          "Die Teilnahmebedingungen decken das ab: dort ist von „der in der Anmeldebestätigung genannten Zahlungsfrist“ die Rede."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.12",
-    groups: [
-      {
-        title: "Alle Konfektionsgrößen zur Auswahl",
-        items: [
-          "Bisher standen nur 116, 128, 140, 152, 164, 176 und S bis XL zur Wahl — die Zwischengrößen fehlten alle, und für kleinere Kinder gab es gar nichts Passendes.",
-          "Jetzt stehen dort alle Kindergrößen von 98 bis 176 in Zweierschritten (98, 104, 110, 116, 122, 128, 134, 140, 146, 152, 158, 164, 170, 176).",
-          "Bei den Erwachsenengrößen sind XS, XXL und 3XL dazugekommen.",
-          "Die Liste ist in „Kindergrößen“ und „Erwachsenengrößen“ unterteilt, damit man sich bei 21 Einträgen zurechtfindet.",
-          "Bereits eingegangene Anmeldungen bleiben unverändert — eine alte Größe steht weiterhin genauso da, wie sie eingetragen wurde."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.11",
-    groups: [
-      {
-        title: "Frühbucherpreis: bis Tag X günstiger",
-        items: [
-          "Im Camp-Dialog stehen jetzt zwei neue Felder: „Frühbucherpreis“ und „Frühbucher bis“. Beispiel: regulär 180,00 €, Frühbucher 160,00 € bis zum 30.09.",
-          "Der günstigere Beitrag gilt bis EINSCHLIESSLICH des gewählten Tages. Am Tag danach kostet es den regulären Beitrag.",
-          "Wichtig: Wer sich im Frühbucherfenster angemeldet hat, behält den günstigeren Beitrag — auch nach dem Stichtag. Der Betrag wird beim Anmelden festgehalten und ändert sich danach nicht mehr. Sonst stünde in der Bestätigungsmail einer Familie ein anderer Betrag als in deiner Liste.",
-          "Beide Felder gehören zusammen. Steht nur eines davon da, gilt für alle der reguläre Beitrag — so kann kein halb eingerichteter Rabatt unbemerkt danebenstehen.",
-          "Der Frühbucherpreis muss unter dem regulären liegen, sonst nimmt die App ihn nicht an.",
-          "Sichtbar ist er im Fenster auf der Vereins-Homepage, oben auf der Anmeldeseite und auf der Camp-Karte — überall mit dem Datum, bis wann er gilt.",
-          "In der Anmeldeliste wird die Beitragssumme jetzt Anmeldung für Anmeldung gerechnet, nicht mehr Anzahl mal Camp-Preis. Bei zwei verschiedenen Beträgen wäre die alte Rechnung falsch gewesen.",
-          "Bei einer Anmeldung mit Frühbucherpreis steht das in der Detailansicht dabei.",
-          "Camps ohne Frühbucherpreis verhalten sich genau wie bisher."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.10",
-    groups: [
-      {
-        title: "Der Meldekasten sagt, WAS die Eltern geändert haben",
-        items: [
-          "Bisher stand dort nur „hat die Angaben geändert“ — du musstest die Anmeldung öffnen und suchen. Jetzt stehen die geänderten Felder beim Namen, zum Beispiel „hat geändert: Handy für Notfälle, Allergien“.",
-          "In der Anmeldeliste zeigt der Zeiger auf „von Eltern geändert“ dieselbe Liste.",
-          "Haben die Eltern die Teilnahmebedingungen neu bestätigt, steht auch das dabei.",
-          "Wenn die Eltern speichern, ohne etwas geändert zu haben, kommt jetzt gar keine Meldung mehr. Vorher meldete jedes Absenden eine Änderung — auch das bloße Nachsehen.",
-          "Meldungen, die vor dieser Änderung entstanden sind, zeigen weiterhin nur „hat die Angaben geändert“: für sie wurde damals nicht mitgeschrieben, welche Felder es waren.",
-          "Was NICHT gespeichert wird: der alte Wert. Nur welches Feld angefasst wurde. Ein aufbewahrter alter Wert wäre eine zweite Kopie derselben Angabe über ein Kind, die keine Löschung mehr erwischt."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.9",
-    groups: [
-      {
-        title: "Das Camp steht von allein im Vereinskalender",
-        items: [
-          "Sobald du ein Camp aus dem Entwurf holst („Anmeldung öffnen“), legt es sich selbst als Termin im Vereinskalender ab — mit Namen, Tagen, Ort, der täglichen Uhrzeit, den Jahrgängen und dem Anmeldelink. Du musst denselben Termin nicht mehr ein zweites Mal von Hand eintragen.",
-          "Damit steht das Camp auch bei allen, die den Vereinskalender in ihrem eigenen Kalender abonniert haben — also im Handy der Trainer.",
-          "Änderst du am Camp etwas, zieht der Termin nach. Stellst du es zurück auf Entwurf, ist er wieder weg. Ein Camp, dessen letzter Tag vorbei ist, verschwindet ebenfalls.",
-          "An der Camp-Karte steht, ob das Camp im Vereinskalender angekommen ist. Camps, die es schon vor dieser Änderung gab, kommen in der nächsten Nacht von selbst dazu.",
-          "Wenn du den Termin im Vereinskalender löschst, bleibt er gelöscht — er wird nicht wieder angelegt.",
-          "Ein mehrtägiges Camp steht bewusst ohne Uhrzeit im Kalender: sonst zeigen Kalenderprogramme einen einzigen Block von Montag früh bis Freitag nachmittag, also durch die Nächte hindurch. Die tägliche Zeit steht stattdessen in der Notiz des Termins."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.8",
-    groups: [
-      {
-        title: "Das Plakat am quer gehaltenen Handy",
-        items: [
-          "Auf der Anmeldeseite nimmt das Plakat jetzt höchstens knapp zwei Drittel der Bildschirmhöhe ein. Vorher war das eine feste Zahl — auf einem quer gehaltenen Handy wurde das Plakat damit anderthalb Bildschirme hoch, und man musste zweimal wischen, bis überhaupt der Name des Camps kam.",
-          "Hochkant ändert sich nichts: dort bestimmt ohnehin die Breite des Bildschirms, wie groß das Plakat wird.",
-          "Das Fenster auf der Vereins-Homepage hat schon vorher so gerechnet. Beide Stellen benutzen jetzt dieselbe Grenze."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.7",
-    groups: [
-      {
-        title: "Ein Bild fürs Camp",
-        items: [
-          "Beim Anlegen und Bearbeiten eines Camps lässt sich jetzt ein Bild hochladen — zum Beispiel das Werbeplakat des Camps.",
-          "Das Bild erscheint im Fenster auf der Vereins-Homepage über den Angaben zum Camp und noch einmal oben auf der Anmeldeseite. Am Schnipsel für die Homepage musst du nichts ändern: er lädt weiterhin nur eine Datei, das Bild kommt von selbst mit.",
-          "Große Bilder werden im Browser verkleinert, bevor sie hochgehen (längste Kante 1400 Pixel). Ein Plakat aus WhatsApp oder Canva kannst du also einfach so auswählen.",
-          "Ein Camp ohne Bild sieht aus wie bisher. Ein Bild lässt sich jederzeit austauschen oder wieder entfernen; das alte wird dabei gelöscht."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.6",
-    groups: [
-      {
-        title: "Der Änderungs-Link geht nur noch per E-Mail",
-        items: [
-          "Wer ein Kind anmeldet, für das schon eine Anmeldung vorliegt, bekommt den Link zum späteren Ändern nicht mehr auf der Seite angezeigt. Er geht per E-Mail an die Adresse, die in der vorhandenen Anmeldung hinterlegt ist.",
-          "Der Grund: Vor- und Nachname eines Kindes und die E-Mail-Adresse der Eltern sind im Verein bekannt. Wer sie kannte, bekam durch ein zweites Absenden des Formulars den Link — und über den Link Allergien, Medikamente, Anschrift und Telefonnummer einer fremden Familie. Das geht jetzt nicht mehr.",
-          "Der normale Fall bleibt genauso: Bleibt die Anmeldung im Netz hängen und wird noch einmal abgeschickt, entsteht weiterhin keine zweite Anmeldung, der Platz bleibt derselbe, und die Bestätigung kommt erneut per E-Mail.",
-          "Damit niemand ein fremdes Postfach mit Mails zudecken kann, wird der Link höchstens alle zehn Minuten einmal nachgeschickt."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.5",
-    groups: [
-      {
-        title: "Datenschutz nachgeschärft",
-        items: [
-          "Die Datenschutz-Information im Anmeldeformular nennt jetzt die vollständige Anschrift des Vereins, die zuständige Aufsichtsbehörde und alle Dienstleister, über die die Anmeldung läuft — vorher verwies sie nur auf das Impressum und nannte den Serverdienst nicht.",
-          "Sie sagt außerdem ehrlich, dass die Frage nach Allergien in der Regel ein Pflichtfeld ist. Vorher stand dort „Du kannst diese Felder leer lassen“ — das stimmte seit den neuen Pflichtangaben nicht mehr.",
-          "Die Seite „Meine Anmeldung“ hat einen eigenen Datenschutz-Abschnitt bekommen. Sie ist für viele Eltern die einzige Seite, die sie nach der Anmeldung wiedersehen; bisher stand dort kein Wort dazu und keine Adresse, an die man sich wenden kann.",
-          "Bei der Absage steht jetzt, was eine Absage tut und was nicht: sie gibt den Platz frei, löscht die Anmeldung aber nicht. Wer vorher gelöscht werden möchte, findet dort den Hinweis, sich zu melden."
-        ]
-      },
-      {
-        title: "Aufräum-Hinweis erwischt auch vergessene Camps",
-        items: [
-          "Der Kasten „reif zum Aufräumen“ erschien bisher nur für Camps im Status „abgeschlossen“. Blieb ein Camp nach dem letzten Tag einfach auf „offen“ stehen, wurde es nie fällig — und die Namen und Gesundheitsangaben der Kinder blieben unbefristet gespeichert.",
-          "Jetzt meldet der Kasten zusätzlich Camps, die längst vorbei sind und noch Anmeldungen tragen, mit der Bitte, sie abzuschließen.",
-          "Gelöscht wird weiterhin nichts von allein. Das Aufräumen bleibt ein bewusster Klick."
-        ]
-      },
-      {
-        title: "Keine Kindernamen mehr im Verlauf",
-        items: [
-          "Jedes Camp führt im Hintergrund einen Verlauf — wer wann was getan hat. Bei Anmeldungen stand darin bisher der volle Name des Kindes, obwohl der Verlauf nirgends angezeigt wird.",
-          "Der Verlauf hält jetzt nur noch die laufende Nummer fest. Beim Löschen einer Anmeldung und beim Aufräumen eines Camps werden zusätzlich die alten Einträge von Namen befreit — sonst hätte eine Löschung nur die halbe Arbeit gemacht."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.4",
-    groups: [
-      {
-        title: "Am Handy",
-        items: [
-          "Nach dem Absenden einer Anmeldung stand der Link zum späteren Ändern in voller Länge da und lief seitlich aus dem Bild — er ist 412 Pixel breit, das Handy hat 375. Die ganze Bestätigungsseite ließ sich dadurch nach rechts schieben, und der Link war nur zur Hälfte lesbar. Jetzt bricht er um.",
-          "Im Fenster auf der Vereinsseite waren die beiden kleinen Knöpfe kaum zu treffen: das Kreuz zum Schließen maß 31 × 30 Pixel, „Nicht mehr anzeigen“ war 17 Pixel hoch. Beide haben jetzt 44 Pixel Fingerbreite. Sichtbar ändert sich nichts — das Kreuz bleibt gleich groß, nur die Fläche darum wächst.",
-          "Geprüft, aber in Ordnung: die Anmeldeseite mit allen Feldern, „Meine Anmeldung“ mit Kontodaten, und die Verwaltung mit allen sechs Reitern nebeneinander. Überall 0 Pixel Überlauf bei 375 Pixel Breite."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.3",
-    groups: [
-      {
-        title: "Fotos regeln allein die Teilnahmebedingungen",
-        items: [
-          "Das Häkchen „Fotos vom Camp dürfen veröffentlicht werden“ ist aus dem Anmeldeformular entfallen. Punkt 16 der Teilnahmebedingungen regelt das jetzt allein — und die müssen die Eltern ohnehin anerkennen.",
-          "Grund: Es gab zwei Stellen, die dieselbe Frage unterschiedlich beantworten konnten. Wer die Bedingungen anerkannte, das Häkchen aber wegließ, hinterließ einen widersprüchlichen Datensatz.",
-          "Die Datenschutz-Information im Formular nennt die Aufnahmen jetzt ausdrücklich und verweist für Einzelheiten und den Widerruf auf Punkt 16. Vorher stand dort gar nichts zu Fotos — das Häkchen war die einzige sichtbare Stelle.",
-          "Der Abschnitt „Einverständnis“ im Formular heißt jetzt „Abholung und Heimweg“. Darin stehen nur noch die beiden Fragen dazu."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.2",
-    groups: [
-      {
-        title: "Der richtige Vereinsname",
-        items: [
-          "Überall, wo der Verein genannt wird, steht jetzt „1. SC 1911 Heiligenstadt e.V.“ — so, wie er wirklich heißt. Vorher stand dort „1. SC 1911 e.V. Heilbad Heiligenstadt“.",
-          "Betrifft die Anmeldeseite, die Seite „Meine Anmeldung“, den Fuß der Mails an die Eltern und die Datenschutz-Information. Gerade dort zählt es: die Information nach Art. 13 DSGVO muss den Verantwortlichen richtig benennen.",
-          "⚠️ Der vorgeschlagene Kontoinhaber unter „Verwaltung“ heißt jetzt ebenfalls so. Prüfe beim Eintragen der IBAN, wie das Konto bei der Bank wirklich lautet — der Empfängername muss dazu passen, sonst kann eine Überweisung abgelehnt werden."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.1",
-    groups: [
-      {
-        title: "Teilnahmebedingungen im Formular",
-        items: [
-          "Vor dem Absenden stehen die Teilnahmebedingungen des Vereins im Formular — aufklappbar, dazu ein eigenes Pflicht-Häkchen. Ohne dieses Häkchen nimmt der Server keine Anmeldung an.",
-          "Der Text wird unter „Verwaltung → Teilnahmebedingungen“ gepflegt. Es braucht dafür keine Änderung am Programm; was dort steht, erscheint sofort im Formular.",
-          "Bei jeder Anmeldung wird festgehalten, WELCHE Fassung die Eltern zugestimmt haben. Änderst du den Text später, bleibt für die früheren Anmeldungen die damals gültige Fassung erhalten und ist im Anmeldedialog nachlesbar — eine spätere Änderung wirkt nie rückwirkend.",
-          "Ändern die Eltern ihre Anmeldung über den Link aus der Mail, müssen sie nur dann erneut zustimmen, wenn sich der Text seit ihrer Anmeldung geändert hat."
-        ]
-      },
-      {
-        title: "Pflichtangaben nach Vorgabe des Nachwuchsbereichs",
-        items: [
-          "Ein neues Camp fragt jetzt von sich aus verpflichtend: Name, Geburtsdatum, Konfektionsgröße, Allergien, „darf allein nach Hause“, E-Mail und Telefon der Erziehungsberechtigten. Bestehende Camps bleiben unverändert; je Camp lässt sich weiterhin alles umstellen.",
-          "„Trikotgröße“ heißt jetzt „Konfektionsgröße“.",
-          "„Wer darf das Kind abholen“ wird bei einem neuen Camp mit angeboten — vorher war das Feld standardmäßig aus."
-        ]
-      },
-      {
-        title: "„Darf allein nach Hause“ ist jetzt eine echte Frage",
-        items: [
-          "Aus dem Häkchen ist eine Ja/Nein-Frage geworden. Bei einem Häkchen waren „nein“ und „nicht angekreuzt“ derselbe Zustand — am letzten Camptag sah man dem leeren Kästchen nicht an, ob die Eltern es verneint oder schlicht übersehen haben.",
-          "Als Pflichtfeld ging ein Häkchen ohnehin nicht: erfüllen ließe es sich nur, indem man jedem Kind erlaubt, allein zu gehen.",
-          "In der Teilnehmerliste der Betreuer steht bei „nein“ jetzt ein sichtbarer roter Hinweis statt gar nichts."
-        ]
-      }
-    ]
-  },
-  {
     version: "1.0",
     groups: [
       {
         title: "Ein Camp anlegen",
         items: [
-          "Ein Camp bekommt Zeitraum, tägliche Uhrzeit, Ort, Altersspanne, Platzzahl und einen Preis. Aus dem Zeitraum entstehen sofort echte Camp-Tage — das ist die Grundlage für die Jobs und die Anwesenheit.",
+          "Ein Camp bekommt Zeitraum, tägliche Uhrzeit, Ort, Altersspanne, Platzzahl und einen Beitrag. Aus dem Zeitraum entstehen sofort echte Camp-Tage — das ist die Grundlage für die Aufgaben und die Teilnehmerlisten.",
           "Ein neues Camp ist zuerst ein Entwurf und damit für niemanden sichtbar. Erst „Anmeldung öffnen“ stellt es auf die Homepage und nimmt Anmeldungen an.",
-          "Zu jedem Camp gehört ein Anmeldefenster mit Datum von und bis. Läuft es ab, schließt die Anmeldung von selbst — es muss niemand daran denken."
+          "Zu jedem Camp gehört ein Anmeldefenster mit Datum von und bis. Läuft es ab, schließt die Anmeldung von selbst — es muss niemand daran denken.",
+          "Zu jedem Camp lässt sich ein Bild hochladen, zum Beispiel das Werbeplakat. Große Bilder verkleinert der Browser vor dem Hochladen, ein Plakat aus WhatsApp oder Canva kannst du also einfach so auswählen. Ein Camp ohne Bild sieht schlicht aus wie jedes andere.",
+          "Welche Felder das Anmeldeformular fragt, entscheidest du je Camp: nicht fragen, freiwillig oder Pflicht. Ein neues Camp fragt von sich aus verpflichtend nach Name, Geburtsdatum, Konfektionsgröße, Allergien, „darf allein nach Hause“ sowie E-Mail und Telefon der Erziehungsberechtigten."
         ]
       },
       {
-        title: "Auf der Vereins-Homepage",
+        title: "Auf der Vereins-Homepage und im Vereinskalender",
         items: [
-          "Die App liefert einen fertigen Schnipsel für die Homepage. Er wird einmal eingebaut und bleibt danach unangetastet: welches Camp dort erscheint, entscheidet allein der Status in dieser App.",
-          "Auf der Homepage öffnet sich ein Fenster mit den offenen Camps und einem Knopf zur Anmeldung. Wer es wegklickt, bekommt es sieben Tage lang nicht wieder zu sehen.",
-          "Zusätzlich gibt es zu jedem Camp einen normalen Link zum Weitergeben — für WhatsApp, Aushang oder Elternbrief."
+          "Die App liefert einen fertigen Schnipsel für die Homepage. Er wird einmal eingebaut und bleibt danach unangetastet: welches Camp dort erscheint, entscheidet allein der Status in dieser App. Eine Vorschau zeigt vorher, wie das Fenster auf einer fremden Seite aussieht.",
+          "Auf der Homepage öffnet sich ein Fenster mit den offenen Camps, dem Plakat und einem Knopf zur Anmeldung. Wer es wegklickt, bekommt es sieben Tage lang nicht wieder zu sehen; ein neues Camp erscheint trotzdem.",
+          "Zusätzlich gibt es zu jedem Camp einen normalen Link zum Weitergeben — für WhatsApp, Aushang oder Elternbrief.",
+          "Sobald du ein Camp aus dem Entwurf holst, legt es sich selbst als Termin im Vereinskalender ab — mit Namen, Tagen, Ort, täglicher Uhrzeit, Jahrgängen und Anmeldelink. Damit steht das Camp auch bei allen, die den Vereinskalender abonniert haben, also im Handy der Trainer.",
+          "Änderst du am Camp etwas, zieht der Termin nach. Stellst du es zurück auf Entwurf, ist er wieder weg. An der Camp-Karte steht, ob der Termin im Vereinskalender angekommen ist. Löschst du ihn dort von Hand, bleibt er gelöscht."
         ]
       },
       {
         title: "Anmeldung",
         items: [
-          "Die Eltern melden ohne Login an. Welche Felder gefragt werden, entscheidest du je Camp: nicht fragen, freiwillig oder Pflicht.",
+          "Die Eltern melden ohne Vereinskonto an, über einen Link oder das Fenster auf der Homepage.",
           "Ein Kind je Anmeldung. Nach dem Absenden führt ein Knopf direkt zur nächsten Anmeldung, bei der die Elternangaben schon ausgefüllt sind.",
           "Ist das Camp voll, kommt die Anmeldung auf die Warteliste — mit Platznummer, sichtbar für die Eltern. Nachrücken lässt du selbst per Klick; die Zusage geht dann automatisch per Mail raus.",
-          "Jede Bestätigung enthält einen persönlichen Link. Darüber ändern die Eltern ihre Angaben oder sagen ab. Beides wird in der App auffällig markiert, damit es dir nicht entgeht."
+          "Bei der Konfektionsgröße stehen alle Kindergrößen von 98 bis 176 in Zweierschritten sowie XS bis 3XL zur Wahl, nach Kinder- und Erwachsenengrößen getrennt.",
+          "„Darf allein nach Hause“ ist eine Ja/Nein-Frage, kein Häkchen. Bei einem Häkchen wären „nein“ und „nicht angekreuzt“ derselbe Zustand — am letzten Camptag ist das ein Unterschied, der zählt.",
+          "Vor dem Absenden stehen die Teilnahmebedingungen im Formular, aufklappbar und mit eigenem Pflicht-Häkchen. Ohne dieses Häkchen nimmt der Server keine Anmeldung an. Der Text wird unter „Verwaltung → Teilnahmebedingungen“ gepflegt und erscheint sofort im Formular.",
+          "Bei jeder Anmeldung wird festgehalten, welche Fassung der Bedingungen die Eltern anerkannt haben. Änderst du den Text später, bleibt für die früheren Anmeldungen die damals gültige Fassung erhalten und ist im Anmeldedialog nachlesbar."
         ]
       },
       {
         title: "Beitrag",
         items: [
-          "Ein Preis je Camp. Betrag, Kontoverbindung und Verwendungszweck stehen auf der Bestätigungsseite und in der Bestätigungsmail.",
-          "Den Verwendungszweck baut die App selbst aus Campnamen und Kindernamen — damit auf dem Kontoauszug erkennbar ist, wofür das Geld kam.",
-          "In der Anmeldeliste hakst du ab, wer bezahlt hat. Ein Filter zeigt die offenen Beiträge, und eine Erinnerungsmail lässt sich für alle Offenen auf einmal auslösen."
+          "Ein Beitrag je Camp. Betrag, Kontoverbindung und Verwendungszweck stehen auf der Bestätigungsseite und in der Bestätigungsmail. Den Verwendungszweck baut die App selbst aus Camp- und Kindernamen, damit auf dem Kontoauszug erkennbar ist, wofür das Geld kam.",
+          "Ein Camp kann einen Frühbucherpreis mit Stichtag haben. Der günstigere Beitrag gilt bis einschließlich des gewählten Tages und wird bei der Anmeldung festgehalten — wer im Frühbucherfenster gebucht hat, behält ihn auch danach. Sichtbar ist er im Fenster auf der Homepage, auf der Anmeldeseite und auf der Camp-Karte, überall mit dem Datum, bis wann er gilt.",
+          "Als Zahlungsziel nennt die Bestätigung den Tag genau eine Woche vor dem ersten Camp-Tag. Wer sich später anmeldet, wird um umgehende Zahlung gebeten — eine Frist zu nennen, die schon vorbei ist, hilft niemandem.",
+          "In der Anmeldeliste hakst du ab, wer bezahlt hat. Ein Filter zeigt die offenen Beiträge, und eine Zahlungserinnerung lässt sich für alle Offenen auf einmal auslösen. Sie geht erst raus, wenn die eingestellte Wartezeit um ist UND die Zahlungsfrist naht oder vorbei ist.",
+          "Kontoinhaber, IBAN, BIC und Bank sind gesperrt und grau. Zum Ändern erst auf „Zum Ändern freigeben“, dann siehst du alt und neu nebeneinander und bestätigst noch einmal. Danach schnappt das Schloss von allein wieder zu. Die IBAN wird über ihre Prüfziffer geprüft, ein Zahlendreher wird also abgelehnt."
+        ]
+      },
+      {
+        title: "Ändern und Absagen",
+        items: [
+          "Jede Bestätigung enthält einen persönlichen Link. Darüber ändern die Eltern ihre Angaben oder sagen ab. Der Link geht ausschließlich per E-Mail an die hinterlegte Adresse und wird nie auf der Seite angezeigt.",
+          "Der Meldekasten nennt beim Namen, WAS die Eltern geändert haben, zum Beispiel „hat geändert: Handy für Notfälle, Allergien“. Wer speichert, ohne etwas zu ändern, löst gar keine Meldung aus.",
+          "Sagt eine Familie über ihren Link ab, bekommt sie sofort eine Bestätigung per Mail. Sie nennt die Erstattungsregel aus den Teilnahmebedingungen, verspricht aber nie einen konkreten Betrag — über die Rückzahlung entscheidet weiterhin ein Mensch. Bei einem Freiplatz steht nichts über Geld darin.",
+          "Sagst du selbst ab, öffnet sich ein Fenster mit dem Grund und einem Häkchen „Eltern per E-Mail benachrichtigen“. Das Häkchen ist vorbelegt; für eine Dublette oder einen Testeintrag nimmst du es heraus. Ohne hinterlegte E-Mail-Adresse ist es grau, und daneben steht warum. Der Absagegrund bleibt in jedem Fall intern.",
+          "Zu jeder abgesagten Anmeldung zeigt die App den Abschnitt „Absage und Erstattung“: Eingangstag der Absage, Abstand zum Camp-Beginn, die greifende Stufe der Teilnahmebedingungen und den zurückzuzahlenden Betrag. Gerechnet wird mit dem Eingangstag, nicht mit dem heutigen. Ohne Haken „bezahlt“ steht dort „nichts“ samt Grund, bei fehlendem Anfangsdatum „nicht bestimmbar“, und bei einer Absage durch den Verein „von Hand klären“. Der Betrag ist eine Ablesehilfe, keine Anweisung."
         ]
       },
       {
         title: "Aufgaben und Helfer",
         items: [
-          "Der Job-Katalog wird einmal gepflegt: Name, Beschreibung, benötigte Personenzahl, Uhrzeit von und bis.",
-          "Jobs hängen am einzelnen Camp-Tag. Ein Knopf legt einen Job auf allen Tagen des Camps auf einmal an — ausfüllen muss man ihn nur einmal.",
-          "Wer Zugriff auf das Tool hat, trägt sich selbst ein und wieder aus. Ein voller Job nimmt niemanden mehr an; das prüft der Server, nicht nur die Oberfläche.",
-          "Helfer ohne Vereinskonto trägst du als freien Namen ein. Am Job steht dann, wer den Eintrag vorgenommen hat.",
-          "Anders als in der Spieltagscrew darf eine Person am selben Tag mehrere Jobs übernehmen — vormittags Betreuung, mittags Essensausgabe ist beim Camp der Normalfall."
+          "Der Aufgaben-Katalog wird einmal gepflegt: Name, Beschreibung, benötigte Personenzahl, Uhrzeit von und bis.",
+          "Aufgaben hängen am einzelnen Camp-Tag. Beim Anlegen setzt ein Häkchen dieselbe Aufgabe auf allen Tagen des Camps auf einmal — ausfüllen muss man sie nur einmal.",
+          "Wer Zugriff auf das Werkzeug hat, trägt sich selbst ein und wieder aus. Eine volle Aufgabe nimmt niemanden mehr an; das prüft der Server, nicht nur die Oberfläche.",
+          "Helfer ohne Vereinskonto trägst du als freien Namen ein. An der Aufgabe steht dann, wer den Eintrag vorgenommen hat.",
+          "Anders als in der Spieltagscrew darf eine Person am selben Tag mehrere Aufgaben übernehmen — vormittags Betreuung, mittags Essensausgabe ist beim Camp der Normalfall."
+        ]
+      },
+      {
+        title: "Listen zum Ausdrucken",
+        items: [
+          "Der Aufgabenplan eines Camps lässt sich als Ganzes ausdrucken — mit allen Tagen, Zeiten und eingetragenen Helfern.",
+          "Die Teilnehmerliste der Betreuer ist auf das Nötige verkürzt: Name, Alter, Allergien, Medikamente, Notfallnummer. Bei einem Kind, das nicht allein nach Hause darf, steht ein sichtbarer roter Hinweis.",
+          "Die vollständige Anmeldeliste lässt sich drucken oder als Excel-Datei ausgeben — mit Nummer, Status, Zahlungsstand, Verwendungszweck und allen Feldern, die dieses Camp abfragt."
         ]
       },
       {
         title: "Wer darf was",
         items: [
-          "Sehen: Camps, Camp-Tage und Jobs. Anmeldungen und Kinderdaten sind hier nicht dabei.",
-          "Betreuer: Wer an einem Camp auf mindestens einem Job steht, sieht für dieses Camp eine kurze Teilnehmerliste — Name, Alter, Allergien, Medikamente, Notfallnummer. Ohne Anschrift, ohne Beitragsstand. Diese Liste stellt der Server zusammen; wer nicht eingetragen ist, bekommt die Daten gar nicht erst geschickt.",
+          "Sehen: Camps, Camp-Tage und Aufgaben. Anmeldungen und Kinderdaten sind hier nicht dabei.",
+          "Betreuer: Wer an einem Camp auf mindestens einer Aufgabe steht, sieht für dieses Camp die kurze Teilnehmerliste. Ohne Anschrift, ohne Beitragsstand. Diese Liste stellt der Server zusammen; wer nicht eingetragen ist, bekommt die Daten gar nicht erst geschickt.",
           "Bearbeiten: Camps und Camp-Tage pflegen, Anmeldungen einsehen und ändern, Beiträge abhaken, nachrücken lassen, Listen ausgeben.",
-          "Administrieren: Kontoverbindung, Absender, Job-Katalog, Erinnerungen, Löschen und der Schnipsel für die Homepage.",
-          "Der Reiter „Info“ ist für alle sichtbar."
+          "Administrieren: Kontoverbindung, Ansprechpartner, Aufgaben-Katalog, Erinnerungen, Teilnahmebedingungen, Löschen und der Schnipsel für die Homepage.",
+          "Der Reiter „Info“ ist für alle sichtbar.",
+          "Fällt jemandem ein Recht weg, während er die App offen hat, verschwinden nicht nur die Reiter: Anmeldeliste, Meldekasten, Teilnehmerliste und die Felder der Verwaltung werden geräumt, ein offener Anmelde-Dialog wird geschlossen und geleert."
         ]
       },
       {
         title: "Datenschutz",
         items: [
-          "Auf der Anmeldeseite steht die Pflichtinformation nach Art. 13 DSGVO, und die Eltern müssen ihr Einverständnis ausdrücklich geben. Ohne diesen Haken nimmt der Server keine Anmeldung an.",
+          "Auf der Anmeldeseite steht die Pflichtinformation nach Art. 13 DSGVO mit Anschrift des Vereins, Aufsichtsbehörde und allen beteiligten Dienstleistern. Die Eltern müssen ihr Einverständnis ausdrücklich geben; ohne diesen Haken nimmt der Server keine Anmeldung an. Die Seite „Meine Anmeldung“ hat einen eigenen Datenschutz-Abschnitt.",
           "Gesundheitsangaben verlassen den Server nur an Bearbeiter und an die Betreuer des jeweiligen Camps.",
-          "Nach dem Camp läuft eine Frist (Vorgabe: sechs Monate). Danach zeigt die App einen Hinweis mit einem Knopf zum Aufräumen: Namen, Anschriften und Gesundheitsangaben werden gelöscht, die reinen Zahlen für die Statistik bleiben.",
+          "Aufnahmen vom Camp regeln allein die Teilnahmebedingungen. Zwei Stellen, die dieselbe Frage unterschiedlich beantworten können, gibt es bewusst nicht.",
+          "Der Verlauf eines Camps hält bei Anmeldungen nur die laufende Nummer fest, keine Kindernamen.",
+          "Nach dem Camp läuft eine Frist (Vorgabe: sechs Monate). Danach zeigt die App einen Hinweis mit einem Knopf zum Aufräumen: Namen, Anschriften und Gesundheitsangaben werden gelöscht, die reinen Zahlen für die Statistik bleiben. Gemeldet werden auch Camps, die längst vorbei sind und noch auf „offen“ stehen.",
           "Die App löscht nie von allein. Das bleibt eine bewusste Entscheidung mit einem Klick."
         ]
       }

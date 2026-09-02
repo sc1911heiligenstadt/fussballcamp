@@ -10,29 +10,49 @@ Teil der Vereins-Werkzeugsammlung → [Tools-Übersicht](https://sc1911heiligens
 
 **Camps anlegen.** Zeitraum, tägliche Uhrzeit, Ort, Altersspanne, Platzzahl und Beitrag.
 Aus dem Zeitraum entstehen die Camp-Tage. Ein neues Camp ist zuerst ein Entwurf und für
-niemanden sichtbar — erst „Anmeldung öffnen" stellt es auf die Homepage.
+niemanden sichtbar — erst „Anmeldung öffnen“ stellt es auf die Homepage. Zu jedem Camp
+lässt sich ein Bild hochladen (Werbeplakat); große Bilder verkleinert der Browser vor dem
+Hochladen.
 
 **Auf der Vereinsseite.** Die App liefert einen Schnipsel, der einmal in die Homepage
-eingebaut wird. Danach erscheint dort von selbst ein Fenster mit den offenen Camps und
-einem Knopf zur Anmeldung. Wer es wegklickt, bekommt es sieben Tage lang nicht wieder zu
-sehen; ein neues Camp erscheint trotzdem.
+eingebaut wird. Danach erscheint dort von selbst ein Fenster mit den offenen Camps, dem
+Plakat und einem Knopf zur Anmeldung. Wer es wegklickt, bekommt es sieben Tage lang nicht
+wieder zu sehen; ein neues Camp erscheint trotzdem.
+
+**Im Vereinskalender.** Sobald ein Camp aus dem Entwurf geholt wird, legt es sich selbst
+als Termin im Vereinskalender ab — mit Tagen, Ort, Uhrzeit, Jahrgängen und Anmeldelink.
+Änderungen ziehen nach; ein zurückgestelltes oder abgelaufenes Camp verschwindet wieder.
 
 **Anmeldung ohne Vereinskonto.** Die Eltern melden über einen Link an. Welche Felder
 gefragt werden, wird je Camp eingestellt: nicht fragen, freiwillig oder Pflicht. Ist das
 Camp voll, läuft eine Warteliste mit Platznummer.
 
+**Teilnahmebedingungen.** Der Text wird in der App gepflegt und steht aufklappbar im
+Formular, mit eigenem Pflicht-Häkchen. Zu jeder Anmeldung wird festgehalten, welche
+Fassung anerkannt wurde — eine spätere Änderung wirkt nie rückwirkend.
+
 **Beitrag.** Betrag, Kontoverbindung und ein automatisch gebildeter Verwendungszweck
-stehen auf der Bestätigungsseite und in der Bestätigungsmail. In der Anmeldeliste wird
-abgehakt, wer bezahlt hat.
+stehen auf der Bestätigungsseite und in der Bestätigungsmail; als Zahlungsziel nennt sie
+den Tag eine Woche vor Camp-Beginn. Ein Camp kann einen Frühbucherpreis mit Stichtag
+haben; der bei der Anmeldung gültige Betrag wird festgehalten. In der Anmeldeliste wird
+abgehakt, wer bezahlt hat. Die Kontoverbindung ist gesperrt und muss zum Ändern
+ausdrücklich freigegeben werden; die IBAN wird über ihre Prüfziffer geprüft.
 
 **Selbst ändern.** Jede Bestätigungsmail enthält einen persönlichen Link. Darüber ändern
-die Eltern ihre Angaben oder sagen ab.
+die Eltern ihre Angaben oder sagen ab. Der Meldekasten in der App nennt, welche Felder
+geändert wurden. Zu einer Absage zeigt die App die greifende Erstattungsstufe und den
+zurückzuzahlenden Betrag als Ablesehilfe.
 
-**Aufgaben für die Helfer.** Ein Job-Katalog wird einmal gepflegt und beim Anlegen eines
-Camps auf jeden Tag kopiert. Wer Zugriff hat, trägt sich selbst ein und wieder aus.
+**Aufgaben für die Helfer.** Ein Job-Katalog wird einmal gepflegt; beim Anlegen lässt sich
+eine Aufgabe auf allen Camp-Tagen auf einmal setzen. Wer Zugriff hat, trägt sich selbst
+ein und wieder aus; Helfer ohne Vereinskonto werden als freier Name eingetragen.
+
+**Listen.** Aufgabenplan, verkürzte Teilnehmerliste für die Betreuer und die vollständige
+Anmeldeliste lassen sich drucken; die Anmeldeliste zusätzlich als Excel-Datei ausgeben.
 
 **Erinnerungen.** Vor dem Campbeginn und bei offenem Beitrag geht automatisch eine Mail
-an die Eltern.
+an die Eltern. Die Zahlungserinnerung geht erst, wenn die eingestellte Wartezeit um ist
+und zugleich die Zahlungsfrist naht oder abgelaufen ist.
 
 ## Datenschutz
 
