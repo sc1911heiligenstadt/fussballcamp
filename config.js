@@ -320,6 +320,20 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.6",
+    groups: [
+      {
+        title: "Das Bearbeiten-Formular sieht aus wie der Rest",
+        items: [
+          "Die Felder stehen jetzt in zwei Spalten statt in einer langen Liste — dasselbe Raster wie im Camp-Dialog. Am Handy bleibt es eine Spalte.",
+          "Lange Angaben wie Anschrift, Allergien oder Bemerkung gehen über die volle Breite, kurze teilen sich eine Zeile.",
+          "Die Ausrichtung (Feldspieler/Torwart) steht jetzt bei „Das Kind“ statt allein über der ersten Überschrift.",
+          "Der Dialog ist etwas breiter, damit alle Knöpfe in eine Zeile passen — vorher rutschte „Endgültig löschen“ allein in eine zweite."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.5",
     groups: [
       {

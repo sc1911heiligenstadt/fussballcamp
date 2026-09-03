@@ -313,20 +313,38 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 
 
 /* ---------- Angaben bearbeiten im Anmeldungs-Dialog ---------- */
-.anm-bearbeiten-feld { margin-bottom: 11px; }
-/* ⚠️ Volle Breite. Ohne das sind die Felder rund 110 px breit (Browser-
-   Vorgabe fuer input/select) -- in einem 400-px-Dialog nicht zu gebrauchen, wenn
-   man einen Satz wie "Konfektionsgroesse eigentlich 134" korrigieren will. Der
-   Selektor nimmt die Id mit, weil weiter oben `#tab-verwaltung`-Regeln
-   dieselben Elemente treffen koennen; im Dialog gilt das zwar nicht, aber die
-   Breite soll nicht von der Reihenfolge im Stylesheet abhaengen. */
-.anm-bearbeiten-feld > input,
-.anm-bearbeiten-feld > select,
-.anm-bearbeiten-feld > textarea { width: 100%; box-sizing: border-box; }
-.anm-bearbeiten-feld > label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; }
-/* ⚠️ Der Haken darf KEIN Block ueber die volle Breite werden -- dieselbe Falle
-   wie bei den Push-Schaltern der Tools-Uebersicht. */
-.anm-bearbeiten-feld.haken > label {
-  display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 14px; cursor: pointer;
+/* ⚠️ Fast nichts Eigenes: das Formular benutzt `.feld-gitter`, `label.voll`,
+   `label.feld-schmal` und `.inline-check` -- dieselben Bausteine wie der
+   Camp-Dialog daneben. Hier steht nur, was es dort noch nicht gab. */
+
+/* ⚠️ Dieser Dialog traegt ein ganzes Formular (bis zu 18 Felder), nicht nur
+   ein paar Angaben wie die uebrigen -- er darf breiter sein als die 640 px der
+   Grundklasse. Gemessen: mit 640 px fehlten der Knopfreihe genau 27 px und
+   "Endgueltig loeschen" brach allein in eine zweite Zeile um; mit 720 px stehen
+   alle fuenf nebeneinander und die zwei Spalten haben Luft. Am Handy bindet
+   ohnehin die Fensterbreite, dort aendert sich nichts. */
+#anm-modal .modal { max-width: 720px; }
+
+/* ⚠️ ZWEI Spalten, nicht drei. Die Grundklasse rechnet mit `minmax(210px)`
+   und legt bei 676 px Innenbreite drei Spalten an -- dann ist ein Feld 212 px
+   breit, und darin steht "***entfernt*** + ***entfernt***" oder "***entfernt***
+   Heilbad Heiligenstadt" nicht mehr lesbar. Mit 280 px werden es zwei Spalten zu
+   je rund 330 px. Unter 640 px greift `min(100%, 280px)` und es wird wieder
+   eine. */
+#anm-modal-body .feld-gitter {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }
-.anm-bearbeiten-feld.haken input { width: 18px; height: 18px; flex-shrink: 0; margin: 0; }
+
+/* Der Haken braucht eine eigene Zeile mit Abstand; `.inline-check` selbst ist
+   ein inline-flex ohne Aussenabstand. */
+.anm-haken-zeile { margin-bottom: 14px; }
+
+/* Die Warnung oben steht direkt unter der Ueberschrift und braucht darueber
+   keinen doppelten Abstand. */
+#anm-modal-body > .hinweis:first-child { margin-top: 0; }
+
+/* ⚠️ Die erste Ueberschrift bekommt weniger Luft nach oben. `.modal-body h3`
+   traegt 18 px, und direkt hinter dem Warnkasten sieht das nach einer Luecke
+   aus. */
+#anm-modal-body > .hinweis + h3,
+#anm-modal-body > label + h3 { margin-top: 12px; }

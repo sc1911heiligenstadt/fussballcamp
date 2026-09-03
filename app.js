@@ -1434,7 +1434,7 @@ function oeffneAnmDialog(campId, anmeldungId) {
   // schon in der Ansehen-Ansicht steht — ein Knopf, der das Gegenteil dessen
   // ankündigt, was er tut.
   const bearbKnopf = document.getElementById("btn-anm-bearbeiten");
-  if (bearbKnopf) bearbKnopf.textContent = "Angaben bearbeiten";
+  if (bearbKnopf) bearbKnopf.textContent = "Bearbeiten";
 
   document.getElementById("btn-anm-absagen").classList.toggle("hidden", a.status === "abgesagt");
   document.getElementById("btn-anm-loeschen").classList.toggle("hidden", !canAdmin());
@@ -1478,7 +1478,7 @@ function anmBearbeitenUmschalten() {
   document.getElementById("anm-modal-body").innerHTML =
     anmBearbeiten ? anmFormular(camp, a) : anmDetails(camp, a);
   const knopf = document.getElementById("btn-anm-bearbeiten");
-  if (knopf) knopf.textContent = anmBearbeiten ? "Angaben nur ansehen" : "Angaben bearbeiten";
+  if (knopf) knopf.textContent = anmBearbeiten ? "Nur ansehen" : "Bearbeiten";
 }
 
 // Das Änderungs-Formular der Verwaltung.
@@ -1489,6 +1489,12 @@ function anmBearbeitenUmschalten() {
 // Eltern-Formular führt Gruppenüberschriften, Hinweise und Pflicht-Sterne, hier
 // geht es um schnelles Korrigieren. Der Bauer dafür (`baueFormular`) steckt in
 // `oeffentlich.js` samt seiner eigenen CSS-Datei, die diese Seite nicht lädt.
+//
+// ⚠️ Gebaut wird mit den BESTEHENDEN Bausteinen der App — `.feld-gitter` für die
+// kurzen Felder, `label.voll` für die langen, `<h3>` für die Überschriften.
+// Genauso sieht der Camp-Dialog daneben aus. Eine eigene Formularoptik nur für
+// diesen einen Dialog wäre eine zweite Formsprache, die beim nächsten
+// Feinschliff vergessen wird.
 //
 // ⚠️ Gezeigt werden nur die am Camp EINGESCHALTETEN Felder plus die festen —
 // genau die, die der Worker auch annimmt. Ein Feld anzubieten, das beim
@@ -1502,23 +1508,35 @@ function anmFormular(camp, a) {
     <em>welche</em> Felder du angefasst hast — nicht, was vorher darin stand.</div>`];
 
   // Ausrichtung, aber nur wenn es etwas zu wählen gibt.
-  if (camp.fuerFeldspieler && camp.fuerTorwart) {
-    teile.push(`<div class="anm-bearbeiten-feld"><label for="af-rolle">Ausrichtung</label>
+  //
+  // ⚠️ Sie gehört IN die Gruppe „Das Kind“, nicht darüber: allein über der
+  // ersten Überschrift stand sie wie ein vergessenes Feld da. Sie wird deshalb
+  // unten als erstes Gitterfeld dieser Gruppe eingeschoben.
+  const rollenFeld = (camp.fuerFeldspieler && camp.fuerTorwart)
+    ? `<label>Ausrichtung
       <select id="af-rolle">${ROLLEN.map((r) =>
-        `<option value="${escapeAttr(r.id)}"${(a.rolle || "feldspieler") === r.id ? " selected" : ""}>${escapeHtml(r.label)}</option>`).join("")}</select></div>`);
-  }
+        `<option value="${escapeAttr(r.id)}"${(a.rolle || "feldspieler") === r.id ? " selected" : ""}>${escapeHtml(r.label)}</option>`).join("")}</select></label>`
+    : "";
 
   FELD_GRUPPEN.forEach((g) => {
     const drin = felder.filter((f) => f.gruppe === g.id);
     if (!drin.length) return;
     teile.push(`<h3>${escapeHtml(g.label)}</h3>`);
-    drin.forEach((f) => teile.push(anmFeldEingabe(f, a[f.id])));
+
+    // ⚠️ Kurze Felder ins Gitter, lange darunter über die volle Breite. Alles in
+    // eine Spalte zu stellen macht aus zwanzig Feldern eine Rolltreppe; alles
+    // ins Gitter zu zwingen quetscht eine Anschrift in 210 px.
+    const kurz = drin.filter((f) => f.typ !== "mehrzeilig" && f.typ !== "haken");
+    const lang = drin.filter((f) => f.typ === "mehrzeilig" || f.typ === "haken");
+    const vorne = g.id === "kind" ? rollenFeld : "";
+    if (kurz.length || vorne) teile.push(`<div class="feld-gitter">${vorne}${kurz.map((f) => anmFeldEingabe(f, a[f.id])).join("")}</div>`);
+    lang.forEach((f) => teile.push(anmFeldEingabe(f, a[f.id])));
   });
 
   if (camp.zusatzfrage) {
     teile.push(`<h3>Zusatzfrage</h3>`);
-    teile.push(`<div class="anm-bearbeiten-feld"><label for="af-zusatz">${escapeHtml(camp.zusatzfrage)}</label>
-      <input type="text" id="af-zusatz" maxlength="200" value="${escapeAttr(a.zusatzantwort || "")}" /></div>`);
+    teile.push(`<label class="voll">${escapeHtml(camp.zusatzfrage)}
+      <input type="text" id="af-zusatz" maxlength="200" value="${escapeAttr(a.zusatzantwort || "")}" /></label>`);
   }
 
   return teile.join("");
@@ -1528,38 +1546,46 @@ function anmFormular(camp, a) {
 // `leseAnmFormular` die Werte wieder ab.
 function anmFeldEingabe(f, wert) {
   const id = "af-" + f.id;
+
   if (f.typ === "haken") {
-    return `<div class="anm-bearbeiten-feld haken"><label for="${id}">
+    // ⚠️ NICHT in `label.voll`: dort greift `input { width: 100% }`, und aus dem
+    // Kästchen wird ein Balken. Dieselbe Falle wie bei den Push-Schaltern der
+    // Tools-Übersicht. `.inline-check` ist der Baustein dafür.
+    return `<div class="anm-haken-zeile"><label class="inline-check" for="${id}">
       <input type="checkbox" id="${id}" data-af="${escapeAttr(f.id)}"${wert ? " checked" : ""} />
-      <span>${escapeHtml(f.label)}</span></label></div>`;
+      ${escapeHtml(f.label)}</label></div>`;
   }
+
   if (f.typ === "janein") {
     // ⚠️ Drei Zustände, nicht zwei: „ja", „nein" und „noch nicht beantwortet".
     // Ein Ja/Nein-Umschalter würde aus „nicht beantwortet" beim ersten Speichern
     // stillschweigend ein „nein" machen — und genau diesen Unterschied braucht
     // der Betreuer am letzten Camptag.
     const g = wert === true ? "ja" : (wert === "ja" || wert === "nein" ? wert : "");
-    return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
+    return `<label>${escapeHtml(f.label)}
       <select id="${id}" data-af="${escapeAttr(f.id)}">
         <option value=""${g === "" ? " selected" : ""}>— nicht beantwortet —</option>
         ${JANEIN.map((o) => `<option value="${escapeAttr(o.id)}"${g === o.id ? " selected" : ""}>${escapeHtml(o.label)}</option>`).join("")}
-      </select></div>`;
+      </select></label>`;
   }
+
   if (f.typ === "auswahl") {
     const opt = (o) => `<option value="${escapeAttr(o)}"${o === wert ? " selected" : ""}>${escapeHtml(o)}</option>`;
     const inhalt = Array.isArray(f.gruppen)
       ? f.gruppen.map((g) => `<optgroup label="${escapeAttr(g.label)}">${(g.optionen || []).map(opt).join("")}</optgroup>`).join("")
       : (f.optionen || []).map(opt).join("");
-    return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
-      <select id="${id}" data-af="${escapeAttr(f.id)}"><option value="">— keine Angabe —</option>${inhalt}</select></div>`;
+    return `<label>${escapeHtml(f.label)}
+      <select id="${id}" data-af="${escapeAttr(f.id)}"><option value="">— keine Angabe —</option>${inhalt}</select></label>`;
   }
+
   if (f.typ === "mehrzeilig") {
-    return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
-      <textarea id="${id}" data-af="${escapeAttr(f.id)}" rows="2" maxlength="${f.maxLen || 500}">${escapeHtml(wert || "")}</textarea></div>`;
+    return `<label class="voll">${escapeHtml(f.label)}
+      <textarea id="${id}" data-af="${escapeAttr(f.id)}" rows="2" maxlength="${f.maxLen || 500}">${escapeHtml(wert || "")}</textarea></label>`;
   }
+
   const typ = f.typ === "datum" ? "date" : (f.typ === "email" ? "email" : "text");
-  return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
-    <input type="${typ}" id="${id}" data-af="${escapeAttr(f.id)}" maxlength="${f.maxLen || 120}" value="${escapeAttr(wert || "")}" /></div>`;
+  return `<label>${escapeHtml(f.label)}
+    <input type="${typ}" id="${id}" data-af="${escapeAttr(f.id)}" maxlength="${f.maxLen || 120}" value="${escapeAttr(wert || "")}" /></label>`;
 }
 
 // Liest das Formular zurück. ⚠️ Gibt `undefined`, wenn der Bearbeiten-Modus gar
