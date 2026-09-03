@@ -1176,6 +1176,51 @@ async function setzePerson() {
 //  Teilnehmer (Betreuer-Sicht)
 // ============================================================
 
+// „Keine“ ist eine Nicht-Angabe (Michel-Vorgabe 2026-09-03).
+//
+// Die Eltern schreiben in ein Pflichtfeld „Allergien“ meistens „keine“ — und
+// dann stand auf der Liste am Platz bei jedem Kind „Allergien: Keine“, und der
+// Marker „beachten“ leuchtete bei allen. Ein Marker, der immer an ist, sagt
+// nichts mehr; genau deshalb übersieht man den einen, bei dem er zählt.
+//
+// ⚠️⚠️ NUR VOLLTREFFER, niemals ein Anfangs- oder Teilstück. „keine Nüsse“ ist
+// eine ALLERGIE und muss stehen bleiben, „kein Schweinefleisch“ ebenso. Ein
+// `startsWith("kein")` würde beides verschlucken — und zwar genau die Angaben,
+// wegen derer es die Liste gibt. Deshalb wird der getrimmte, kleingeschriebene
+// Wert Zeichen für Zeichen gegen diese Liste gehalten.
+//
+// ⚠️ Gelöscht wird NICHTS. Der Wert bleibt in der Anmeldung stehen — im
+// Anmeldungs-Dialog unter „Anmeldungen“ ist er weiter zu sehen. „keine“ ist eine
+// beantwortete Frage und damit etwas anderes als ein leeres Feld; das darf die
+// Anzeige nicht einebnen.
+// ⚠️ Die Liste bleibt KURZ und wird nur um eindeutige Volltreffer ergänzt.
+// Jeder Eintrag hier ist eine Angabe, die am Sportplatz nicht mehr auftaucht —
+// im Zweifel lieber eine Zeile zu viel als eine verschluckte Allergie.
+const LEERE_ANGABEN = [
+  "keine", "kein", "keiner", "keins", "keine bekannt", "keine bekannten",
+  "keine allergien", "keine medikamente",
+  "nein", "nichts", "nix", "ohne", "entfaellt", "entfällt", "na", "n/a", "0"
+];
+
+function istLeereAngabe(wert) {
+  if (wert === undefined || wert === null) return true;
+  // Satzzeichen am Rand weg: „keine.“, „keine!“, „-“ meinen dasselbe.
+  const w = String(wert).trim().toLowerCase().replace(/^[\s.,;:!/\-–—]+|[\s.,;:!/\-–—]+$/g, "").trim();
+  if (!w) return true;
+  return LEERE_ANGABEN.includes(w);
+}
+
+// Die Hinweiszeile der Teilnehmerliste. Gibt genau das zurück, was wirklich
+// beachtet werden muss — ist sie leer, gibt es auch keinen Marker.
+function teilnehmerHinweise(t) {
+  return [
+    istLeereAngabe(t.allergien) ? "" : "Allergien: " + t.allergien,
+    istLeereAngabe(t.medikamente) ? "" : "Medikamente: " + t.medikamente,
+    istLeereAngabe(t.krankheiten) ? "" : String(t.krankheiten),
+    istLeereAngabe(t.essenHinweis) ? "" : "Essen: " + t.essenHinweis
+  ].filter(Boolean);
+}
+
 async function zeichneTeilnehmer() {
   const camp = gewaehltesCamp("teilnehmer-camp");
   const ziel = document.getElementById("teilnehmer-liste");
@@ -1207,12 +1252,7 @@ async function zeichneTeilnehmer() {
   if (!liste.length) { ziel.innerHTML = ""; return; }
 
   ziel.innerHTML = liste.map((t) => {
-    const hinweise = [
-      t.allergien ? "Allergien: " + t.allergien : "",
-      t.medikamente ? "Medikamente: " + t.medikamente : "",
-      t.krankheiten ? t.krankheiten : "",
-      t.essenHinweis ? "Essen: " + t.essenHinweis : ""
-    ].filter(Boolean);
+    const hinweise = teilnehmerHinweise(t);
 
     // ⚠️ Die Konfektionsgröße steht in der ERSTEN Unterzeile, nicht bei den
     // Gesundheitshinweisen: das hier ist die Liste, mit der am letzten Camptag
@@ -1315,7 +1355,9 @@ function zeichneAnmeldungen() {
 
 function anmZeile(camp, a) {
   const klassen = ["anm-zeile", a.status === "warteliste" ? "warteliste" : "", a.status === "abgesagt" ? "abgesagt" : "", a.elternAenderung ? "neu-geaendert" : ""].filter(Boolean).join(" ");
-  const gesund = [a.allergien, a.medikamente, a.krankheiten, a.essenHinweis].some(Boolean);
+  // ⚠️ Dieselbe Regel wie auf der Teilnehmerliste: ein „Gesundheit“-Marker, der
+  // auch bei „keine“ leuchtet, leuchtet bei jedem — und ist damit wertlos.
+  const gesund = [a.allergien, a.medikamente, a.krankheiten, a.essenHinweis].some((w) => !istLeereAngabe(w));
   const frei = Math.max(0, (camp.plaetze || 0) - (camp.belegt || 0));
 
   return `

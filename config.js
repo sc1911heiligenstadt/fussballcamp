@@ -320,6 +320,21 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.4",
+    groups: [
+      {
+        title: "Teilnehmerliste: nur noch das, was wirklich zählt",
+        items: [
+          "Schreiben Eltern bei Allergien oder Medikamenten „keine“, steht das auf der Teilnehmerliste nicht mehr. Vorher stand bei fast jedem Kind „Allergien: Keine · Medikamente: Keine“, und dazwischen ging die eine echte Angabe unter.",
+          "Der Merker „beachten“ erscheint nur noch, wenn wirklich etwas zu beachten ist — eine Allergie, ein Medikament, ein Essenshinweis oder eine Bemerkung. Vorher leuchtete er bei allen und sagte damit nichts mehr.",
+          "Dasselbe gilt für den Merker „Gesundheit“ in der Anmeldeliste.",
+          "Gespeichert bleibt alles: Im Anmeldungs-Dialog unter „Anmeldungen“ steht weiter, was die Eltern geschrieben haben — „keine“ ist eine beantwortete Frage und etwas anderes als ein leeres Feld.",
+          "Eine echte Angabe wird nie verschluckt: „keine Nüsse“ oder „keine Medikamente, aber Asthmaspray“ bleiben stehen. Ausgeblendet wird nur, was als Ganzes nichts sagt."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.3",
     groups: [
       {
