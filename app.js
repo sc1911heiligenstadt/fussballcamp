@@ -2123,7 +2123,10 @@ function zeichneFeedback() {
   const bloecke = fragen.map((f) => {
     if (f.typ === "note") {
       const schnitt = (fb.schnitte || {})[f.id];
-      const v = ((fb.verteilung || {})[f.id] || {}).verteilung || [0, 0, 0, 0, 0];
+      // ⚠️ Die Ersatzliste wird aus FEEDBACK_NOTEN gebaut, nie als feste Zahl
+      // getippt — sonst fiele beim nächsten Ändern der Skala genau eine Note
+      // aus der Anzeige, während die Zahl daneben weiter stimmt.
+      const v = ((fb.verteilung || {})[f.id] || {}).verteilung || FEEDBACK_NOTEN.map(() => 0);
       const hoechste = Math.max(1, ...v);
       const balken = FEEDBACK_NOTEN.map((n, i) => `
         <div class="fb-balken-zeile">

@@ -249,11 +249,21 @@ body.fc-oeffentlich {
 
 /* ---------- Feedbackbogen (feedback.html) ---------- */
 
-/* Funf Knopfe passen nebeneinander nur auf dem Rechner. Am Handy sollen sie
-   umbrechen statt zu schrumpfen -- ein 40 px breiter Knopf mit "eher nicht"
-   darin ist nicht mehr zu treffen. */
-.fb-noten-reihe { flex-wrap: wrap; }
-.fb-note-knopf { flex: 1 1 128px; }
+/* ⚠️ GITTER statt Flex-Umbruch. Mit `flex: 1 1 128px` zog sich die letzte Note
+   allein in ihrer Zeile ueber die volle Breite -- bei sechs Noten waere es
+   genauso. Ein Gitter mit fester Spaltenzahl bricht gleichmaessig: am Rechner
+   zweimal drei, am Handy dreimal zwei.
+   ⚠️ Der Selektor nimmt BEIDE Klassen mit (0,2,0), damit er das `display: flex`
+   von `.janein-knoepfe` sicher schlaegt -- unabhaengig von der Reihenfolge im
+   Stylesheet. */
+.janein-knoepfe.fb-noten-reihe {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (max-width: 560px) {
+  .janein-knoepfe.fb-noten-reihe { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .fb-note-knopf span { display: flex; align-items: baseline; gap: 6px; }
 .fb-note-knopf strong { font-size: 15px; }
 .fb-note { margin-bottom: 20px; }

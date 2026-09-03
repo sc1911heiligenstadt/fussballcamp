@@ -175,18 +175,26 @@ const FEEDBACK_FRAGEN = [
   { id: "besser",       typ: "text",   frage: "Was sollen wir beim nächsten Mal besser machen?" }
 ];
 
-// Schulnoten-Richtung: 1 ist die beste.
+// Schulnoten 1 bis 6 (Michel-Vorgabe 2026-09-03, vorher 1–5).
 //
 // ⚠️ Die Beschriftung steht an JEDEM Knopf, nicht nur an den Enden der Reihe.
-// Eine nackte Skala von 1 bis 5 beantwortet nicht, welche Seite gut ist —
-// Schulnote und Sternchen laufen genau andersherum, und wer sich vertut,
-// verdirbt seine Antwort, ohne es zu merken.
+// Eine nackte Skala beantwortet nicht, welche Seite gut ist — Schulnote und
+// Sternchen laufen genau andersherum, und wer sich vertut, verdirbt seine
+// Antwort, ohne es zu merken.
+//
+// ⚠️ Bewusst die echten Schulnoten-Wörter statt umgangssprachlicher („geht so",
+// „gar nicht"). Sie sind in Deutschland jedem geläufig und lassen keinen Zweifel
+// an der Richtung — genau darum geht es hier.
+//
+// ⚠️ Zeichengleich mit FC_FEEDBACK_NOTEN im Worker; der Prüfstand nagelt beide
+// Fassungen gegeneinander fest.
 const FEEDBACK_NOTEN = [
   { wert: 1, label: "sehr gut" },
   { wert: 2, label: "gut" },
-  { wert: 3, label: "geht so" },
-  { wert: 4, label: "eher nicht" },
-  { wert: 5, label: "gar nicht" }
+  { wert: 3, label: "befriedigend" },
+  { wert: 4, label: "ausreichend" },
+  { wert: 5, label: "mangelhaft" },
+  { wert: 6, label: "ungenügend" }
 ];
 
 const FEEDBACK_TEXT_MAX = 1000;
@@ -314,6 +322,13 @@ const APP_CHANGELOG = [
   {
     version: "1.2",
     groups: [
+      {
+        title: "Feedbackbogen: Schulnoten 1 bis 6",
+        items: [
+          "Der Bogen fragt jetzt in Schulnoten von 1 bis 6 statt bis 5 — mit den gewohnten Wörtern von „sehr gut“ bis „ungenügend“. Damit ist klar, welche Seite gut ist.",
+          "Die Knöpfe stehen in einem gleichmäßigen Raster: am Rechner zweimal drei, am Handy dreimal zwei. Vorher stand die letzte Note allein in einer Zeile und zog sich über die ganze Breite."
+        ]
+      },
       {
         title: "Alle E-Mails an einer Stelle",
         items: [
