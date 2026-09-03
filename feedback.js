@@ -17,11 +17,47 @@
 let fbToken = "";
 let bogen = null;   // { campName, vonDatum, bisDatum, fragen, noten, textMax, schonBeantwortet }
 
+// Vorschau-Betrieb (`?vorschau=1`). Zweck: die Verwaltung soll den Bogen ansehen
+// können, ohne eine echte Anmeldung zu haben.
+//
+// ⚠️ Der Eltern-Token verlässt den Server NIE, auch nicht an Bearbeiter — es gibt
+// also keinen Weg, den echten Bogen einer Familie aufzurufen. Deshalb dieser
+// eigene Betrieb statt eines Beispiel-Tokens.
+//
+// ⚠️ Es ist DIESELBE Seite und derselbe Code, kein Nachbau: gezeichnet wird über
+// dasselbe `frageHtml`, das die Eltern sehen. Eine zweite Vorschau-Seite liefe
+// über kurz oder lang auseinander, und dann zeigte sie etwas, das es nicht gibt.
+const VORSCHAU = oQuery("vorschau") === "1";
+
 document.addEventListener("DOMContentLoaded", () => {
   fbToken = oQuery("a");
   document.getElementById("bogen-form").addEventListener("submit", absenden);
-  lade();
+  if (VORSCHAU) zeigeVorschau(); else lade();
 });
+
+// Baut den Bogen aus den Fragen in `config.js`. ⚠️ Die WIRKSAME Liste steht im
+// Worker (`FC_FEEDBACK_FRAGEN`); diese hier ist der Rückfall für die Anzeige.
+// Beide Fassungen sind im Prüfstand gegeneinander festgenagelt — Id, Typ UND
+// Wortlaut. Ohne diesen Vergleich zeigte die Vorschau Fragen, die den Eltern nie
+// gestellt werden, und niemand merkte es.
+function zeigeVorschau() {
+  bogen = {
+    campName: "Beispielcamp",
+    vonDatum: "", bisDatum: "",
+    fragen: FEEDBACK_FRAGEN,
+    noten: FEEDBACK_NOTEN.map((n) => n.wert),
+    textMax: FEEDBACK_TEXT_MAX,
+    schonBeantwortet: false
+  };
+  document.getElementById("laden").classList.add("fc-hidden");
+  document.getElementById("bereich").classList.remove("fc-hidden");
+  document.getElementById("vorschau-hinweis").classList.remove("fc-hidden");
+  document.title = "Vorschau: Feedbackbogen — 1. SC 1911 Heiligenstadt e.V.";
+  document.getElementById("kopf-titel").textContent = "Beispielcamp";
+  document.getElementById("kopf-zeitraum").textContent = "So sieht der Bogen für die Eltern aus.";
+  document.getElementById("btn-senden").textContent = "Absenden (in der Vorschau ohne Wirkung)";
+  document.getElementById("fragen").innerHTML = bogen.fragen.map(frageHtml).join("");
+}
 
 async function lade() {
   if (!fbToken) {
@@ -127,6 +163,17 @@ async function absenden(ev) {
   const fehlerBox = document.getElementById("form-fehler");
   const knopf = document.getElementById("btn-senden");
   fehlerBox.classList.add("fc-hidden");
+
+  // ⚠️ ERSTE Zeile nach dem Zurücksetzen der Fehlerbox, vor jedem Einlesen: in
+  // der Vorschau gibt es keinen Token, und ein Absenden liefe entweder ins Leere
+  // oder — schlimmer — gegen eine fremde Anmeldung, falls jemand `a=` und
+  // `vorschau=1` zugleich in die Adresse schreibt.
+  if (VORSCHAU) {
+    fehlerBox.textContent = "Das ist die Vorschau — es wurde nichts gespeichert und nichts verschickt.";
+    fehlerBox.classList.remove("fc-hidden");
+    fehlerBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
 
   const antworten = {};
   let inhalt = 0;

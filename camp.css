@@ -284,3 +284,29 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
   .fb-balken-zeile { grid-template-columns: minmax(0, 1fr) 32px; }
   .fb-balken-label { grid-column: 1 / -1; }
 }
+
+
+/* ---------- Mailvorlagen unter Verwaltung ---------- */
+.mail-vorlage {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 14px; margin-bottom: 10px;
+}
+.mail-vorlage > summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+.mail-vorlage[open] > summary { margin-bottom: 10px; }
+.mail-wann { font-size: 13px; margin-bottom: 6px; }
+.mail-felder { font-size: 12px; margin-bottom: 12px; line-height: 1.9; }
+.mail-felder code, #mail-platzhalter-liste code {
+  background: var(--gray); border-radius: 4px; padding: 1px 5px; font-size: 12px;
+}
+#mail-platzhalter-liste { display: block; margin-top: 6px; line-height: 2; font-size: 13px; }
+/* ⚠️ Die Vorlagen sind Fliesstext mit fester Einrueckung (Kontoblock, Ablauf).
+   Ohne Festbreitenschrift verrutscht beim Bearbeiten, was in der Mail
+   untereinander stehen soll.
+   ⚠️ Der Selektor MUSS die Id mitnehmen: weiter oben steht
+   `#tab-verwaltung textarea { font-family: inherit }`, und eine Id schlaegt jede
+   Klasse -- unabhaengig von der Reihenfolge. Mit `.mail-vorlage textarea` allein
+   blieb die Proportionalschrift stehen (im Browser gemessen). */
+#tab-verwaltung .mail-vorlage textarea {
+  font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+  font-size: 13px; line-height: 1.5;
+}

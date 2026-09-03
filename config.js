@@ -312,6 +312,28 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.2",
+    groups: [
+      {
+        title: "Alle E-Mails an einer Stelle",
+        items: [
+          "Unter Verwaltung stehen jetzt alle neun Mails, die die App an die Eltern verschickt — mit Betreff, vollem Text und dem Hinweis, wann sie rausgeht. Aufklappen und nachlesen, ohne dass jemand im Programm nachsehen muss.",
+          "Jeden Text kannst du ändern. Gespeichert wird zusammen mit den übrigen Einstellungen; ein Programm-Update braucht es dafür nicht.",
+          "Bausteine in geschweiften Klammern werden beim Verschicken ersetzt — zum Beispiel {kind} für den Namen des Kindes oder {zahlungsblock} für Betrag, Konto und Verwendungszweck. Neben jeder Mail steht, welche es dort gibt.",
+          "Ein paar Bausteine sind Pflicht: die Kontoverbindung, der persönliche Link zur Anmeldung und die Erstattungsregel bei einer Absage. Ohne sie nimmt der Server die Vorlage nicht an — sonst stünden die Eltern ohne Zahlungsangaben oder ohne Weg zu ihrer Anmeldung da.",
+          "Jede Mail hat einen Knopf „Auf die mitgelieferte Fassung zurücksetzen“. Ein leeres Feld bedeutet dasselbe."
+        ]
+      },
+      {
+        title: "Feedbackbogen ansehen",
+        items: [
+          "Unter Verwaltung steht neben „Jetzt auslösen“ ein Knopf „Bogen ansehen“. Er öffnet den Feedbackbogen so, wie ihn die Eltern nach dem Camp bekommen — mit einem deutlichen Hinweis oben, dass nichts gespeichert und nichts verschickt wird.",
+          "Es ist dieselbe Seite, die auch die Eltern sehen, nur ohne Anmeldung dahinter. Der persönliche Link einer Familie lässt sich nämlich nicht nachschlagen: er verlässt den Server nie, auch nicht für dich."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.1",
     groups: [
       {

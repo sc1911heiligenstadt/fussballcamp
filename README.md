@@ -72,13 +72,22 @@ abgehakt, bekommen die Eltern automatisch eine Bestätigung — mit dem Betrag u
 Ablauf des Camps. Höchstens einmal je Anmeldung; der Haken lässt sich also gefahrlos hin
 und her stellen.
 
+**Alle E-Mails an einer Stelle.** Unter *Verwaltung* stehen alle neun Mails, die die App
+an die Eltern verschickt — mit Betreff, vollem Text und dem Hinweis, wann sie rausgeht.
+Jeder Text lässt sich ändern, ohne dass dafür etwas am Programm gemacht werden muss.
+Bausteine in geschweiften Klammern werden beim Verschicken ersetzt (etwa `{kind}` für den
+Namen oder `{zahlungsblock}` für Betrag, Konto und Verwendungszweck); ein paar davon sind
+Pflicht, damit den Eltern nichts fehlt, was sie zwingend brauchen. Ein leeres Feld heißt
+„nimm die mitgelieferte Fassung“.
+
 **Feedbackbogen nach dem Camp.** Ein paar Tage nach dem letzten Camptag bekommen die
 Eltern einen Link zu einem kurzen Bogen: Gesamteindruck, Training, Essen, Organisation,
 Ausstattung und zwei Freitextfelder. Die Antworten sind **anonym** — festgehalten wird,
 *wer* geantwortet hat (damit niemand zweimal abstimmt), die Antwort selbst wird ohne
 Namen, ohne Uhrzeit und an zufälliger Stelle abgelegt. Die Auswertung steht im Reiter
 *Feedback*. Der Bogen ist von sich aus ausgeschaltet und gilt nach dem Einschalten nur
-für Camps, deren letzter Tag höchstens drei Wochen zurückliegt.
+für Camps, deren letzter Tag höchstens drei Wochen zurückliegt. Unter *Verwaltung* gibt
+es einen Knopf, der den Bogen zum Ansehen öffnet — dort wird nichts gespeichert.
 
 ## Datenschutz
 

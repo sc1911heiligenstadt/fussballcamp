@@ -181,6 +181,12 @@ function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
     const archivBlock = document.getElementById("agb-archiv-block");
     if (archivBlock) archivBlock.classList.add("hidden");
     leere("katalog-liste");
+    // ⚠️ Die Mailvorlagen stehen in `<input>` und `<textarea>` INNERHALB von
+    // #mail-vorlagen. Die Schleife über #tab-verwaltung darüber leert zwar ihre
+    // Werte, lässt aber die Kästen samt Überschriften stehen — und die nennen
+    // Betreff und Anlass jeder Vereinsmail. Der ganze Container muss weg.
+    leere("mail-vorlagen");
+    leere("mail-platzhalter-liste");
   }
   if (!betreuer) {
     // Die Betreuer-Sicht trägt Allergien, Medikamente und Notfallnummern.
@@ -1631,6 +1637,7 @@ function fuelleVerwaltung() {
   zeichneAgbArchiv();
 
   zeichneKatalog();
+  zeichneMailVorlagen();
   document.getElementById("einbau-code").value = einbauCode();
 }
 
@@ -1716,6 +1723,7 @@ async function speichereVerwaltung() {
     startErinnerungTage: zahlOderNull("e-starterinnerungtage") || 3,
     zahlErinnerung: document.getElementById("e-zahlerinnerung").checked,
     zahlErinnerungTage: zahlOderNull("e-zahlerinnerungtage") || 14,
+    mailVorlagen: leseMailVorlagen(),
     feedbackAktiv: document.getElementById("e-feedback").checked,
     // ⚠️ zahlOderNull() gibt bei "0" die 0 zurück (dafür ist es gebaut) — hier
     // also NICHT mit `|| 2` nachhelfen, sonst wäre "am letzten Camptag" nicht
@@ -1723,6 +1731,8 @@ async function speichereVerwaltung() {
     feedbackTage: zahlOderNull("e-feedbacktage"),
     aufraeumenNachMonaten: zahlOderNull("e-aufraeumen") || 6
   };
+  const mailFehler = mailVorlagenFehler(e.mailVorlagen);
+  if (mailFehler) return toast(mailFehler + " Ohne diesen Baustein wäre die Mail unbrauchbar.", true);
   if (e.iban && !/^[A-Z]{2}[0-9A-Z]{13,32}$/.test(e.iban)) return toast("Die IBAN sieht nicht richtig aus.", true);
   // ⚠️ Die Form allein sagt nichts. Ein Zahlendreher sieht formal einwandfrei aus
   // und ist genau der Fehler, der hier passiert. Die Prüfziffer fängt ihn.
@@ -1919,6 +1929,12 @@ function verdrahteBedienung() {
     });
   });
 
+  // Der Bogen zum Ansehen. ⚠️ Neues Fenster, nicht dieselbe Seite: wer hier steht,
+  // hat gerade Einstellungen offen, und ein Wegnavigieren würde sie verwerfen.
+  document.getElementById("btn-feedback-vorschau").addEventListener("click", () => {
+    window.open(APP_URL + "feedback.html?vorschau=1", "_blank", "noopener");
+  });
+
   document.getElementById("fb-camp").addEventListener("change", zeichneFeedback);
 
   // Klick auf den dunklen Rand schließt den Dialog — aber nur dort, nicht auf
@@ -1965,6 +1981,106 @@ function exportiereAnmeldungen() {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+// ============================================================
+//  E-Mails an die Eltern (seit 2026-09-03)
+// ============================================================
+//
+// ⚠️ Vorgabe UND wirksamer Stand kommen FERTIG vom Server (`daten.mailVorlagen`),
+// ebenso die Liste der Platzhalter. Der Client führt keine zweite Fassung der
+// Texte — eine Kopie hier liefe auseinander, und dann zeigte die Maske etwas
+// anderes, als die Eltern bekommen.
+
+function zeichneMailVorlagen() {
+  if (!canAdmin()) return;
+  const ziel = document.getElementById("mail-vorlagen");
+  const liste = (daten && daten.mailVorlagen) || [];
+  if (!ziel) return;
+
+  const platz = document.getElementById("mail-platzhalter-liste");
+  const alle = (daten && daten.mailPlatzhalter) || {};
+  if (platz) {
+    platz.innerHTML = " " + Object.keys(alle)
+      .map((k) => `<code>{${escapeHtml(k)}}</code> ${escapeHtml(alle[k])}`)
+      .join(" · ");
+  }
+
+  if (!liste.length) { ziel.innerHTML = `<p class="muted">Die Vorlagen konnten nicht geladen werden.</p>`; return; }
+
+  ziel.innerHTML = liste.map((v) => `
+    <details class="mail-vorlage">
+      <summary>${escapeHtml(v.name)}${v.eigenerBetreff || v.eigenerText ? ` <span class="marker warteliste">angepasst</span>` : ""}</summary>
+      <p class="muted mail-wann">${escapeHtml(v.wann)}</p>
+      <p class="muted mail-felder">Hier einsetzbar: ${(v.felder || []).map((f) =>
+        `<code>{${escapeHtml(f)}}</code>${(v.pflicht || []).includes(f) ? " <strong>(Pflicht)</strong>" : ""}`).join(" · ")}</p>
+      <label class="voll">Betreff
+        <input type="text" maxlength="140" data-mail-betreff="${escapeAttr(v.id)}" value="${escapeAttr(v.betreff)}" />
+      </label>
+      <label class="voll">Text
+        <textarea rows="14" maxlength="6000" data-mail-text="${escapeAttr(v.id)}">${escapeHtml(v.text)}</textarea>
+      </label>
+      <div class="btn-row">
+        <button type="button" class="btn small ghost" data-mail-zurueck="${escapeAttr(v.id)}">Auf die mitgelieferte Fassung zurücksetzen</button>
+      </div>
+    </details>`).join("");
+
+  // ⚠️ Der Zurücksetzen-Knopf schreibt die VORGABE ins Feld, statt es zu leeren.
+  // Ein leeres Feld hieße zwar dasselbe (der Server fällt darauf zurück), aber
+  // man sähe nicht mehr, worauf man zurückgesetzt hat — und die nächste Person
+  // hielte die Mail für abgeschaltet.
+  ziel.querySelectorAll("[data-mail-zurueck]").forEach((b) => b.addEventListener("click", () => {
+    const v = liste.find((x) => x.id === b.dataset.mailZurueck);
+    if (!v) return;
+    const bf = ziel.querySelector(`[data-mail-betreff="${CSS.escape(v.id)}"]`);
+    const tf = ziel.querySelector(`[data-mail-text="${CSS.escape(v.id)}"]`);
+    if (bf) bf.value = v.betreffVorgabe;
+    if (tf) tf.value = v.textVorgabe;
+    toast("Zurückgesetzt. Zum Übernehmen unten auf „Einstellungen speichern“.");
+  }));
+}
+
+// Liest die Maske zurück. ⚠️ Gibt `undefined` zurück, wenn die Karte gar nicht
+// gezeichnet wurde (kein Admin-Recht, alter Worker ohne das Feld) — der Worker
+// deutet ein fehlendes `mailVorlagen` als „unverändert" und räumt dann nichts weg.
+function leseMailVorlagen() {
+  const ziel = document.getElementById("mail-vorlagen");
+  const liste = (daten && daten.mailVorlagen) || [];
+  if (!ziel || !liste.length) return undefined;
+  const raus = {};
+  let gefunden = 0;
+  liste.forEach((v) => {
+    const bf = ziel.querySelector(`[data-mail-betreff="${CSS.escape(v.id)}"]`);
+    const tf = ziel.querySelector(`[data-mail-text="${CSS.escape(v.id)}"]`);
+    if (!bf && !tf) return;
+    gefunden++;
+    raus[v.id] = { betreff: bf ? bf.value : "", text: tf ? tf.value : "" };
+  });
+  // ⚠️ Der Kasten steht im Markup, ist aber LEER — etwa weil
+  // raeumeWasNichtMehrErlaubtIst ihn nach einem Rechteverlust ausgeräumt hat
+  // oder das Zeichnen nicht durchlief. Ein `{}` an dieser Stelle hieße für den
+  // Worker „leere alle Vorlagen“ und löschte jede angepasste Mail.
+  // `undefined` heißt „unverändert“ — das ist die richtige Richtung.
+  if (!gefunden) return undefined;
+  return raus;
+}
+
+// Prüft die Pflicht-Bausteine schon hier. ⚠️ Der Worker prüft dasselbe noch
+// einmal und ist die eigentliche Schranke — hier geht es nur darum, dass der
+// Fehler VOR dem Absenden dasteht und man sieht, welche Mail gemeint ist.
+function mailVorlagenFehler(vorlagen) {
+  const liste = (daten && daten.mailVorlagen) || [];
+  for (const v of liste) {
+    const eintrag = vorlagen && vorlagen[v.id];
+    if (!eintrag) continue;
+    const text = String(eintrag.text || "").trim();
+    if (!text) continue;
+    const fehlend = (v.pflicht || []).filter((p) => !text.includes("{" + p + "}"));
+    if (fehlend.length) {
+      return `In der Mail „${v.name}" fehlt ${fehlend.map((p) => "{" + p + "}").join(", ")}.`;
+    }
+  }
+  return "";
 }
 
 // ============================================================
