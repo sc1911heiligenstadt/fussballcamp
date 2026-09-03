@@ -327,10 +327,13 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 
 /* ⚠️ ZWEI Spalten, nicht drei. Die Grundklasse rechnet mit `minmax(210px)`
    und legt bei 676 px Innenbreite drei Spalten an -- dann ist ein Feld 212 px
-   breit, und darin steht "***entfernt*** + ***entfernt***" oder "***entfernt***
-   Heilbad Heiligenstadt" nicht mehr lesbar. Mit 280 px werden es zwei Spalten zu
+   breit. Darin sind die laengsten Werte nicht mehr lesbar: ein Notfallfeld mit
+   ZWEI Rufnummern (rund 26 Zeichen) und eine Anschrift aus Strasse, Hausnummer,
+   Postleitzahl und Ort (rund 34 Zeichen). Mit 280 px werden es zwei Spalten zu
    je rund 330 px. Unter 640 px greift `min(100%, 280px)` und es wird wieder
-   eine. */
+   eine.
+   !! KEINE echten Rufnummern oder Anschriften als Beispiel hier hineinschreiben.
+      Das Repo ist oeffentlich; genau das stand hier bis zum 03.09.2026. */
 #anm-modal-body .feld-gitter {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }

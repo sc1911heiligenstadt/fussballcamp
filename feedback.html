@@ -56,12 +56,56 @@
         Wir speichern sie ohne Namen und ohne Verbindung zur Anmeldung. Wir sehen
         also, <em>was</em> geantwortet wurde, aber nicht von wem. Wir merken uns
         nur, dass du geantwortet hast — damit niemand zweimal abstimmt.
+        <br /><strong>Bitte schreib keine Namen in die Textfelder</strong> — auch
+        nicht deinen eigenen oder den deines Kindes.
       </div>
       <p class="fc-grau">Es dauert zwei Minuten. Du musst nicht alles beantworten.</p>
     </div>
 
     <form class="fc-karte" id="bogen-form" novalidate>
       <div id="fragen"></div>
+
+      <!-- ⚠️ Die Information nach Art. 13 DSGVO steht VOR dem Absenden-Knopf,
+           nicht darunter: sie muss zum Zeitpunkt der Erhebung vorliegen. Diese
+           Seite ist ohne Login erreichbar — sie ist der einzige Ort, an dem die
+           Eltern das nachlesen können. -->
+      <h3>Datenschutz</h3>
+      <details class="fc-details">
+        <summary>Was mit den Antworten passiert (Information nach Art. 13 DSGVO)</summary>
+        <div>
+          <p><strong>Verantwortlich</strong> ist der 1. SC 1911 Heiligenstadt e.V., Nachwuchsbereich, Leineberg 2, 37308 Heilbad Heiligenstadt, Telefon 03606 612206, <a href="mailto:info@sc1911-heiligenstadt.de">info@sc1911-heiligenstadt.de</a>.</p>
+          <p><strong>Wozu und auf welcher Grundlage:</strong> Wir wollen wissen, was beim
+          nächsten Camp besser laufen muss. Die Teilnahme ist freiwillig; du willigst
+          mit dem Absenden ein (Art. 6 Abs. 1 lit. a DSGVO). Wenn du nicht antwortest,
+          hat das keinerlei Folgen — weder für dich noch für dein Kind.</p>
+          <p><strong>Was wir speichern:</strong> nur deine Antworten, ohne Namen, ohne
+          Uhrzeit und an einer zufälligen Stelle in der Liste. An der Anmeldung deines
+          Kindes vermerken wir zusätzlich das <em>Datum</em>, an dem geantwortet wurde —
+          nicht was. Das brauchen wir nur, damit der Bogen nicht zweimal ausgefüllt wird.
+          <br />⚠️ <strong>Ehrlich gesagt:</strong> solange erst sehr wenige Bögen
+          zurückgekommen sind, ließe sich daraus theoretisch ein Rückschluss ziehen.
+          Deshalb zeigen wir die freien Texte erst ab drei Antworten an — und bitten
+          dich, keine Namen hineinzuschreiben.</p>
+          <p><strong>Wer die Antworten sieht:</strong> die Verantwortlichen des
+          Nachwuchsbereichs und die Personen, die das nächste Camp planen. Eine
+          Weitergabe an Dritte findet nicht statt.</p>
+          <p><strong>Wo die Daten liegen:</strong> gespeichert werden sie auf dem
+          Vereinsspeicher (Nextcloud) bei einem Anbieter innerhalb der EU. Auf dem Weg
+          dorthin läuft der Bogen über einen Serverdienst von Cloudflare, der dabei
+          alle Angaben verarbeitet. Beide arbeiten als Auftragsverarbeiter für uns und
+          nicht für eigene Zwecke.</p>
+          <p><strong>Wie lange:</strong> die freien Texte werden zusammen mit den übrigen
+          Anmeldedaten des Camps gelöscht, in der Regel sechs Monate nach dem Camp. Die
+          Noten bleiben als anonyme Zahlen erhalten.</p>
+          <p><strong>Deine Rechte:</strong> Auskunft, Berichtigung, Löschung,
+          Einschränkung, Datenübertragbarkeit und Widerspruch; die Einwilligung kannst du
+          jederzeit für die Zukunft widerrufen. ⚠️ Für eine <em>bereits abgeschickte</em>
+          Antwort geht das nicht mehr: wir können sie dir nicht mehr zuordnen und
+          deshalb auch nicht einzeln herausgeben oder löschen (Art. 11 DSGVO). Genau das
+          ist der Preis der Anonymität. Beschweren kannst du dich beim Thüringer
+          Landesbeauftragten für den Datenschutz und die Informationsfreiheit.</p>
+        </div>
+      </details>
 
       <div class="fc-hinweis fehler fc-hidden" id="form-fehler"></div>
 
@@ -79,7 +123,7 @@
 
 </div>
 
-<script src="config.js?v=1.8"></script>
+<script src="config.js?v=1.9"></script>
 <script src="oeffentlich.js?v=1.2"></script>
 <script src="feedback.js?v=1.2"></script>
 </body>

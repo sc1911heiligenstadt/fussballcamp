@@ -332,6 +332,22 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.8",
+    groups: [
+      {
+        title: "Datenschutz beim Feedbackbogen und auf der Anmeldeseite",
+        items: [
+          "Der Feedbackbogen hat jetzt eine eigene Datenschutz-Information nach Art. 13 DSGVO — vorher stand dort keine. Sie steht über dem Absenden-Knopf und nennt Verantwortlichen, Zweck, Speicherdauer und die Rechte der Eltern.",
+          "Freie Texte aus dem Bogen werden erst ab drei Antworten angezeigt. Bei einer einzelnen Antwort wäre sonst zurückzurechnen, von wem sie stammt — und genau das sagt der Bogen den Eltern zu.",
+          "Der Merker „hat geantwortet“ verlässt den Server nicht mehr. Er stand vorher neben den Antworten in derselben Ladung.",
+          "Auf dem Bogen steht jetzt die Bitte, keine Namen in die Textfelder zu schreiben.",
+          "Die Datenschutz-Information der Anmeldeseite sagte noch, bei Allergien solle man „keine“ eintragen. Seit der Umstellung auf Ja/Nein stimmte das nicht mehr.",
+          "Beide Elternseiten nennen jetzt vollständig, was die Betreuer zu sehen bekommen — seit Kurzem gehören auch Konfektionsgröße und die Ausrichtung dazu. Und sie erklären den Feedbackbogen, der vorher in keinem Datenschutztext vorkam."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.7",
     groups: [
       {

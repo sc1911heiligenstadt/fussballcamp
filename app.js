@@ -2428,6 +2428,20 @@ function zeichneFeedback() {
     // Freitexte. ⚠️ In der Reihenfolge, in der sie vom Server kommen — die ist
     // gewürfelt, siehe handleFcFeedbackSenden im Worker.
     const texte = (fb.texte || []).map((t) => t[f.id]).filter(Boolean);
+    // ⚠️ Bei zu wenigen Antworten liefert der Worker die Texte gar nicht erst aus
+    // (FC_FEEDBACK_TEXTE_AB) — die Anonymitätszusage trägt sonst nicht. Der Grund
+    // MUSS dastehen: eine leere Stelle sähe aus wie „niemand hat etwas
+    // geschrieben“, und wer das glaubt, wartet auf Texte, die nie kommen.
+    if (!texte.length && fb.texteZurueckgehalten) {
+      return `
+      <div class="fb-frage">
+        <h3>${escapeHtml(f.frage)}</h3>
+        <p class="muted">${fb.texteZurueckgehalten} ${fb.texteZurueckgehalten === 1 ? "Antwort" : "Antworten"}
+        liegen vor, werden aber noch nicht angezeigt: freie Texte erscheinen erst ab
+        ${fb.texteAb || 3} Bögen. Bei weniger ließe sich sonst zurückrechnen, wer
+        geantwortet hat — und genau das sagt der Bogen den Eltern zu.</p>
+      </div>`;
+    }
     if (!texte.length) return "";
     return `
       <div class="fb-frage">
