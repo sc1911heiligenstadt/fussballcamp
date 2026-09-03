@@ -320,7 +320,7 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
-    version: "1.2",
+    version: "1.3",
     groups: [
       {
         title: "Feedbackbogen: Schulnoten 1 bis 6",
@@ -328,7 +328,12 @@ const APP_CHANGELOG = [
           "Der Bogen fragt jetzt in Schulnoten von 1 bis 6 statt bis 5 — mit den gewohnten Wörtern von „sehr gut“ bis „ungenügend“. Damit ist klar, welche Seite gut ist.",
           "Die Knöpfe stehen in einem gleichmäßigen Raster: am Rechner zweimal drei, am Handy dreimal zwei. Vorher stand die letzte Note allein in einer Zeile und zog sich über die ganze Breite."
         ]
-      },
+      }
+    ]
+  },
+  {
+    version: "1.2",
+    groups: [
       {
         title: "Alle E-Mails an einer Stelle",
         items: [
