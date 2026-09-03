@@ -83,14 +83,26 @@ const FORMULAR_FELDER = [
   { id: "elternAnschrift", gruppe: "eltern",      label: "Anschrift",            typ: "text",   maxLen: 200 },
 
   // Gesundheit. ⚠️ Art. 9 DSGVO — nur erheben, was für das Camp gebraucht wird.
-  { id: "allergien",       gruppe: "gesundheit",  label: "Allergien",            typ: "mehrzeilig", maxLen: 500, sensibel: true },
-  { id: "medikamente",     gruppe: "gesundheit",  label: "Medikamente",          typ: "mehrzeilig", maxLen: 500, sensibel: true },
-  { id: "krankheiten",     gruppe: "gesundheit",  label: "Was wir sonst wissen sollten", typ: "mehrzeilig", maxLen: 500, sensibel: true, hinweis: "Asthma, Brille, Unverträglichkeiten — alles, was im Notfall zählt." },
+  //
+  // ⚠️ `janein_text` statt eines nackten Textfeldes (Michel-Vorgabe 2026-09-03):
+  // erst die Frage, und nur bei „Ja" öffnet sich das Feld für das Was. In ein
+  // Pflicht-Textfeld „Allergien" schreiben die Eltern sonst „keine" — und dann
+  // steht auf jeder Liste dieselbe Nicht-Information.
+  //
+  // ⚠️ Gespeichert werden ZWEI Werte: `<id>Hat` („ja"/„nein"/leer) und `<id>`
+  // (der Text, nur bei „ja"). Ein einzelnes Feld könnte „nein" nicht von „noch
+  // nicht beantwortet" unterscheiden — derselbe Grund wie bei `alleinNachHause`.
+  //
+  // `label` ist die Ja/Nein-Frage, `detail` die Beschriftung des Textfeldes
+  // darunter. `hinweis` steht wie gehabt klein darunter.
+  { id: "allergien",       gruppe: "gesundheit",  label: "Hat dein Kind Allergien?",   typ: "janein_text", detail: "Welche Allergien?", maxLen: 500, sensibel: true },
+  { id: "medikamente",     gruppe: "gesundheit",  label: "Nimmt dein Kind Medikamente?", typ: "janein_text", detail: "Welche Medikamente, und wann?", maxLen: 500, sensibel: true },
+  { id: "krankheiten",     gruppe: "gesundheit",  label: "Sollen wir sonst etwas über die Gesundheit wissen?", typ: "janein_text", detail: "Was sollen wir wissen?", maxLen: 500, sensibel: true, hinweis: "Asthma, Brille, Unverträglichkeiten — alles, was im Notfall zählt." },
   { id: "krankenkasse",    gruppe: "gesundheit",  label: "Krankenkasse",         typ: "text",   maxLen: 100, sensibel: true },
 
   // Verpflegung
   { id: "vegetarisch",     gruppe: "essen",       label: "Isst vegetarisch",     typ: "haken" },
-  { id: "essenHinweis",    gruppe: "essen",       label: "Beim Essen beachten",  typ: "mehrzeilig", maxLen: 300, sensibel: true },
+  { id: "essenHinweis",    gruppe: "essen",       label: "Gibt es beim Essen etwas zu beachten?", typ: "janein_text", detail: "Was ist beim Essen zu beachten?", maxLen: 300, sensibel: true },
 
   // Heimweg. ⚠️ `alleinNachHause` ist bewusst KEIN Haken, sondern eine Ja/Nein-Frage.
   // Bei einem Haken wären „nein" und „vergessen anzukreuzen" derselbe Zustand — und
@@ -319,6 +331,22 @@ FORMULAR_FELDER.forEach((f) => {
 });
 
 const APP_CHANGELOG = [
+  {
+    version: "1.7",
+    groups: [
+      {
+        title: "Allergien und Medikamente: erst die Frage, dann das Feld",
+        items: [
+          "Im Anmeldeformular stehen Allergien, Medikamente, Essenshinweise und „Was wir sonst wissen sollten“ jetzt als Frage mit Ja und Nein. Erst bei „Ja“ geht darunter ein Feld auf, in das geschrieben wird, worum es geht.",
+          "Damit gibt es kein „keine“ mehr auf den Listen — die Eltern klicken „Nein“ und fertig.",
+          "„Nein“ ist eine richtige Antwort: sie erfüllt auch ein Pflichtfeld und steht so in der Anmeldung. Vorher war „nicht beantwortet“ und „nichts vorhanden“ nicht zu unterscheiden.",
+          "Wer „Ja“ ankreuzt, muss auch sagen was — sonst nimmt der Server die Anmeldung nicht an.",
+          "Wechselt jemand von „Ja“ auf „Nein“, wird der Text mit gelöscht. Sonst stünde in der Anmeldung „Nein“ und daneben eine Allergie.",
+          "Bestehende Anmeldungen bleiben, wie sie sind. Wer eine ändert, beantwortet die Frage einmal mit."
+        ]
+      }
+    ]
+  },
   {
     version: "1.6",
     groups: [

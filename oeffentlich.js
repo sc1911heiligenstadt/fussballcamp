@@ -71,9 +71,29 @@ function baueFormular(ziel, konf, werte, rollen) {
         <legend>${oEsc(g.label)}</legend>
         ${g.hinweis ? `<p class="anm-gruppen-hinweis">${oEsc(g.hinweis)}</p>` : ""}
         ${rollenHier}
-        ${drin.map((f) => feldHtml(f, konf, w[f.id])).join("")}
+        ${drin.map((f) => feldHtml(f, konf,
+          // ⚠️ `janein_text` braucht BEIDE Werte. Würde hier nur der Text
+          // durchgereicht, stünde beim Ändern einer Anmeldung nie ein Knopf
+          // vorgewählt da — und die Familie müsste die Frage neu beantworten,
+          // obwohl sie das längst getan hat.
+          f.typ === "janein_text" ? { hat: w[f.id + "Hat"], text: w[f.id] } : w[f.id]
+        )).join("")}
       </fieldset>`;
   }).join("");
+
+  // ⚠️ Der Horcher wird HIER gesetzt, nicht in den beiden Seiten daneben:
+  // `baueFormular` schreibt das Markup, also gehört das Verdrahten dazu.
+  // Anmeldeseite und „Meine Anmeldung" bekommen es damit beide, ohne dass
+  // jemand daran denken muss.
+  ziel.querySelectorAll("[data-feld-hat]").forEach((k) => k.addEventListener("change", () => {
+    const kasten = ziel.querySelector(`[data-detail-fuer="${CSS.escape(k.dataset.feldHat)}"]`);
+    if (!kasten) return;
+    const auf = k.value === "ja" && k.checked;
+    kasten.classList.toggle("fc-hidden", !auf);
+    // Beim Aufklappen die Schreibmarke gleich hineinsetzen -- sonst tippt
+    // niemand los, sondern sucht erst das Feld.
+    if (auf) { const t = kasten.querySelector("textarea"); if (t) t.focus(); }
+  }));
 }
 
 // Die Frage „Feldspieler oder Torwart?" — als zwei Knöpfe, gleiche Bauform wie
@@ -137,6 +157,33 @@ function feldHtml(f, konf, wert) {
       </div>`;
   }
 
+  // Ja/Nein mit Nachfrage. ⚠️ Der Textkasten hängt an der Antwort: bei „nein"
+  // ist er weg, bei „ja" da. Ein immer sichtbares Feld war genau das Problem —
+  // die Eltern füllen es dann mit „keine".
+  //
+  // ⚠️ Zwei Datenhalter: `data-feld-hat` an den Knöpfen, `data-feld` am Text.
+  // `leseFormular` liest beide.
+  if (f.typ === "janein_text") {
+    const hatWert = wert && wert.hat === "ja" ? "ja" : (wert && wert.hat === "nein" ? "nein" : "");
+    const text = (wert && wert.text) || "";
+    return `
+      <div class="anm-feld janein jn-block" role="group" aria-labelledby="${id}-frage"${pflicht ? ' aria-required="true"' : ""}>
+        <span class="janein-frage" id="${id}-frage">${oEsc(f.label)}${stern}</span>
+        <div class="janein-knoepfe">
+          ${JANEIN.map((o) => `
+            <label class="janein-knopf">
+              <input type="radio" name="${id}-hat" value="${oEsc(o.id)}" data-feld-hat="${oEsc(f.id)}"${o.id === hatWert ? " checked" : ""} />
+              <span>${oEsc(o.label)}</span>
+            </label>`).join("")}
+        </div>
+        <div class="jn-detail${hatWert === "ja" ? "" : " fc-hidden"}" data-detail-fuer="${oEsc(f.id)}">
+          <label for="${id}">${oEsc(f.detail || "Was genau?")}</label>
+          <textarea id="${id}" data-feld="${oEsc(f.id)}" rows="2" maxlength="${f.maxLen || 500}">${oEsc(text)}</textarea>
+          ${f.hinweis ? `<span class="anm-hinweis">${oEsc(f.hinweis)}</span>` : ""}
+        </div>
+      </div>`;
+  }
+
   let eingabe;
   if (f.typ === "mehrzeilig") {
     eingabe = `<textarea id="${id}" data-feld="${oEsc(f.id)}" rows="2" maxlength="${f.maxLen || 500}"${req}>${oEsc(wert || "")}</textarea>`;
@@ -170,6 +217,23 @@ function leseFormular(wurzel, konf) {
   const fehlend = [];
 
   sichtbareFelder(konf).forEach((f) => {
+    // Ja/Nein mit Nachfrage: zwei Werte, `<id>Hat` und `<id>`.
+    if (f.typ === "janein_text") {
+      const gewaehlt = wurzel.querySelector(`[data-feld-hat="${CSS.escape(f.id)}"]:checked`);
+      const hat = gewaehlt ? String(gewaehlt.value) : "";
+      const el = wurzel.querySelector(`[data-feld="${CSS.escape(f.id)}"]`);
+      daten[f.id + "Hat"] = hat;
+      // ⚠️ Bei „nein" wird KEIN Text mitgeschickt. Der Worker leert ihn ohnehin;
+      // ihn hier schon wegzulassen hält beide Seiten bei derselben Aussage.
+      daten[f.id] = hat === "ja" ? String((el && el.value) || "").trim() : "";
+      if (istPflicht(f, konf) && !hat) fehlend.push(f.label);
+      // ⚠️ „ja" ohne Text ist keine Antwort — unabhängig von der Pflichtstufe.
+      // ⚠️ Das Fragezeichen weg: die Meldung setzt selbst einen Punkt
+      // dahinter, sonst steht dort „Welche Allergien?.“
+      if (hat === "ja" && !daten[f.id]) fehlend.push(String(f.detail || f.label).replace(/\?+$/, ""));
+      return;
+    }
+
     // ⚠️ Ja/Nein liegt als ZWEI Radio-Knöpfe vor. Ohne `:checked` läge hier immer
     // der erste von beiden — also stünde bei jeder Anmeldung „ja", auch wenn
     // niemand etwas angeklickt hat.

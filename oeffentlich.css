@@ -267,3 +267,15 @@ body.fc-oeffentlich {
 .fb-note-knopf span { display: flex; align-items: baseline; gap: 6px; }
 .fb-note-knopf strong { font-size: 15px; }
 .fb-note { margin-bottom: 20px; }
+
+
+/* ---------- Ja/Nein mit Nachfrage ---------- */
+.jn-block { margin-bottom: 18px; }
+/* Der Kasten haengt sichtbar an der Antwort darueber -- eingerueckt und mit
+   Linie, damit er als Nachfrage zur Frage gelesen wird und nicht als neues
+   Feld. */
+.jn-detail {
+  margin-top: 10px; padding-left: 12px;
+  border-left: 3px solid var(--fc-blau-hell);
+}
+.jn-detail > label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 4px; }

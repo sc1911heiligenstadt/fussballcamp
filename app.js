@@ -1526,11 +1526,18 @@ function anmFormular(camp, a) {
     // ⚠️ Kurze Felder ins Gitter, lange darunter über die volle Breite. Alles in
     // eine Spalte zu stellen macht aus zwanzig Feldern eine Rolltreppe; alles
     // ins Gitter zu zwingen quetscht eine Anschrift in 210 px.
-    const kurz = drin.filter((f) => f.typ !== "mehrzeilig" && f.typ !== "haken");
-    const lang = drin.filter((f) => f.typ === "mehrzeilig" || f.typ === "haken");
+    // ⚠️ `janein_text` gehört zu den LANGEN: es bringt eine Frage, zwei Knöpfe
+    // und einen Textkasten mit — in eine 325-px-Spalte gequetscht wäre das nicht
+    // mehr zu lesen.
+    const kurz = drin.filter((f) => f.typ !== "mehrzeilig" && f.typ !== "haken" && f.typ !== "janein_text");
+    const lang = drin.filter((f) => f.typ === "mehrzeilig" || f.typ === "haken" || f.typ === "janein_text");
     const vorne = g.id === "kind" ? rollenFeld : "";
-    if (kurz.length || vorne) teile.push(`<div class="feld-gitter">${vorne}${kurz.map((f) => anmFeldEingabe(f, a[f.id])).join("")}</div>`);
-    lang.forEach((f) => teile.push(anmFeldEingabe(f, a[f.id])));
+    // ⚠️ `janein_text` braucht BEIDE Werte, sonst steht die Auswahl beim Öffnen
+    // immer auf „nicht beantwortet" — und ein Speichern machte daraus eine
+    // gelöschte Antwort.
+    const w = (f) => (f.typ === "janein_text" ? { hat: a[f.id + "Hat"], text: a[f.id] } : a[f.id]);
+    if (kurz.length || vorne) teile.push(`<div class="feld-gitter">${vorne}${kurz.map((f) => anmFeldEingabe(f, w(f))).join("")}</div>`);
+    lang.forEach((f) => teile.push(anmFeldEingabe(f, w(f))));
   });
 
   if (camp.zusatzfrage) {
@@ -1540,6 +1547,18 @@ function anmFormular(camp, a) {
   }
 
   return teile.join("");
+}
+
+// Der gespeicherte Ja/Nein-Stand eines `janein_text`-Feldes.
+//
+// ⚠️ Rückfall für den Altbestand: Anmeldungen von vor dem 03.09.2026 haben kein
+// `<id>Hat`. Steht dort ein Text, der etwas aussagt, gilt das als „ja" — sonst
+// bleibt es unbeantwortet. Ein pauschales „nein" wäre eine Behauptung, die
+// niemand aufgestellt hat.
+function a_hat(f, wert) {
+  const h = wert && wert.hat;
+  if (h === "ja" || h === "nein") return h;
+  return (wert && wert.text && !istLeereAngabe(wert.text)) ? "ja" : "";
 }
 
 // Ein einzelnes Eingabefeld. `data-af` trägt die Feld-Id — daran liest
@@ -1554,6 +1573,21 @@ function anmFeldEingabe(f, wert) {
     return `<div class="anm-haken-zeile"><label class="inline-check" for="${id}">
       <input type="checkbox" id="${id}" data-af="${escapeAttr(f.id)}"${wert ? " checked" : ""} />
       ${escapeHtml(f.label)}</label></div>`;
+  }
+
+  if (f.typ === "janein_text") {
+    // ⚠️ In der Verwaltung als AUSWAHL plus dauerhaft sichtbarem Textfeld, nicht
+    // als aufklappender Kasten wie bei den Eltern. Hier wird korrigiert, nicht
+    // ausgefüllt — wer die Zeile sucht, will sehen, was drinsteht, ohne erst
+    // etwas anklicken zu müssen. Der Worker leert den Text bei „nein" ohnehin.
+    const hat = a_hat(f, wert);
+    return `<label class="voll">${escapeHtml(f.label)}
+        <select id="af-${escapeAttr(f.id)}-hat" data-af-hat="${escapeAttr(f.id)}">
+          <option value=""${hat === "" ? " selected" : ""}>— nicht beantwortet —</option>
+          ${JANEIN.map((o) => `<option value="${escapeAttr(o.id)}"${hat === o.id ? " selected" : ""}>${escapeHtml(o.label)}</option>`).join("")}
+        </select></label>
+      <label class="voll">${escapeHtml(f.detail || "Was genau?")}
+        <textarea id="af-${escapeAttr(f.id)}" data-af="${escapeAttr(f.id)}" rows="2" maxlength="${f.maxLen || 500}">${escapeHtml((wert && wert.text) || "")}</textarea></label>`;
   }
 
   if (f.typ === "janein") {
@@ -1601,6 +1635,13 @@ function leseAnmFormular() {
     gefunden++;
     felder[el.dataset.af] = el.type === "checkbox" ? el.checked : el.value;
   });
+  // ⚠️ Die Ja/Nein-Hälfte der `janein_text`-Felder trägt `data-af-hat` und würde
+  // von der Schleife darüber nicht erfasst — die Antwort ginge verloren, und der
+  // Worker läse ein leeres `<id>Hat` als „nicht beantwortet".
+  wurzel.querySelectorAll("[data-af-hat]").forEach((el) => {
+    gefunden++;
+    felder[el.dataset.afHat + "Hat"] = el.value;
+  });
   if (!gefunden) return undefined;
   return felder;
 }
@@ -1618,10 +1659,26 @@ function anmDetails(camp, a) {
   if (camp.fuerFeldspieler && camp.fuerTorwart) zeile("Ausrichtung", rolleLabel(a.rolle));
 
   FELD_GRUPPEN.forEach((g) => {
-    const felder = FORMULAR_FELDER.filter((f) => f.gruppe === g.id && a[f.id] !== undefined && a[f.id] !== "" && a[f.id] !== false);
+    const felder = FORMULAR_FELDER.filter((f) => f.gruppe === g.id && (
+      // ⚠️ Ein `janein_text` mit „nein" hat einen LEEREN Text — es zählt
+      // trotzdem als beantwortet und gehört in die Liste.
+      f.typ === "janein_text"
+        ? (a[f.id + "Hat"] === "ja" || a[f.id + "Hat"] === "nein" || !!a[f.id])
+        : (a[f.id] !== undefined && a[f.id] !== "" && a[f.id] !== false)));
     if (!felder.length) return;
     zeilen.push(`<h3>${escapeHtml(g.label)}</h3>`);
-    felder.forEach((f) => zeile(f.label, f.typ === "haken" ? "ja" : a[f.id]));
+    felder.forEach((f) => {
+      // ⚠️ Bei `janein_text` steht die ANTWORT da, nicht nur der Text: „nein" ist
+      // eine Angabe und darf nicht als leere Zeile verschwinden — sonst sieht
+      // eine beantwortete Frage aus wie eine offene.
+      if (f.typ === "janein_text") {
+        const hat = a[f.id + "Hat"];
+        if (hat === "nein") return zeile(f.label, "nein");
+        if (a[f.id]) return zeile(f.label, a[f.id]);
+        return;
+      }
+      zeile(f.label, f.typ === "haken" ? "ja" : a[f.id]);
+    });
   });
 
   if (camp.zusatzfrage && a.zusatzantwort) {
@@ -2176,6 +2233,14 @@ function exportiereAnmeldungen() {
   ].concat(spalten.map((f) => {
     const v = a[f.id];
     if (f.typ === "haken") return v ? "ja" : "nein";
+    // ⚠️ Eine Spalte, zwei Werte: „nein" oder der Text. Zwei Spalten daraus zu
+    // machen bläht die Tabelle auf, ohne mehr zu sagen — „nein" und ein Text
+    // schließen sich aus.
+    if (f.typ === "janein_text") {
+      const hat = a[f.id + "Hat"];
+      if (hat === "nein") return "nein";
+      return v === undefined || v === null ? "" : String(v);
+    }
     return v === undefined || v === null ? "" : String(v);
   })));
 
