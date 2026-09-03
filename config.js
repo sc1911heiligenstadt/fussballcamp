@@ -320,6 +320,20 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.5",
+    groups: [
+      {
+        title: "Anmeldung nachträglich ändern",
+        items: [
+          "Im Anmeldungs-Dialog steht ein Knopf „Angaben bearbeiten“. Damit lassen sich alle Angaben der Eltern korrigieren — Name, Geburtsdatum, Konfektionsgröße, Telefon, Allergien, alles was das Camp fragt. Bisher ging nur der Beitrags-Haken und die interne Notiz.",
+          "Der Dialog bleibt beim Öffnen zum Ansehen. Erst der Knopf macht die Felder änderbar — sonst überschreibt man beim Nachschlagen schnell einmal eine Gesundheitsangabe.",
+          "Wird etwas geändert, steht im Verlauf des Camps, wer wann welche Felder angefasst hat. Was vorher drinstand, wird bewusst nicht aufbewahrt.",
+          "Die Eltern bekommen darüber keine Nachricht — sie ändern über ihren eigenen Link weiter selbst."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.4",
     groups: [
       {

@@ -310,3 +310,23 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
   font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
   font-size: 13px; line-height: 1.5;
 }
+
+
+/* ---------- Angaben bearbeiten im Anmeldungs-Dialog ---------- */
+.anm-bearbeiten-feld { margin-bottom: 11px; }
+/* ⚠️ Volle Breite. Ohne das sind die Felder rund 110 px breit (Browser-
+   Vorgabe fuer input/select) -- in einem 400-px-Dialog nicht zu gebrauchen, wenn
+   man einen Satz wie "Konfektionsgroesse eigentlich 134" korrigieren will. Der
+   Selektor nimmt die Id mit, weil weiter oben `#tab-verwaltung`-Regeln
+   dieselben Elemente treffen koennen; im Dialog gilt das zwar nicht, aber die
+   Breite soll nicht von der Reihenfolge im Stylesheet abhaengen. */
+.anm-bearbeiten-feld > input,
+.anm-bearbeiten-feld > select,
+.anm-bearbeiten-feld > textarea { width: 100%; box-sizing: border-box; }
+.anm-bearbeiten-feld > label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+/* ⚠️ Der Haken darf KEIN Block ueber die volle Breite werden -- dieselbe Falle
+   wie bei den Push-Schaltern der Tools-Uebersicht. */
+.anm-bearbeiten-feld.haken > label {
+  display: flex; align-items: center; gap: 8px; font-weight: 400; font-size: 14px; cursor: pointer;
+}
+.anm-bearbeiten-feld.haken input { width: 18px; height: 18px; flex-shrink: 0; margin: 0; }

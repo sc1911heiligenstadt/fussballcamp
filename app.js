@@ -154,6 +154,7 @@ function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
     const absageGrund = document.getElementById("absage-grund");
     if (absageGrund) absageGrund.value = "";
     anmEntwurf = null;
+    anmBearbeiten = false;
     // ⚠️ Die Feedback-Auswertung ist zwar anonym, aber sie kommt vom Server nur
     // mit Bearbeiten-Recht — und was einmal gezeichnet ist, bleibt sonst im DOM
     // stehen. Gleiche Regel wie oben: Verstecken ist nicht Räumen.
@@ -1407,14 +1408,33 @@ async function nachruecken(camp, anmeldungId) {
   });
 }
 
+// Bearbeiten-Modus des Anmeldungs-Dialogs (seit 2026-09-03).
+//
+// ⚠️ Der Dialog ist per Vorgabe zum ANSEHEN da. Er wird vor allem geöffnet, um
+// nachzuschlagen und den Beitrag abzuhaken; zwanzig offene Eingabefelder daneben
+// laden dazu ein, versehentlich eine Gesundheitsangabe zu überschreiben. Deshalb
+// ein Schalter davor — gleiches Muster wie das Schloss über der Kontoverbindung.
+let anmBearbeiten = false;
+
 function oeffneAnmDialog(campId, anmeldungId) {
   const camp = findeCamp(campId);
   const a = (camp.anmeldungen || []).find((x) => x.id === anmeldungId);
   if (!a) return;
   anmEntwurf = { campId, id: anmeldungId };
+  // ⚠️ Bei JEDEM Öffnen zurück auf Ansehen. Bliebe der Modus stehen, stünde die
+  // nächste Anmeldung sofort offen zum Ändern da — und der Schalter hätte seinen
+  // Zweck verloren.
+  anmBearbeiten = false;
 
   document.getElementById("anm-modal-titel").textContent = kindName(a);
   document.getElementById("anm-modal-body").innerHTML = anmDetails(camp, a);
+
+  // ⚠️ Auch die BESCHRIFTUNG zurück. Nur das Flag zurückzusetzen reicht nicht:
+  // der Knopf hätte weiter „Angaben nur ansehen“ geheißen, während der Dialog
+  // schon in der Ansehen-Ansicht steht — ein Knopf, der das Gegenteil dessen
+  // ankündigt, was er tut.
+  const bearbKnopf = document.getElementById("btn-anm-bearbeiten");
+  if (bearbKnopf) bearbKnopf.textContent = "Angaben bearbeiten";
 
   document.getElementById("btn-anm-absagen").classList.toggle("hidden", a.status === "abgesagt");
   document.getElementById("btn-anm-loeschen").classList.toggle("hidden", !canAdmin());
@@ -1447,6 +1467,116 @@ function oeffneAbsageDialog() {
     : "Für diese Anmeldung ist keine E-Mail-Adresse hinterlegt, es kann also nichts verschickt werden.";
 
   oeffne("absage-modal");
+}
+
+// Schaltet zwischen Ansehen und Bearbeiten um und zeichnet den Rumpf neu.
+function anmBearbeitenUmschalten() {
+  const camp = findeCamp(anmEntwurf && anmEntwurf.campId);
+  const a = camp && (camp.anmeldungen || []).find((x) => x.id === anmEntwurf.id);
+  if (!camp || !a) return;
+  anmBearbeiten = !anmBearbeiten;
+  document.getElementById("anm-modal-body").innerHTML =
+    anmBearbeiten ? anmFormular(camp, a) : anmDetails(camp, a);
+  const knopf = document.getElementById("btn-anm-bearbeiten");
+  if (knopf) knopf.textContent = anmBearbeiten ? "Angaben nur ansehen" : "Angaben bearbeiten";
+}
+
+// Das Änderungs-Formular der Verwaltung.
+//
+// ⚠️ Die FELDLISTE ist dieselbe wie im Anmeldeformular der Eltern
+// (`FORMULAR_FELDER`) — es gibt keine zweite Wahrheit darüber, was es gibt und
+// welchen Typ ein Feld hat. Nur die Darstellung ist eine eigene: das
+// Eltern-Formular führt Gruppenüberschriften, Hinweise und Pflicht-Sterne, hier
+// geht es um schnelles Korrigieren. Der Bauer dafür (`baueFormular`) steckt in
+// `oeffentlich.js` samt seiner eigenen CSS-Datei, die diese Seite nicht lädt.
+//
+// ⚠️ Gezeigt werden nur die am Camp EINGESCHALTETEN Felder plus die festen —
+// genau die, die der Worker auch annimmt. Ein Feld anzubieten, das beim
+// Speichern verworfen wird, wäre eine stille Falle.
+function anmFormular(camp, a) {
+  const konf = camp.felder || {};
+  const felder = FORMULAR_FELDER.filter((f) => f.fest || konf[f.id] === "optional" || konf[f.id] === "pflicht");
+
+  const teile = [`<div class="hinweis warn"><strong>Du änderst die Angaben der Eltern.</strong>
+    Die Familie bekommt darüber keine Nachricht. Für den Verlauf wird festgehalten,
+    <em>welche</em> Felder du angefasst hast — nicht, was vorher darin stand.</div>`];
+
+  // Ausrichtung, aber nur wenn es etwas zu wählen gibt.
+  if (camp.fuerFeldspieler && camp.fuerTorwart) {
+    teile.push(`<div class="anm-bearbeiten-feld"><label for="af-rolle">Ausrichtung</label>
+      <select id="af-rolle">${ROLLEN.map((r) =>
+        `<option value="${escapeAttr(r.id)}"${(a.rolle || "feldspieler") === r.id ? " selected" : ""}>${escapeHtml(r.label)}</option>`).join("")}</select></div>`);
+  }
+
+  FELD_GRUPPEN.forEach((g) => {
+    const drin = felder.filter((f) => f.gruppe === g.id);
+    if (!drin.length) return;
+    teile.push(`<h3>${escapeHtml(g.label)}</h3>`);
+    drin.forEach((f) => teile.push(anmFeldEingabe(f, a[f.id])));
+  });
+
+  if (camp.zusatzfrage) {
+    teile.push(`<h3>Zusatzfrage</h3>`);
+    teile.push(`<div class="anm-bearbeiten-feld"><label for="af-zusatz">${escapeHtml(camp.zusatzfrage)}</label>
+      <input type="text" id="af-zusatz" maxlength="200" value="${escapeAttr(a.zusatzantwort || "")}" /></div>`);
+  }
+
+  return teile.join("");
+}
+
+// Ein einzelnes Eingabefeld. `data-af` trägt die Feld-Id — daran liest
+// `leseAnmFormular` die Werte wieder ab.
+function anmFeldEingabe(f, wert) {
+  const id = "af-" + f.id;
+  if (f.typ === "haken") {
+    return `<div class="anm-bearbeiten-feld haken"><label for="${id}">
+      <input type="checkbox" id="${id}" data-af="${escapeAttr(f.id)}"${wert ? " checked" : ""} />
+      <span>${escapeHtml(f.label)}</span></label></div>`;
+  }
+  if (f.typ === "janein") {
+    // ⚠️ Drei Zustände, nicht zwei: „ja", „nein" und „noch nicht beantwortet".
+    // Ein Ja/Nein-Umschalter würde aus „nicht beantwortet" beim ersten Speichern
+    // stillschweigend ein „nein" machen — und genau diesen Unterschied braucht
+    // der Betreuer am letzten Camptag.
+    const g = wert === true ? "ja" : (wert === "ja" || wert === "nein" ? wert : "");
+    return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
+      <select id="${id}" data-af="${escapeAttr(f.id)}">
+        <option value=""${g === "" ? " selected" : ""}>— nicht beantwortet —</option>
+        ${JANEIN.map((o) => `<option value="${escapeAttr(o.id)}"${g === o.id ? " selected" : ""}>${escapeHtml(o.label)}</option>`).join("")}
+      </select></div>`;
+  }
+  if (f.typ === "auswahl") {
+    const opt = (o) => `<option value="${escapeAttr(o)}"${o === wert ? " selected" : ""}>${escapeHtml(o)}</option>`;
+    const inhalt = Array.isArray(f.gruppen)
+      ? f.gruppen.map((g) => `<optgroup label="${escapeAttr(g.label)}">${(g.optionen || []).map(opt).join("")}</optgroup>`).join("")
+      : (f.optionen || []).map(opt).join("");
+    return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
+      <select id="${id}" data-af="${escapeAttr(f.id)}"><option value="">— keine Angabe —</option>${inhalt}</select></div>`;
+  }
+  if (f.typ === "mehrzeilig") {
+    return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
+      <textarea id="${id}" data-af="${escapeAttr(f.id)}" rows="2" maxlength="${f.maxLen || 500}">${escapeHtml(wert || "")}</textarea></div>`;
+  }
+  const typ = f.typ === "datum" ? "date" : (f.typ === "email" ? "email" : "text");
+  return `<div class="anm-bearbeiten-feld"><label for="${id}">${escapeHtml(f.label)}</label>
+    <input type="${typ}" id="${id}" data-af="${escapeAttr(f.id)}" maxlength="${f.maxLen || 120}" value="${escapeAttr(wert || "")}" /></div>`;
+}
+
+// Liest das Formular zurück. ⚠️ Gibt `undefined`, wenn der Bearbeiten-Modus gar
+// nicht offen ist — der Worker deutet ein fehlendes `felder` als „nichts
+// ändern". Ein leeres Objekt wäre hier harmlos, aber die Regel ist dieselbe wie
+// bei den Mailvorlagen und soll nicht je Stelle anders lauten.
+function leseAnmFormular() {
+  if (!anmBearbeiten) return undefined;
+  const wurzel = document.getElementById("anm-modal-body");
+  const felder = {};
+  let gefunden = 0;
+  wurzel.querySelectorAll("[data-af]").forEach((el) => {
+    gefunden++;
+    felder[el.dataset.af] = el.type === "checkbox" ? el.checked : el.value;
+  });
+  if (!gefunden) return undefined;
+  return felder;
 }
 
 function anmDetails(camp, a) {
@@ -1565,15 +1695,27 @@ function anmDetails(camp, a) {
 }
 
 async function speichereAnmAusDialog() {
+  // ⚠️ Im Bearbeiten-Modus gibt es die Felder „bezahlt" und „Notiz" gar nicht im
+  // Rumpf — sie stehen in der Ansehen-Ansicht. Ein `wert("ad-notiz")` lieferte
+  // dort einen leeren String und LÖSCHTE die Notiz beim Speichern.
+  const felder = leseAnmFormular();
+  const nutzlast = { id: anmEntwurf.id };
+  if (felder) {
+    nutzlast.felder = felder;
+    const rolle = document.getElementById("af-rolle");
+    if (rolle) nutzlast.rolle = rolle.value;
+    const zusatz = document.getElementById("af-zusatz");
+    if (zusatz) nutzlast.zusatzantwort = zusatz.value;
+  } else {
+    nutzlast.bezahlt = document.getElementById("ad-bezahlt").checked;
+    nutzlast.notiz = wert("ad-notiz");
+  }
+
   await mitFehler(async () => {
-    await speichereAnmeldung(anmEntwurf.campId, {
-      id: anmEntwurf.id,
-      bezahlt: document.getElementById("ad-bezahlt").checked,
-      notiz: wert("ad-notiz")
-    });
+    await speichereAnmeldung(anmEntwurf.campId, nutzlast);
     schliesse("anm-modal");
     await ladeUndZeichne();
-    toast("Gespeichert.");
+    toast(felder ? "Angaben geändert." : "Gespeichert.");
   });
 }
 
@@ -1893,6 +2035,7 @@ function verdrahteBedienung() {
   ["anm-camp", "anm-status"].forEach((id) => document.getElementById(id).addEventListener("change", zeichneAnmeldungen));
   document.getElementById("anm-suche").addEventListener("input", zeichneAnmeldungen);
   document.getElementById("btn-anm-speichern").addEventListener("click", speichereAnmAusDialog);
+  document.getElementById("btn-anm-bearbeiten").addEventListener("click", anmBearbeitenUmschalten);
   document.getElementById("btn-anm-abbrechen").addEventListener("click", () => schliesse("anm-modal"));
   document.getElementById("btn-anm-absagen").addEventListener("click", oeffneAbsageDialog);
   document.getElementById("btn-absage-abbrechen").addEventListener("click", () => schliesse("absage-modal"));
