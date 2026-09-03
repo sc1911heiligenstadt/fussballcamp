@@ -6,7 +6,7 @@
 <title>⚽ Fußballcamp</title>
 <meta name="theme-color" content="#1a56a0" />
 <link rel="stylesheet" href="style.css?v=1.0" />
-<link rel="stylesheet" href="camp.css?v=1.0" />
+<link rel="stylesheet" href="camp.css?v=1.1" />
 </head>
 <body>
 
@@ -38,6 +38,7 @@
       <button data-tab="jobs">Aufgaben</button>
       <button data-tab="teilnehmer" class="betreuer-only hidden" id="tab-btn-teilnehmer">Teilnehmer</button>
       <button data-tab="anmeldungen" class="editor-only hidden">Anmeldungen</button>
+      <button data-tab="feedback" class="editor-only hidden">Feedback</button>
       <div class="nav-right">
         <button data-tab="verwaltung" class="admin-only hidden">Verwaltung</button>
         <button data-tab="info">Info</button>
@@ -133,6 +134,27 @@
         </div>
       </section>
 
+      <!-- ---------- Feedback (Bearbeiten) ---------- -->
+      <!-- ⚠️ Bewusst links, also ab BEARBEITEN und nicht erst ab
+           Administrieren: die Auswertung enthält nichts Personenbezogenes, und
+           gebraucht wird sie von denen, die das nächste Camp planen. -->
+      <section class="tab-section" id="tab-feedback">
+        <div class="card">
+          <h2>Feedback der Eltern</h2>
+          <div class="hinweis">
+            Die Antworten sind <strong>anonym</strong>. Wir wissen, wie viele Familien
+            geantwortet haben — aber nicht, welche Antwort von wem kommt.
+            Eingeschaltet wird der Bogen unter <em>Verwaltung</em>.
+          </div>
+          <div class="filter-row">
+            <label for="fb-camp">Camp</label>
+            <select id="fb-camp"></select>
+          </div>
+          <div id="fb-inhalt"></div>
+          <div class="empty-state hidden" id="fb-empty">Für dieses Camp liegt noch keine Antwort vor.</div>
+        </div>
+      </section>
+
       <!-- ---------- Verwaltung (Administrieren) ---------- -->
       <section class="tab-section" id="tab-verwaltung">
 
@@ -171,6 +193,16 @@
           <label class="feld-schmal">Tage nach der Anmeldung<input type="number" id="e-zahlerinnerungtage" min="1" max="120" /></label>
           <p class="muted" style="margin:6px 0 10px;">Erinnert wird erst, wenn <strong>zusätzlich</strong> die Zahlungsfrist näher als drei Tage ist oder schon abgelaufen. Sonst käme bei einer Anmeldung lange vor dem Camp eine Zahlungsaufforderung, bevor überhaupt etwas fällig ist.</p>
           <div class="btn-row"><button type="button" class="btn small ghost" id="btn-test-zahlung">Jetzt auslösen</button></div>
+          <hr />
+          <label class="inline-check"><input type="checkbox" id="e-feedback" /> Feedbackbogen nach dem Camp an die Eltern</label>
+          <label class="feld-schmal">Tage nach dem letzten Camptag<input type="number" id="e-feedbacktage" min="0" max="60" /></label>
+          <p class="muted" style="margin:6px 0 10px;">
+            Die Eltern bekommen einen Link zu einem kurzen, <strong>anonymen</strong> Bogen.
+            Gefragt wird nur bei Camps, deren letzter Tag <strong>höchstens drei Wochen</strong>
+            zurückliegt — sonst ginge beim Einschalten an die Eltern jedes je gelaufenen Camps
+            eine Mail. Die Auswertung steht im Reiter <em>Feedback</em>.
+          </p>
+          <div class="btn-row"><button type="button" class="btn small ghost" id="btn-test-feedback">Jetzt auslösen</button></div>
           <p class="muted" id="lauf-info" style="margin-top:14px;"></p>
         </div>
 
@@ -304,6 +336,15 @@
           <label>Anmeldung ab<input type="date" id="c-anmvon" /></label>
           <label>Anmeldung bis<input type="date" id="c-anmbis" /></label>
         </div>
+        <!-- Ausrichtung. Steht direkt unter den Eckdaten, weil sie darüber
+             entscheidet, ob das Anmeldeformular überhaupt danach fragt. -->
+        <fieldset class="voll fc-ausrichtung">
+          <legend>Für wen ist das Camp?</legend>
+          <label class="inline-check"><input type="checkbox" id="c-fuer-feldspieler" /> Feldspieler</label>
+          <label class="inline-check"><input type="checkbox" id="c-fuer-torwart" /> Torwart</label>
+          <p class="muted">Sind <strong>beide</strong> angekreuzt, fragt das Anmeldeformular die Eltern, als was ihr Kind kommt — nur dann weißt du am Ende, wie viele Torwarttrainer du brauchst. Bei nur einer Ausrichtung wird nicht gefragt.</p>
+        </fieldset>
+
         <label class="voll">Kurztext fürs Homepage-Fenster
           <input type="text" id="c-kurz" maxlength="200" placeholder="Fünf Tage Fußball in den Herbstferien — für Jahrgänge 2014 bis 2019." />
         </label>
@@ -327,6 +368,11 @@
         <label class="voll">Ausführlicher Text auf der Anmeldeseite
           <textarea id="c-beschreibung" rows="4" maxlength="2000" placeholder="Was passiert im Camp, was mitzubringen ist, wie der Tag abläuft …"></textarea>
         </label>
+        <label class="voll">Ablauf des Camps <span class="muted">(freiwillig)</span>
+          <textarea id="c-ablauf" rows="5" maxlength="4000" placeholder="08:30 Ankunft und Begrüßung&#10;09:00 Training in Gruppen&#10;12:00 Mittagessen&#10;…"></textarea>
+        </label>
+        <p class="muted voll">Der Ablauf steht <strong>nicht</strong> auf der Anmeldeseite, sondern in der Mail, die die Eltern bekommen, sobald du den Beitrag als bezahlt abhakst. Du kannst ihn jederzeit nachtragen; die Mail nimmt dann den Stand von dem Moment, in dem du den Haken setzt.</p>
+
         <p class="muted voll">Der Frühbucherpreis gilt bis <strong>einschließlich</strong> des gewählten Tages. Beide Felder gehören zusammen — steht nur eines davon da, gilt für alle der reguläre Beitrag. Wer sich im Frühbucherfenster anmeldet, behält den günstigeren Beitrag auch danach.</p>
         <label class="voll">Hinweis zum Beitrag
           <input type="text" id="c-preishinweis" maxlength="200" placeholder="Inklusive Mittagessen, Getränken und Campshirt." />
@@ -428,8 +474,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="config.js?v=1.0"></script>
+  <script src="config.js?v=1.1"></script>
   <script src="db.js?v=1.0"></script>
-  <script src="app.js?v=1.0"></script>
+  <script src="app.js?v=1.1"></script>
 </body>
 </html>

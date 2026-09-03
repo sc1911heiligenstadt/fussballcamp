@@ -143,6 +143,9 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 .marker.offen { background: var(--red-light); color: var(--red); }
 .marker.warteliste { background: var(--gold-light); color: var(--gold); }
 .marker.gesundheit { background: var(--blue-light); color: var(--blue); }
+/* Torwart. Eigene Farbe, weil dieser Marker etwas ganz anderes sagt als die
+   ubrigen: kein Zustand, der sich andern kann, sondern wofur das Kind kommt. */
+.marker.torwart { background: var(--gold-light); color: var(--gold); }
 /* Für Angaben, die FEHLEN und gebraucht werden — nicht für einen schlechten
    Zustand. Beispiel: bei einem Kind ist nicht beantwortet, ob es allein nach
    Hause darf. Rot, weil genau das am letzten Camptag auffallen muss. */
@@ -244,4 +247,40 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
 .schloss-zeile.offen .schloss-status { color: var(--gold); }
 #konto-gitter input[readonly] {
   background: var(--gray); color: var(--muted); cursor: not-allowed;
+}
+
+
+/* ---------- Ausrichtung im Camp-Dialog ---------- */
+.fc-ausrichtung { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 4px 0 14px; }
+.fc-ausrichtung > legend { font-size: 13px; font-weight: 600; color: var(--muted); padding: 0 6px; }
+.fc-ausrichtung .inline-check { margin-right: 22px; }
+.fc-ausrichtung .muted { margin-top: 8px; font-size: 12px; }
+
+/* ---------- Feedback-Auswertung ---------- */
+.fb-frage { margin-bottom: 22px; }
+.fb-frage h3 { font-size: 15px; margin-bottom: 4px; }
+.fb-schnitt { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+
+/* Ein Balken je Note. Gitter statt Flex, damit die Beschriftungen links
+   untereinander stehen und die Balken alle an derselben Stelle beginnen --
+   sonst wandert die Balkenkante mit der Textlange. */
+.fb-balken-zeile {
+  display: grid; grid-template-columns: 130px minmax(0, 1fr) 32px;
+  align-items: center; gap: 10px; margin-bottom: 4px; font-size: 13px;
+}
+.fb-balken-label { color: var(--muted); }
+.fb-balken { background: var(--gray); border-radius: 999px; height: 14px; overflow: hidden; }
+.fb-balken-fuellung { display: block; height: 100%; background: var(--blue); border-radius: 999px; }
+.fb-balken-zahl { text-align: right; font-variant-numeric: tabular-nums; }
+
+.fb-text {
+  border-left: 3px solid var(--border); padding: 6px 0 6px 12px;
+  margin: 0 0 8px; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  /* Am Handy bindet die Breite: 130px Beschriftung plus Balken plus Zahl passt
+     nicht mehr. Beschriftung uber den Balken, Zahl daneben. */
+  .fb-balken-zeile { grid-template-columns: minmax(0, 1fr) 32px; }
+  .fb-balken-label { grid-column: 1 / -1; }
 }

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feedback zum Fußballcamp — 1. SC 1911 Heiligenstadt e.V.</title>
+<meta name="theme-color" content="#1a56a0" />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="stylesheet" href="oeffentlich.css?v=1.1" />
+</head>
+<body class="fc-oeffentlich">
+
+<div class="fc-kopf">
+  <img src="https://sc1911heiligenstadt.github.io/logo.svg" alt="" />
+  <div>
+    <h1>Wie war das Camp?</h1>
+    <div class="fc-verein">1. SC 1911 Heiligenstadt e.V. · Nachwuchsbereich</div>
+  </div>
+</div>
+
+<div class="fc-blatt">
+
+  <div class="fc-karte" id="laden">
+    <p class="fc-grau">Der Bogen wird geladen …</p>
+  </div>
+
+  <div class="fc-karte fc-hidden" id="problem">
+    <h2 id="problem-titel">Das hat nicht geklappt</h2>
+    <div class="fc-hinweis fehler" id="problem-text"></div>
+    <p class="fc-grau">Der Link steht in der Mail nach dem Camp. Wenn er nicht mehr geht, melde dich bitte beim Verein.</p>
+  </div>
+
+  <div id="bereich" class="fc-hidden">
+
+    <div class="fc-karte">
+      <h2 id="kopf-titel"></h2>
+      <p class="fc-grau" id="kopf-zeitraum"></p>
+      <!-- ⚠️ Die Anonymitätszusage steht GANZ OBEN und nicht im Kleingedruckten.
+           Sie ist der Grund, warum jemand ehrlich antwortet — und sie ist eine
+           Zusage, die im Worker eingelöst wird (handleFcFeedbackSenden), nicht
+           bloß ein freundlicher Satz. -->
+      <div class="fc-hinweis ok">
+        <strong>Deine Antworten sind anonym.</strong>
+        Wir speichern sie ohne Namen und ohne Verbindung zur Anmeldung. Wir sehen
+        also, <em>was</em> geantwortet wurde, aber nicht von wem. Wir merken uns
+        nur, dass du geantwortet hast — damit niemand zweimal abstimmt.
+      </div>
+      <p class="fc-grau">Es dauert zwei Minuten. Du musst nicht alles beantworten.</p>
+    </div>
+
+    <form class="fc-karte" id="bogen-form" novalidate>
+      <div id="fragen"></div>
+
+      <div class="fc-hinweis fehler fc-hidden" id="form-fehler"></div>
+
+      <button type="submit" class="fc-btn gruen breit" id="btn-senden">Antworten absenden</button>
+      <p class="fc-grau" style="margin-top:12px;font-size:13px;">Absenden geht einmal. Danach lässt sich nichts mehr ändern — genau deshalb, weil wir hinterher nicht mehr wissen, welche Antwort deine war.</p>
+    </form>
+
+  </div>
+
+  <div class="fc-karte fc-hidden" id="danke-bereich">
+    <h2>Danke!</h2>
+    <p>Deine Antworten sind angekommen. Wir schauen sie uns an, bevor wir das nächste Camp planen.</p>
+    <p class="fc-grau">Diese Seite kannst du jetzt schließen.</p>
+  </div>
+
+</div>
+
+<script src="config.js?v=1.1"></script>
+<script src="oeffentlich.js?v=1.1"></script>
+<script src="feedback.js?v=1.1"></script>
+</body>
+</html>

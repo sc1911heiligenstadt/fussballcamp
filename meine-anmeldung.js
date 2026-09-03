@@ -113,7 +113,7 @@ function zeige() {
   document.getElementById("absage-karte").classList.toggle("fc-hidden", abgesagt);
   if (abgesagt) return;
 
-  baueFormular(document.getElementById("felder"), camp.felder, a);
+  baueFormular(document.getElementById("felder"), camp.felder, a, camp.rollen);
   zeigeAgb();
 
   const zb = document.getElementById("zusatzfrage-bereich");

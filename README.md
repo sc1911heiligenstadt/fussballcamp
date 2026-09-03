@@ -12,7 +12,12 @@ Teil der Vereins-Werkzeugsammlung → [Tools-Übersicht](https://sc1911heiligens
 Aus dem Zeitraum entstehen die Camp-Tage. Ein neues Camp ist zuerst ein Entwurf und für
 niemanden sichtbar — erst „Anmeldung öffnen“ stellt es auf die Homepage. Zu jedem Camp
 lässt sich ein Bild hochladen (Werbeplakat); große Bilder verkleinert der Browser vor dem
-Hochladen.
+Hochladen. Beim Anlegen wird angekreuzt, für wen das Camp ist — Feldspieler, Torwart oder
+beides — und der Tagesablauf hinterlegt.
+
+**Anmeldeschluss.** Ist der Anmeldeschluss vorbei, springt das Camp in der Nacht darauf
+von selbst auf „Geschlossen“. Der Anmeldelink verschwindet dabei auch aus dem Termin im
+Vereinskalender.
 
 **Auf der Vereinsseite.** Die App liefert einen Schnipsel, der einmal in die Homepage
 eingebaut wird. Danach erscheint dort von selbst ein Fenster mit den offenen Camps, dem
@@ -26,6 +31,12 @@ als Termin im Vereinskalender ab — mit Tagen, Ort, Uhrzeit, Jahrgängen und An
 **Anmeldung ohne Vereinskonto.** Die Eltern melden über einen Link an. Welche Felder
 gefragt werden, wird je Camp eingestellt: nicht fragen, freiwillig oder Pflicht. Ist das
 Camp voll, läuft eine Warteliste mit Platznummer.
+
+**Feldspieler oder Torwart.** Bietet ein Camp beides an, fragt das Formular die Eltern,
+als was ihr Kind kommt. In der Anmeldeliste und auf der Teilnehmerliste steht dann, wer
+Torwart ist, und oben, wie viele es sind — damit sich planen lässt, wie viele
+Torwarttrainer gebraucht werden. Bietet ein Camp nur eine Ausrichtung an, wird nicht
+gefragt.
 
 **Teilnahmebedingungen.** Der Text wird in der App gepflegt und steht aufklappbar im
 Formular, mit eigenem Pflicht-Häkchen. Zu jeder Anmeldung wird festgehalten, welche
@@ -49,10 +60,25 @@ ein und wieder aus; Helfer ohne Vereinskonto werden als freier Name eingetragen.
 
 **Listen.** Aufgabenplan, verkürzte Teilnehmerliste für die Betreuer und die vollständige
 Anmeldeliste lassen sich drucken; die Anmeldeliste zusätzlich als Excel-Datei ausgeben.
+Auf der Teilnehmerliste — der Liste, die am Platz gebraucht wird — steht auch die
+Konfektionsgröße, für die Ausgabe des Materials.
 
 **Erinnerungen.** Vor dem Campbeginn und bei offenem Beitrag geht automatisch eine Mail
 an die Eltern. Die Zahlungserinnerung geht erst, wenn die eingestellte Wartezeit um ist
 und zugleich die Zahlungsfrist naht oder abgelaufen ist.
+
+**Bestätigung, wenn der Beitrag da ist.** Wird jemand in der Anmeldeliste als bezahlt
+abgehakt, bekommen die Eltern automatisch eine Bestätigung — mit dem Betrag und dem
+Ablauf des Camps. Höchstens einmal je Anmeldung; der Haken lässt sich also gefahrlos hin
+und her stellen.
+
+**Feedbackbogen nach dem Camp.** Ein paar Tage nach dem letzten Camptag bekommen die
+Eltern einen Link zu einem kurzen Bogen: Gesamteindruck, Training, Essen, Organisation,
+Ausstattung und zwei Freitextfelder. Die Antworten sind **anonym** — festgehalten wird,
+*wer* geantwortet hat (damit niemand zweimal abstimmt), die Antwort selbst wird ohne
+Namen, ohne Uhrzeit und an zufälliger Stelle abgelegt. Die Auswertung steht im Reiter
+*Feedback*. Der Bogen ist von sich aus ausgeschaltet und gilt nach dem Einschalten nur
+für Camps, deren letzter Tag höchstens drei Wochen zurückliegt.
 
 ## Datenschutz
 

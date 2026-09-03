@@ -136,11 +136,74 @@ const JANEIN = [
   { id: "nein", label: "Nein" }
 ];
 
+// ---------- Feldspieler oder Torwart (seit 2026-09-03) ----------
+//
+// Am Camp steht, WAS angeboten wird; an der Anmeldung, WOFÜR dieses Kind kommt.
+// Der Zweck ist die Personalplanung: ohne die Zahl der Torhüter weiß niemand,
+// wie viele Torwarttrainer gebraucht werden.
+//
+// ⚠️ Das ist KEIN Eintrag in FORMULAR_FELDER, und das ist Absicht: ob die Frage
+// im Anmeldeformular auftaucht, hängt nicht an einer Einstellung je Camp,
+// sondern daran, ob das Camp beide Ausrichtungen anbietet. Bietet es nur eine
+// an, wird nicht gefragt — die Antwort steht ja fest.
+//
+// ⚠️ Zeichengleich mit FC_ROLLEN / FC_ROLLEN_LABEL im Worker.
+const ROLLEN = [
+  { id: "feldspieler", label: "Feldspieler" },
+  { id: "torwart",     label: "Torwart" }
+];
+
+function rolleLabel(id) {
+  const r = ROLLEN.find((x) => x.id === id);
+  return r ? r.label : "Feldspieler";
+}
+
+// ---------- Feedbackbogen (seit 2026-09-03) ----------
+//
+// ⚠️ Die WIRKSAME Liste ist FC_FEEDBACK_FRAGEN im Worker — er liefert sie zur
+// Anzeige gleich mit und wirft beim Speichern alles weg, was dort nicht steht.
+// Diese Fassung hier ist der Rückfall für die Auswertung in der App, damit die
+// Überschriften auch dann stimmen, wenn gerade nichts geladen wurde.
+const FEEDBACK_FRAGEN = [
+  { id: "gesamt",       typ: "note",   frage: "Wie hat es deinem Kind insgesamt gefallen?" },
+  { id: "training",     typ: "note",   frage: "Training und Betreuung durch die Trainer" },
+  { id: "essen",        typ: "note",   frage: "Verpflegung und Essen" },
+  { id: "organisation", typ: "note",   frage: "Organisation und Information vorab" },
+  { id: "anlage",       typ: "note",   frage: "Plätze, Räume und Ausstattung" },
+  { id: "wieder",       typ: "janein", frage: "Würdest du dein Kind wieder zu einem unserer Camps anmelden?" },
+  { id: "gut",          typ: "text",   frage: "Was hat besonders gut gefallen?" },
+  { id: "besser",       typ: "text",   frage: "Was sollen wir beim nächsten Mal besser machen?" }
+];
+
+// Schulnoten-Richtung: 1 ist die beste.
+//
+// ⚠️ Die Beschriftung steht an JEDEM Knopf, nicht nur an den Enden der Reihe.
+// Eine nackte Skala von 1 bis 5 beantwortet nicht, welche Seite gut ist —
+// Schulnote und Sternchen laufen genau andersherum, und wer sich vertut,
+// verdirbt seine Antwort, ohne es zu merken.
+const FEEDBACK_NOTEN = [
+  { wert: 1, label: "sehr gut" },
+  { wert: 2, label: "gut" },
+  { wert: 3, label: "geht so" },
+  { wert: 4, label: "eher nicht" },
+  { wert: 5, label: "gar nicht" }
+];
+
+const FEEDBACK_TEXT_MAX = 1000;
+
+// Obergrenze für den Tagesablauf am Camp. Muss zu FC_ABLAUF_MAX im Worker
+// passen — steht hier nur, damit das Textfeld selbst schon begrenzt.
+const ABLAUF_MAX = 4000;
+
 // Die Felder, die ein Betreuer über fussballcamp-teilnehmer zu sehen bekommt.
 // ⚠️ Steht ZEICHENGENAU so auch als FC_BETREUER_FELDER im Worker — dort ist die
 // Liste die wirksame; diese hier dient nur der Anzeige. Wer sie erweitert, muss
 // beide anfassen, sonst kommt das Feld gar nicht erst an.
-const BETREUER_FELDER = ["kindVorname", "kindNachname", "geburtsdatum", "allergien", "medikamente", "krankheiten", "essenHinweis", "elternTelefon", "alleinNachHause"];
+//
+// ⚠️ `trikotgroesse` steht seit 2026-09-03 dabei (Michel-Vorgabe): das ist die
+// Liste, die die Trainer am letzten Camptag in der Hand halten, wenn das
+// Material ausgegeben wird.
+const BETREUER_FELDER = ["kindVorname", "kindNachname", "geburtsdatum", "trikotgroesse", "allergien", "medikamente", "krankheiten", "essenHinweis", "elternTelefon", "alleinNachHause"];
 
 // Vorschlag für den ersten Job-Katalog. Wird nur angeboten, solange gar kein
 // Katalog existiert — danach ist der gepflegte Katalog die Wahrheit.
@@ -170,6 +233,10 @@ const DEFAULT_EINSTELLUNGEN = {
   agbText: "",
   startErinnerung: true, startErinnerungTage: 3,
   zahlErinnerung: true, zahlErinnerungTage: 14,
+  // ⚠️ Der Feedbackbogen ist per Vorgabe AUS — anders als die beiden
+  // Erinnerungen darüber. Er verschickt Post an Familien, deren Camp schon
+  // gelaufen ist; das soll jemand bewusst einschalten.
+  feedbackAktiv: false, feedbackTage: 2,
   aufraeumenNachMonaten: 6
 };
 
@@ -244,6 +311,49 @@ FORMULAR_FELDER.forEach((f) => {
 });
 
 const APP_CHANGELOG = [
+  {
+    version: "1.1",
+    groups: [
+      {
+        title: "Feldspieler oder Torwart",
+        items: [
+          "Beim Anlegen eines Camps kreuzt du an, für wen es ist: Feldspieler, Torwart oder beides. Mindestens eines von beiden muss dastehen.",
+          "Bietet ein Camp beides an, fragt das Anmeldeformular die Eltern, als was ihr Kind kommt — dann steht in der Anmeldeliste und auf der Teilnehmerliste, wer Torwart ist, und oben steht, wie viele es sind. So lässt sich planen, wie viele Torwarttrainer gebraucht werden.",
+          "Bietet ein Camp nur eine Ausrichtung an, wird nicht gefragt: die Antwort steht ja schon fest. Bestehende Camps gelten als Feldspieler-Camp und ändern sich nicht von selbst."
+        ]
+      },
+      {
+        title: "Das Camp schließt sich selbst",
+        items: [
+          "Ist der Anmeldeschluss vorbei, springt das Camp in der Nacht darauf von „Anmeldung offen“ auf „Geschlossen“. Bisher nahm es zwar keine Anmeldung mehr an, stand in der Liste aber weiter auf offen.",
+          "Der Anmeldelink verschwindet dabei auch aus dem Termin im Vereinskalender — er führte danach nur noch auf eine Seite, die die Anmeldung ablehnt."
+        ]
+      },
+      {
+        title: "Mail, wenn der Beitrag da ist",
+        items: [
+          "Hakst du in der Anmeldeliste jemanden als bezahlt ab, geht an die Eltern automatisch eine Bestätigung — mit dem Betrag und dem Ablauf des Camps.",
+          "Den Ablauf schreibst du beim Anlegen des Camps in ein eigenes Feld und kannst ihn jederzeit nachpflegen. Steht dort nichts, kommt die Mail trotzdem, nur ohne diesen Teil.",
+          "Die Mail geht höchstens einmal je Anmeldung. Den Haken kannst du also gefahrlos hin und her stellen, ohne dass eine Familie dreimal dieselbe Bestätigung bekommt."
+        ]
+      },
+      {
+        title: "Feedbackbogen nach dem Camp",
+        items: [
+          "Ein paar Tage nach dem letzten Camptag bekommen die Eltern eine Mail mit einem Link zu einem kurzen Bogen: Gesamteindruck, Training, Essen, Organisation, Ausstattung, dazu zwei Freitextfelder.",
+          "Die Antworten sind anonym. Wir merken uns, WER geantwortet hat, damit niemand zweimal abstimmt — die Antwort selbst wird ohne Namen, ohne Uhrzeit und an zufälliger Stelle abgelegt, sodass sie sich nicht zurückverfolgen lässt.",
+          "Unter „Feedback“ steht die Auswertung je Camp: Durchschnitt und Verteilung je Frage sowie die Freitexte.",
+          "Der Bogen ist von sich aus AUS und muss unter Verwaltung eingeschaltet werden. Danach gilt er nur für Camps, deren letzter Tag höchstens drei Wochen zurückliegt — sonst bekämen beim Einschalten alle Eltern aller alten Camps eine Mail."
+        ]
+      },
+      {
+        title: "Kleinigkeiten",
+        items: [
+          "Auf der Teilnehmerliste — der Liste, die die Betreuer am Platz sehen — steht jetzt auch die Konfektionsgröße. Sie wird gebraucht, wenn das Material ausgegeben wird."
+        ]
+      }
+    ]
+  },
   {
     version: "1.0",
     groups: [

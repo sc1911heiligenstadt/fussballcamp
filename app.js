@@ -154,6 +154,10 @@ function raeumeWasNichtMehrErlaubtIst(edit, admin, betreuer) {
     const absageGrund = document.getElementById("absage-grund");
     if (absageGrund) absageGrund.value = "";
     anmEntwurf = null;
+    // ⚠️ Die Feedback-Auswertung ist zwar anonym, aber sie kommt vom Server nur
+    // mit Bearbeiten-Recht — und was einmal gezeichnet ist, bleibt sonst im DOM
+    // stehen. Gleiche Regel wie oben: Verstecken ist nicht Räumen.
+    leere("fb-inhalt");
   }
   if (!admin) {
     leere("aufraeum-box");
@@ -235,6 +239,7 @@ function zeichneAlles() {
   zeichneCamps();
   zeichneJobs();
   zeichneAnmeldungen();
+  zeichneFeedback();
   fuelleVerwaltung();
 }
 
@@ -642,6 +647,7 @@ function oeffneCampDialog(id) {
     : { id: "", name: "", ort: "", vonDatum: "", bisDatum: "", taeglichVon: "09:00", taeglichBis: "16:00",
         jahrgangVon: null, jahrgangBis: null, plaetze: 40, preis: 0, preisHinweis: "",
         anmeldungVon: "", anmeldungBis: "", kurzbeschreibung: "", beschreibung: "",
+        ablauf: "", fuerFeldspieler: true, fuerTorwart: false,
         zusatzfrage: "", bild: null, felder: Object.assign({}, DEFAULT_FELDER) };
 
   document.getElementById("camp-modal-titel").textContent = c ? "Camp bearbeiten" : "Neues Camp";
@@ -662,7 +668,16 @@ function oeffneCampDialog(id) {
   setzeWert("c-kurz", campEntwurf.kurzbeschreibung);
   setzeWert("c-beschreibung", campEntwurf.beschreibung);
   setzeWert("c-preishinweis", campEntwurf.preisHinweis);
+  setzeWert("c-ablauf", campEntwurf.ablauf || "");
   setzeWert("c-zusatzfrage", campEntwurf.zusatzfrage);
+
+  // Ausrichtung. ⚠️ Ein Camp aus der Zeit vor diesen Feldern trägt keines von
+  // beiden — es gilt als Feldspieler-Camp, genau wie im Worker. Stünden hier
+  // beide Haken leer, ließe sich der Dialog nicht mehr speichern, ohne dass
+  // jemand versteht, warum.
+  document.getElementById("c-fuer-feldspieler").checked =
+    campEntwurf.fuerFeldspieler === undefined ? !campEntwurf.fuerTorwart : !!campEntwurf.fuerFeldspieler;
+  document.getElementById("c-fuer-torwart").checked = !!campEntwurf.fuerTorwart;
 
   zeichneFeldwahl();
   campBildZuruecksetzen();
@@ -862,7 +877,10 @@ async function speichereCampAusDialog() {
   c.beschreibung = wert("c-beschreibung").trim();
   c.preishinweis = undefined;
   c.preisHinweis = wert("c-preishinweis").trim();
+  c.ablauf = wert("c-ablauf").trim();
   c.zusatzfrage = wert("c-zusatzfrage").trim();
+  c.fuerFeldspieler = document.getElementById("c-fuer-feldspieler").checked;
+  c.fuerTorwart = document.getElementById("c-fuer-torwart").checked;
 
   // Nur das prüfen, was die App besser weiß als der Server (Reihenfolge der
   // Datumsangaben). Alles Weitere prüft der Worker — doppelt gehaltene
@@ -872,6 +890,7 @@ async function speichereCampAusDialog() {
   if (c.bisDatum < c.vonDatum) return toast("Der letzte Tag liegt vor dem ersten.", true);
   if (c.anmeldungVon && c.anmeldungBis && c.anmeldungBis < c.anmeldungVon) return toast("Das Anmeldefenster endet vor seinem Beginn.", true);
   if (!c.plaetze) return toast("Wie viele Plätze hat das Camp?", true);
+  if (!c.fuerFeldspieler && !c.fuerTorwart) return toast("Für wen ist das Camp? Bitte Feldspieler, Torwart oder beides ankreuzen.", true);
 
   await mitFehler(async () => {
     // ⚠️ Erst die Bilddatei, dann das Camp. Bricht es dazwischen ab, liegt
@@ -900,7 +919,7 @@ async function speichereCampAusDialog() {
 
 function fuelleCampAuswahl() {
   const liste = sortierteCamps();
-  ["jobs-camp", "teilnehmer-camp", "anm-camp"].forEach((id) => {
+  ["jobs-camp", "teilnehmer-camp", "anm-camp", "fb-camp"].forEach((id) => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const vorher = sel.value;
@@ -1189,13 +1208,24 @@ async function zeichneTeilnehmer() {
       t.essenHinweis ? "Essen: " + t.essenHinweis : ""
     ].filter(Boolean);
 
+    // ⚠️ Die Konfektionsgröße steht in der ERSTEN Unterzeile, nicht bei den
+    // Gesundheitshinweisen: das hier ist die Liste, mit der am letzten Camptag
+    // das Material ausgegeben wird, und dabei sucht man nach der Größe, nicht
+    // nach einer Allergie.
+    const kopf = [
+      t.geburtsdatum ? alterText(t.geburtsdatum) : "Alter unbekannt",
+      t.trikotgroesse ? "Größe " + t.trikotgroesse : "",
+      t.elternTelefon ? "Notfall: " + t.elternTelefon : ""
+    ].filter(Boolean);
+
     return `
       <div class="anm-zeile">
         <div class="anm-name">${escapeHtml(t.kindVorname || "")} ${escapeHtml(t.kindNachname || "")}
-          <span class="an-sub">${t.geburtsdatum ? alterText(t.geburtsdatum) : "Alter unbekannt"}${t.elternTelefon ? " · Notfall: " + escapeHtml(t.elternTelefon) : ""}</span>
+          <span class="an-sub">${escapeHtml(kopf.join(" · "))}</span>
           ${hinweise.length ? `<span class="an-sub"><strong>${escapeHtml(hinweise.join(" · "))}</strong></span>` : ""}
         </div>
         <div class="anm-marker">
+          ${t.rolle === "torwart" ? `<span class="marker torwart">Torwart</span>` : ""}
           ${hinweise.length ? `<span class="marker gesundheit">beachten</span>` : ""}
           ${heimwegMarker(t.alleinNachHause)}
         </div>
@@ -1259,7 +1289,12 @@ function zeichneAnmeldungen() {
   const angemeldete = alle.filter((a) => a.status === "angemeldet");
   const summe = angemeldete.reduce((s, a) => s + anmBetrag(camp, a), 0);
   const eingegangen = angemeldete.filter((a) => a.bezahlt).reduce((s, a) => s + anmBetrag(camp, a), 0);
-  zus.textContent = `${angemeldete.length} angemeldet · ${camp.warteliste || 0} auf der Warteliste · ${bezahlt} bezahlt, ${offen} offen · ${euro(eingegangen)} von ${euro(summe)} eingegangen`;
+  // ⚠️ Die Torwart-Zahl steht nur da, wenn das Camp überhaupt beides anbietet.
+  // Bei einem reinen Feldspieler-Camp wäre "0 Torhüter" keine Information,
+  // sondern eine Frage, die sich niemand gestellt hat.
+  const beides = camp.fuerFeldspieler && camp.fuerTorwart;
+  const tw = beides ? ` · davon ${camp.torwarte || 0} Torhüter` : "";
+  zus.textContent = `${angemeldete.length} angemeldet${tw} · ${camp.warteliste || 0} auf der Warteliste · ${bezahlt} bezahlt, ${offen} offen · ${euro(eingegangen)} von ${euro(summe)} eingegangen`;
 
   leer.classList.toggle("hidden", liste.length > 0);
   ziel.innerHTML = liste.map((a) => anmZeile(camp, a)).join("");
@@ -1286,6 +1321,7 @@ function anmZeile(camp, a) {
     <div class="anm-marker">
       ${a.elternAenderung ? `<span class="marker warteliste"${a.elternAenderung === "geaendert" && Array.isArray(a.elternAenderungFelder) && a.elternAenderungFelder.length
         ? ` title="${escapeAttr(a.elternAenderungFelder.map(feldLabel).join(", "))}"` : ""}>${a.elternAenderung === "abgesagt" ? "Eltern haben abgesagt" : "von Eltern geändert"}</span>` : ""}
+      ${a.rolle === "torwart" ? `<span class="marker torwart">Torwart</span>` : ""}
       ${gesund ? `<span class="marker gesundheit">Gesundheit</span>` : ""}
       ${a.status === "warteliste" ? `<span class="marker warteliste">Warteliste</span>` : ""}
       ${a.status === "abgesagt" ? `<span class="marker">abgesagt</span>` : ""}
@@ -1372,6 +1408,10 @@ function anmDetails(camp, a) {
   zeile("Status", a.status === "warteliste" ? `Warteliste, Platz ${a.wartePlatz || "?"}` : (a.status === "abgesagt" ? "abgesagt" + (a.absageGrund ? " — " + a.absageGrund : "") : "angemeldet"));
   zeile("Anmeldung eingegangen", datumZeitDe(a.erstelltAm));
   if (a.geaendertAm) zeile("Zuletzt geändert", datumZeitDe(a.geaendertAm));
+  // ⚠️ Nur bei einem Camp, das beides anbietet. Sonst stünde bei jeder
+  // Anmeldung eines gewöhnlichen Camps "Ausrichtung: Feldspieler" — richtig,
+  // aber ohne jeden Aussagewert.
+  if (camp.fuerFeldspieler && camp.fuerTorwart) zeile("Ausrichtung", rolleLabel(a.rolle));
 
   FELD_GRUPPEN.forEach((g) => {
     const felder = FORMULAR_FELDER.filter((f) => f.gruppe === g.id && a[f.id] !== undefined && a[f.id] !== "" && a[f.id] !== false);
@@ -1572,6 +1612,10 @@ function fuelleVerwaltung() {
   setzeWert("e-starterinnerungtage", e.startErinnerungTage || 3);
   document.getElementById("e-zahlerinnerung").checked = e.zahlErinnerung !== false;
   setzeWert("e-zahlerinnerungtage", e.zahlErinnerungTage || 14);
+  document.getElementById("e-feedback").checked = e.feedbackAktiv === true;
+  // ⚠️ 0 ist ein gültiger Wert ("am letzten Camptag selbst") — deshalb gegen
+  // undefined/null prüfen, nie auf Wahrheitswert. `|| 2` machte die 0 zur 2.
+  setzeWert("e-feedbacktage", e.feedbackTage === undefined || e.feedbackTage === null ? 2 : e.feedbackTage);
   setzeWert("e-aufraeumen", e.aufraeumenNachMonaten || 6);
 
   const lauf = daten && daten.lauf;
@@ -1672,6 +1716,11 @@ async function speichereVerwaltung() {
     startErinnerungTage: zahlOderNull("e-starterinnerungtage") || 3,
     zahlErinnerung: document.getElementById("e-zahlerinnerung").checked,
     zahlErinnerungTage: zahlOderNull("e-zahlerinnerungtage") || 14,
+    feedbackAktiv: document.getElementById("e-feedback").checked,
+    // ⚠️ zahlOderNull() gibt bei "0" die 0 zurück (dafür ist es gebaut) — hier
+    // also NICHT mit `|| 2` nachhelfen, sonst wäre "am letzten Camptag" nicht
+    // einstellbar. Fehlt der Wert ganz, entscheidet der Worker.
+    feedbackTage: zahlOderNull("e-feedbacktage"),
     aufraeumenNachMonaten: zahlOderNull("e-aufraeumen") || 6
   };
   if (e.iban && !/^[A-Z]{2}[0-9A-Z]{13,32}$/.test(e.iban)) return toast("Die IBAN sieht nicht richtig aus.", true);
@@ -1860,6 +1909,17 @@ function verdrahteBedienung() {
   document.getElementById("btn-test-zahlung").addEventListener("click", async () => {
     await mitFehler(async () => { const a = await erinnereJetzt("", "zahlung"); toast(`Verschickt: ${(a && a.gesendet) || 0}.`); });
   });
+  document.getElementById("btn-test-feedback").addEventListener("click", async () => {
+    await mitFehler(async () => {
+      const a = await erinnereJetzt("", "feedback");
+      // ⚠️ Der Fall „aus" braucht eine eigene Meldung. Sonst stünde „Verschickt: 0"
+      // da, und man suchte den Fehler bei den Camps statt beim Haken darüber.
+      if (a && a.aus) return toast("Der Feedbackbogen ist ausgeschaltet. Haken setzen und Einstellungen speichern.", true);
+      toast(`Verschickt: ${(a && a.gesendet) || 0}.`);
+    });
+  });
+
+  document.getElementById("fb-camp").addEventListener("change", zeichneFeedback);
 
   // Klick auf den dunklen Rand schließt den Dialog — aber nur dort, nicht auf
   // dem Dialog selbst.
@@ -1880,9 +1940,12 @@ function exportiereAnmeldungen() {
   if (!liste.length) return toast("Keine Anmeldung zum Ausgeben.");
 
   const spalten = FORMULAR_FELDER.filter((f) => (camp.felder || {})[f.id] !== "aus" || f.fest);
-  const kopf = ["Nr", "Status", "Bezahlt", "Verwendungszweck"].concat(spalten.map((f) => f.label));
+  // ⚠️ Die Ausrichtung steht NICHT in FORMULAR_FELDER (sie hängt am Camp, nicht
+  // an der Feldwahl) und muss deshalb eigens als Spalte mit. Ohne sie fehlte im
+  // Export ausgerechnet die Zahl, wegen der es das Feld gibt.
+  const kopf = ["Nr", "Status", "Ausrichtung", "Bezahlt", "Verwendungszweck"].concat(spalten.map((f) => f.label));
   const zeilen = liste.map((a) => [
-    a.nummer || "", a.status === "warteliste" ? "Warteliste" : "angemeldet", a.bezahlt ? "ja" : "nein", verwendungszweck(camp, a)
+    a.nummer || "", a.status === "warteliste" ? "Warteliste" : "angemeldet", rolleLabel(a.rolle), a.bezahlt ? "ja" : "nein", verwendungszweck(camp, a)
   ].concat(spalten.map((f) => {
     const v = a[f.id];
     if (f.typ === "haken") return v ? "ja" : "nein";
@@ -1902,6 +1965,83 @@ function exportiereAnmeldungen() {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+// ============================================================
+//  Feedback der Eltern (seit 2026-09-03)
+// ============================================================
+//
+// ⚠️ Die Auswertung kommt FERTIG vom Server (`camp.feedback` aus
+// fussballcamp-load). Der Client rechnet nichts selbst nach — er bekommt die
+// einzelnen Antworten gar nicht, sondern nur Schnitte, Verteilung und die
+// Freitexte. Das ist kein Zufall: die einzelnen Antworten liegen auf dem Server
+// in zufälliger Reihenfolge, und jede Umsortierung hier wäre eine Gelegenheit,
+// diese Reihenfolge wieder mit etwas anderem in Verbindung zu bringen.
+
+function zeichneFeedback() {
+  if (!canEdit()) return;
+  const camp = gewaehltesCamp("fb-camp");
+  const ziel = document.getElementById("fb-inhalt");
+  const leer = document.getElementById("fb-empty");
+  if (!ziel || !leer) return;
+
+  if (!camp) {
+    ziel.innerHTML = "";
+    leer.classList.remove("hidden");
+    leer.textContent = "Es ist noch kein Camp angelegt.";
+    return;
+  }
+
+  const fb = camp.feedback || { anzahl: 0, gebeten: 0, schnitte: {}, verteilung: {}, janein: {}, texte: [] };
+  leer.classList.toggle("hidden", fb.anzahl > 0);
+  leer.textContent = fb.gebeten
+    ? `Für dieses Camp wurden ${fb.gebeten} Bögen verschickt, geantwortet hat noch niemand.`
+    : "Für dieses Camp wurde noch kein Feedbackbogen verschickt.";
+  if (!fb.anzahl) { ziel.innerHTML = ""; return; }
+
+  const quote = fb.gebeten ? Math.round((fb.anzahl / fb.gebeten) * 100) : null;
+  const kopf = `<p class="muted">${fb.anzahl} ${fb.anzahl === 1 ? "Antwort" : "Antworten"}${
+    fb.gebeten ? ` von ${fb.gebeten} verschickten Bögen (${quote} %)` : ""}.</p>`;
+
+  const fragen = (FEEDBACK_FRAGEN || []);
+  const bloecke = fragen.map((f) => {
+    if (f.typ === "note") {
+      const schnitt = (fb.schnitte || {})[f.id];
+      const v = ((fb.verteilung || {})[f.id] || {}).verteilung || [0, 0, 0, 0, 0];
+      const hoechste = Math.max(1, ...v);
+      const balken = FEEDBACK_NOTEN.map((n, i) => `
+        <div class="fb-balken-zeile">
+          <span class="fb-balken-label">${escapeHtml(String(n.wert))} — ${escapeHtml(n.label)}</span>
+          <span class="fb-balken"><span class="fb-balken-fuellung" style="width:${Math.round((v[i] / hoechste) * 100)}%"></span></span>
+          <span class="fb-balken-zahl">${v[i]}</span>
+        </div>`).join("");
+      return `
+        <div class="fb-frage">
+          <h3>${escapeHtml(f.frage)}</h3>
+          <p class="fb-schnitt">${schnitt === null || schnitt === undefined ? "keine Antwort" : "Durchschnitt " + String(schnitt).replace(".", ",")}</p>
+          ${balken}
+        </div>`;
+    }
+    if (f.typ === "janein") {
+      const j = (fb.janein || {})[f.id] || { ja: 0, nein: 0 };
+      return `
+        <div class="fb-frage">
+          <h3>${escapeHtml(f.frage)}</h3>
+          <p class="fb-schnitt">${j.ja} × Ja · ${j.nein} × Nein</p>
+        </div>`;
+    }
+    // Freitexte. ⚠️ In der Reihenfolge, in der sie vom Server kommen — die ist
+    // gewürfelt, siehe handleFcFeedbackSenden im Worker.
+    const texte = (fb.texte || []).map((t) => t[f.id]).filter(Boolean);
+    if (!texte.length) return "";
+    return `
+      <div class="fb-frage">
+        <h3>${escapeHtml(f.frage)}</h3>
+        ${texte.map((t) => `<blockquote class="fb-text">${escapeHtml(t)}</blockquote>`).join("")}
+      </div>`;
+  }).join("");
+
+  ziel.innerHTML = kopf + bloecke;
 }
 
 // ============================================================

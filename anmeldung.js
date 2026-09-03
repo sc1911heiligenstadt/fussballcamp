@@ -90,6 +90,15 @@ function zeigeCamp() {
           ? " — Frühbucherpreis, gilt bis " + oDatum(camp.preisFruehBis) + " (danach " + oEuro(camp.preisRegulaer) + ")"
           : "") }
   ];
+  // ⚠️ Nur bei einem reinen TORWART-Camp als Eckdatum. Ein Camp „für beide"
+  // fragt weiter unten sowieso nach, und ein reines Feldspieler-Camp ist der
+  // Normalfall — dort wäre die Zeile nur Lärm.
+  if (Array.isArray(camp.rollen) && camp.rollen.length === 1 && camp.rollen[0] === "torwart") {
+    // ⚠️ NICHT "Für wen" — diese Beschriftung trägt schon die Jahrgangszeile
+    // darüber. Zwei Zeilen mit derselben Frage nebeneinander liest niemand als
+    // zwei verschiedene Angaben (im Browser gemessen, bevor es live ging).
+    eck.push({ t: "Ausrichtung", w: "Torwartcamp" });
+  }
   if (camp.anmeldungBis) eck.push({ t: "Anmeldung bis", w: oDatum(camp.anmeldungBis) });
 
   document.getElementById("camp-eckdaten").innerHTML = eck
@@ -111,7 +120,7 @@ function zeigeCamp() {
   }
   warn.innerHTML = teile.join("");
 
-  baueFormular(document.getElementById("felder"), camp.felder, letzteEltern || {});
+  baueFormular(document.getElementById("felder"), camp.felder, letzteEltern || {}, camp.rollen);
 
   // Teilnahmebedingungen. Steht in der Verwaltung nichts, entfällt der Block
   // ersatzlos — dann wird auch kein Häkchen verlangt. Ein leerer Aufklapper mit

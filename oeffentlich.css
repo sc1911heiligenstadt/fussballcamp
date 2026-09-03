@@ -245,3 +245,15 @@ body.fc-oeffentlich {
   width: auto;
   height: auto;
 }
+
+
+/* ---------- Feedbackbogen (feedback.html) ---------- */
+
+/* Funf Knopfe passen nebeneinander nur auf dem Rechner. Am Handy sollen sie
+   umbrechen statt zu schrumpfen -- ein 40 px breiter Knopf mit "eher nicht"
+   darin ist nicht mehr zu treffen. */
+.fb-noten-reihe { flex-wrap: wrap; }
+.fb-note-knopf { flex: 1 1 128px; }
+.fb-note-knopf span { display: flex; align-items: baseline; gap: 6px; }
+.fb-note-knopf strong { font-size: 15px; }
+.fb-note { margin-bottom: 20px; }

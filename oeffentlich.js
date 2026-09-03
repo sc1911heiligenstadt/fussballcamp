@@ -48,20 +48,53 @@ function istPflicht(f, konf) {
   return !!f.fest || (konf || {})[f.id] === "pflicht";
 }
 
-function baueFormular(ziel, konf, werte) {
+// `rollen` ist die Liste der Ausrichtungen, die das Camp anbietet (kommt vom
+// Worker mit). Nur bei ZWEI Einträgen entsteht daraus eine Frage — bei einer
+// steht die Antwort schon fest, und eine Frage mit genau einer möglichen
+// Antwort ist keine Frage, sondern eine Stolperstelle.
+//
+// ⚠️ Der Parameter ist optional. Ein alter Aufruf ohne ihn verhält sich wie
+// vorher; die Rollenfrage entfällt dann, und der Worker setzt „Feldspieler".
+function baueFormular(ziel, konf, werte, rollen) {
   const w = werte || {};
   const felder = sichtbareFelder(konf);
 
   ziel.innerHTML = FELD_GRUPPEN.map((g) => {
     const drin = felder.filter((f) => f.gruppe === g.id);
-    if (!drin.length) return "";
+    // ⚠️ Die Rollenfrage hängt an der Gruppe „Das Kind" und muss deshalb auch
+    // dann eine Gruppe erzeugen, wenn dort sonst kein Feld eingeschaltet wäre.
+    // Ohne diese Zeile fiele sie stillschweigend aus dem Formular heraus.
+    const rollenHier = g.id === "kind" ? rollenHtml(rollen, w.rolle) : "";
+    if (!drin.length && !rollenHier) return "";
     return `
       <fieldset class="anm-gruppe">
         <legend>${oEsc(g.label)}</legend>
         ${g.hinweis ? `<p class="anm-gruppen-hinweis">${oEsc(g.hinweis)}</p>` : ""}
+        ${rollenHier}
         ${drin.map((f) => feldHtml(f, konf, w[f.id])).join("")}
       </fieldset>`;
   }).join("");
+}
+
+// Die Frage „Feldspieler oder Torwart?" — als zwei Knöpfe, gleiche Bauform wie
+// die Ja/Nein-Felder. Bewusst OHNE Vorauswahl: eine gesetzte Vorauswahl wäre bei
+// den meisten Kindern zufällig richtig und bei den Torhütern zufällig falsch,
+// und niemand merkt es.
+function rollenHtml(rollen, gewaehlt) {
+  const liste = Array.isArray(rollen) ? rollen : [];
+  if (liste.length < 2) return "";
+  return `
+    <div class="anm-feld janein" role="group" aria-labelledby="f-rolle-frage" aria-required="true">
+      <span class="janein-frage" id="f-rolle-frage">Nimmt dein Kind als Feldspieler oder als Torwart teil? <span class="pflicht-stern" aria-hidden="true">*</span></span>
+      <div class="janein-knoepfe">
+        ${liste.map((id) => `
+          <label class="janein-knopf">
+            <input type="radio" name="f-rolle" value="${oEsc(id)}" data-rolle="1"${id === gewaehlt ? " checked" : ""} />
+            <span>${oEsc(rolleLabel(id))}</span>
+          </label>`).join("")}
+      </div>
+      <span class="anm-hinweis">Danach richtet sich, wie viele Torwarttrainer wir einplanen.</span>
+    </div>`;
 }
 
 function feldHtml(f, konf, wert) {
@@ -155,6 +188,17 @@ function leseFormular(wurzel, konf) {
     // Ein Pflicht-HAKEN muss gesetzt sein; ein Pflicht-FELD darf nicht leer sein.
     if (istPflicht(f, konf) && (f.typ === "haken" ? v !== true : v === "")) fehlend.push(f.label);
   });
+
+  // Feldspieler oder Torwart. ⚠️ Steht die Frage gar nicht im Formular (Camp mit
+  // nur einer Ausrichtung), wird auch nichts mitgeschickt — der Worker setzt den
+  // Wert dann selbst. Nur wenn die Knöpfe DA sind und keiner gedrückt wurde,
+  // ist das eine fehlende Pflichtangabe.
+  const rollenGruppe = wurzel.querySelector("[data-rolle]");
+  if (rollenGruppe) {
+    const gewaehlt = wurzel.querySelector("[data-rolle]:checked");
+    if (gewaehlt) daten.rolle = String(gewaehlt.value);
+    else fehlend.push("Feldspieler oder Torwart");
+  }
 
   return { daten, fehlend };
 }
