@@ -332,6 +332,20 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.9",
+    groups: [
+      {
+        title: "Aufgaben-Gitter: eine Spalte je Aufgabe, auch nach dem Umbenennen",
+        items: [
+          "Wer eine Aufgabe an einem einzelnen Tag umbenannt hat, bekam daf\u00fcr eine zweite Spalte \u2014 und in der alten stand an dem Tag ein Strich, als g\u00e4be es die Aufgabe dort nicht. Auch ein versehentliches Leerzeichen reichte daf\u00fcr.",
+          "Umgekehrt fielen zwei verschiedene Aufgaben mit zuf\u00e4llig gleichem Namen in eine Spalte zusammen.",
+          "Beides ist behoben: das Gitter erkennt eine Aufgabe jetzt an ihrer Herkunft aus dem Aufgaben-Katalog, nicht mehr am getippten Namen. Von Hand angelegte Aufgaben laufen weiter \u00fcber den Namen \u2014 dort gibt es nichts anderes.",
+          "Haben zwei Tage verschiedene Uhrzeiten f\u00fcr dieselbe Aufgabe, steht im Spaltenkopf jetzt \u201eZeit je Tag\u201c statt einer Uhrzeit, die nur f\u00fcr den ersten Tag stimmt. Die genaue Zeit steht wie bisher in den Tageskarten darunter."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.8",
     groups: [
       {

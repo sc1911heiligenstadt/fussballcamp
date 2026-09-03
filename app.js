@@ -973,23 +973,55 @@ function zeichneJobs() {
   verdrahteJobKlicks(camp);
 }
 
-// Spaltenköpfe sind die Aufgaben-NAMEN, nicht die einzelnen Job-Objekte: derselbe
-// Job steht an fünf Tagen fünfmal mit eigener Id. Über den Namen fallen sie in
-// eine Spalte zusammen, und man sieht auf einen Blick, an welchem Tag die
+// Eine Spalte je Aufgabe, eine Zeile je Camp-Tag: derselbe Job steht an fünf
+// Tagen fünfmal mit eigener Id. So sieht man auf einen Blick, an welchem Tag die
 // Betreuung fehlt.
+//
+// ⚠⚠ Gruppiert wird über ${T}katalogId${T}, NICHT über den Namen. Jeder Job trägt die
+// Id seiner Katalogvorlage (${T}fcJobsAusKatalog${T} im Worker), und der Name ist frei
+// änderbar — je Tag einzeln (${T}oeffneJobDialog(campId, datum, jobId)${T}). Über den
+// Namen zu gruppieren war [[f-name-als-key]] und in der Bugjagd vom 03.09.2026
+// an vier Fällen gemessen:
+//
+//   * ein angehängtes Leerzeichen an EINEM Tag spaltete die Spalte in zwei
+//   * eine echte Umbenennung ebenso — und die alte Spalte zeigte an dem Tag
+//     ein „—“, als gäbe es die Aufgabe dort nicht, obwohl sie besetzt war
+//   * zwei VERSCHIEDENE Aufgaben mit zufällig gleichem Namen fielen in EINE
+//     Spalte
+//
+// Genau die Frage, für die das Gitter gebaut ist, wurde damit falsch
+// beantwortet. Ein von Hand angelegter Job ohne ${T}katalogId${T} bleibt beim Namen —
+// etwas anderes gibt es dort nicht.
 function jobGitter(camp, nurOffen) {
+  const schluessel = (j) => (j.katalogId ? "k:" + j.katalogId : "n:" + (j.name || ""));
   const spalten = [];
+  const nachSchluessel = {};
   (camp.tage || []).forEach((t) => (t.jobs || []).forEach((j) => {
-    if (!spalten.some((s) => s.name === j.name)) spalten.push({ name: j.name, von: j.von, bis: j.bis });
+    const k = schluessel(j);
+    if (!nachSchluessel[k]) {
+      // Beschriftung und Zeit kommen vom ERSTEN Vorkommen. Wer einen späteren
+      // Tag umbenennt, sieht den alten Namen im Kopf — der Name je Tag steht in
+      // den Karten darunter.
+      nachSchluessel[k] = { k, name: j.name, von: j.von || "", bis: j.bis || "", gleicheZeit: true };
+      spalten.push(nachSchluessel[k]);
+    } else {
+      // ⚠️ Weicht die Zeit an einem Tag ab, darf der Kopf keine einzelne
+      // behaupten: sie stünde sichtbar über ALLEN Tagen der Spalte. Die genaue
+      // Zeit je Tag steht in den Karten darunter.
+      const sp = nachSchluessel[k];
+      if (sp.von !== (j.von || "") || sp.bis !== (j.bis || "")) sp.gleicheZeit = false;
+    }
   }));
   if (!spalten.length) return "";
 
   const kopf = `<thead><tr><th class="spieltag-kopf">Tag</th>${spalten.map((s) =>
-    `<th class="job-kopf">${escapeHtml(s.name)}<span class="jk-zeit">${escapeHtml(s.von || "")}–${escapeHtml(s.bis || "")}</span></th>`).join("")}</tr></thead>`;
+    `<th class="job-kopf">${escapeHtml(s.name)}<span class="jk-zeit">${
+      s.gleicheZeit ? escapeHtml(s.von + "–" + s.bis) : "Zeit je Tag"
+    }</span></th>`).join("")}</tr></thead>`;
 
   const zeilen = (camp.tage || []).map((t) => {
     const zellen = spalten.map((s) => {
-      const job = (t.jobs || []).find((j) => j.name === s.name);
+      const job = (t.jobs || []).find((j) => schluessel(j) === s.k);
       if (!job) return `<td class="muted">—</td>`;
       if (nurOffen && (job.besetzung || []).length >= (job.anzahl || 1)) return `<td class="muted">✓</td>`;
       return `<td>${zelleInhalt(camp, t, job)}</td>`;
