@@ -117,7 +117,18 @@ const FORMULAR_FELDER = [
   // können. Die Art.-13-Information auf anmeldung.html verweist stattdessen auf
   // Punkt 16; wer das eine ändert, zieht das andere mit.
   { id: "alleinNachHause",  gruppe: "heimweg", label: "Darf das Kind nach dem Camp allein nach Hause gehen?", typ: "janein", hinweis: "Wenn nein: bitte unten eintragen, wer es abholen darf." },
-  { id: "abholberechtigt",  gruppe: "heimweg", label: "Wer darf das Kind abholen",                    typ: "mehrzeilig", maxLen: 300 },
+  // ⚠️ `zeigtWenn` — dieses Feld steht nur da, wenn die Frage darüber mit
+  // „nein“ beantwortet ist. Vorher stand es IMMER da, auch bei einem Kind, das
+  // allein nach Hause darf: dann tragen die Eltern trotzdem jemanden ein, und
+  // am letzten Camptag beantworten zwei Stellen dieselbe Frage verschieden.
+  // Gleiche Überlegung wie bei `janein_text` — nur ist die Nachfrage hier ein
+  // eigenes Feld mit eigener Id und eigener Pflichtstufe, kein Begleitwert.
+  //
+  // ⚠️ Die Sichtbarkeit ist NICHT dasselbe wie die Leerregel im Worker
+  // (`leerWenn`, dort auf „ja“). Verborgen ist das Feld auch, solange die Frage
+  // noch gar nicht beantwortet ist — geleert wird aber nur bei der einen
+  // Antwort, die dem Eintrag wirklich widerspricht.
+  { id: "abholberechtigt",  gruppe: "heimweg", label: "Wer darf das Kind abholen",                    typ: "mehrzeilig", maxLen: 300, zeigtWenn: { feld: "alleinNachHause", wert: "nein" } },
 
   // Freitext
   { id: "bemerkung",       gruppe: "sonstiges",   label: "Bemerkung",            typ: "mehrzeilig", maxLen: 800 }
@@ -331,6 +342,20 @@ FORMULAR_FELDER.forEach((f) => {
 });
 
 const APP_CHANGELOG = [
+  {
+    version: "1.10",
+    groups: [
+      {
+        title: "Abholberechtigte nur noch fragen, wenn sie gebraucht werden",
+        items: [
+          "Im Anmeldeformular stand das Feld „Wer darf das Kind abholen“ immer da — auch bei einem Kind, das laut der Frage darüber allein nach Hause gehen darf. Viele Eltern haben dort trotzdem jemanden eingetragen, und am letzten Camptag beantworteten dann zwei Stellen dieselbe Frage verschieden.",
+          "Das Feld erscheint jetzt erst, wenn die Frage mit „nein“ beantwortet ist, und verschwindet wieder, sobald jemand auf „ja“ wechselt. Wer sich vertippt hat und zurückwechselt, findet seinen Text noch vor.",
+          "Steht „ja“, wird nichts mitgeschickt — und ein Camp, das die Abholberechtigten zur Pflicht macht, lässt sich für diese Kinder trotzdem absenden. Vorher wäre es unanmeldbar gewesen.",
+          "Auch über „Angaben bearbeiten“ in der Verwaltung kann der Widerspruch nicht mehr entstehen: wer dort auf „ja“ stellt, leert damit die Abholberechtigten mit. Der Verlauf hält fest, dass das Feld angefasst wurde."
+        ]
+      }
+    ]
+  },
   {
     version: "1.9",
     groups: [

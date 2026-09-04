@@ -76,7 +76,9 @@ function baueFormular(ziel, konf, werte, rollen) {
           // durchgereicht, stünde beim Ändern einer Anmeldung nie ein Knopf
           // vorgewählt da — und die Familie müsste die Frage neu beantworten,
           // obwohl sie das längst getan hat.
-          f.typ === "janein_text" ? { hat: w[f.id + "Hat"], text: w[f.id] } : w[f.id]
+          f.typ === "janein_text" ? { hat: w[f.id + "Hat"], text: w[f.id] } : w[f.id],
+          // Abhaengige Felder (`zeigtWenn`) — siehe `feldSteuerung`.
+          feldSteuerung(f, konf, w)
         )).join("")}
       </fieldset>`;
   }).join("");
@@ -94,6 +96,25 @@ function baueFormular(ziel, konf, werte, rollen) {
     // niemand los, sondern sucht erst das Feld.
     if (auf) { const t = kasten.querySelector("textarea"); if (t) t.focus(); }
   }));
+
+  // Abhaengige Felder (`zeigtWenn`): die Huelle geht auf, sobald die STEUERFRAGE
+  // die passende Antwort traegt.
+  //
+  // ⚠️ Der Horcher sitzt an den Knoepfen der Steuerfrage, nicht am abhaengigen
+  // Feld — dort gaebe es nichts, worauf man horchen koennte. Und er wird je
+  // Huelle gesetzt: zwei Felder duerfen an derselben Frage haengen.
+  ziel.querySelectorAll("[data-zeigt-fuer]").forEach((huelle) => {
+    const steuer = huelle.dataset.steuer;
+    const soll = huelle.dataset.steuerWert;
+    const knoepfe = ziel.querySelectorAll(`[data-feld="${CSS.escape(steuer)}"]`);
+    if (!knoepfe.length) return;
+    knoepfe.forEach((k) => k.addEventListener("change", () => {
+      const gewaehlt = ziel.querySelector(`[data-feld="${CSS.escape(steuer)}"]:checked`);
+      const auf = !!gewaehlt && String(gewaehlt.value) === soll;
+      huelle.classList.toggle("fc-hidden", !auf);
+      if (auf) { const t = huelle.querySelector("textarea, input, select"); if (t) t.focus(); }
+    }));
+  });
 }
 
 // Die Frage „Feldspieler oder Torwart?" — als zwei Knöpfe, gleiche Bauform wie
@@ -117,11 +138,48 @@ function rollenHtml(rollen, gewaehlt) {
     </div>`;
 }
 
-function feldHtml(f, konf, wert) {
+// Haengt dieses Feld an der Antwort auf eine ANDERE Frage (`zeigtWenn`)?
+// Zurueck kommt entweder `null` oder { feld, wert, offen }.
+//
+// ⚠️ Steht die STEUERFRAGE an diesem Camp gar nicht im Formular, gilt das Feld
+// als gewoehnliches Feld. Sonst waere es dauerhaft versteckt — und als
+// Pflichtfeld liesse sich das Formular ueberhaupt nicht mehr absenden.
+function feldSteuerung(f, konf, werte) {
+  const ab = f.zeigtWenn;
+  if (!ab) return null;
+  if (!sichtbareFelder(konf).some((x) => x.id === ab.feld)) return null;
+  return { feld: ab.feld, wert: ab.wert, offen: janeinWert((werte || {})[ab.feld]) === ab.wert };
+}
+
+// Ein gespeicherter Ja/Nein-Wert als "ja" | "nein" | "".
+//
+// ⚠️ `true` aus der Haken-Zeit wird zu "ja", `false` aber NICHT zu "nein" —
+// dieselbe Umdeutung wie im `janein`-Zweig von `feldKern`. Stuenden hier zwei
+// verschiedene Regeln, klappte beim Aendern einer alten Anmeldung der falsche
+// Kasten auf.
+function janeinWert(roh) {
+  return roh === true ? "ja" : (roh === "ja" || roh === "nein" ? roh : "");
+}
+
+// Ein Feld mit `zeigtWenn` bekommt eine Huelle, die auf- und zugeht. Alles
+// andere geht unveraendert durch.
+function feldHtml(f, konf, wert, ab) {
+  const kern = feldKern(f, konf, wert, ab);
+  if (!ab) return kern;
+  return `<div class="anm-abhaengig${ab.offen ? "" : " fc-hidden"}"
+      data-zeigt-fuer="${oEsc(f.id)}" data-steuer="${oEsc(ab.feld)}" data-steuer-wert="${oEsc(ab.wert)}">${kern}</div>`;
+}
+
+function feldKern(f, konf, wert, ab) {
   const pflicht = istPflicht(f, konf);
   const id = "f-" + f.id;
   const stern = pflicht ? ` <span class="pflicht-stern" aria-hidden="true">*</span>` : "";
-  const req = pflicht ? " required" : "";
+  // ⚠️ Ein abhaengiges Feld bekommt NIE `required`. Versteckt und `required`
+  // zugleich heisst: der Browser verweigert das Absenden und zeigt die Meldung
+  // an einem Feld, das niemand sieht — das Formular waere tot, ohne dass etwas
+  // danach aussieht. Die Pflichtpruefung macht `leseFormular`, genau wie bei
+  // `janein_text`.
+  const req = pflicht && !ab ? " required" : "";
   const hinweis = f.hinweis ? `<span class="anm-hinweis">${oEsc(f.hinweis)}</span>` : "";
 
   if (f.typ === "haken") {
@@ -217,6 +275,25 @@ function leseFormular(wurzel, konf) {
   const fehlend = [];
 
   sichtbareFelder(konf).forEach((f) => {
+    // Abhaengiges Feld (`zeigtWenn`): traegt die Steuerfrage nicht die passende
+    // Antwort, steht das Feld gar nicht im Formular. Dann wird LEER geschickt —
+    // nicht der Inhalt, der im versteckten Kasten noch stehen mag.
+    //
+    // ⚠️ Und es zaehlt dann auch NICHT als fehlende Pflichtangabe. Ohne diese
+    // Zeile waere ein Camp, das die Abholberechtigten zur Pflicht macht, fuer
+    // jedes Kind unanmeldbar, das allein nach Hause darf.
+    //
+    // ⚠️ Der Stand wird aus dem DOM gelesen, nicht aus `daten` — die Schleife
+    // laeuft in der Reihenfolge von FORMULAR_FELDER, und ein Umsortieren dort
+    // duerfte diese Pruefung nicht kippen.
+    if (f.zeigtWenn && sichtbareFelder(konf).some((x) => x.id === f.zeigtWenn.feld)) {
+      const steuer = wurzel.querySelector(`[data-feld="${CSS.escape(f.zeigtWenn.feld)}"]:checked`);
+      if (!steuer || String(steuer.value) !== f.zeigtWenn.wert) {
+        daten[f.id] = f.typ === "haken" ? false : "";
+        return;
+      }
+    }
+
     // Ja/Nein mit Nachfrage: zwei Werte, `<id>Hat` und `<id>`.
     if (f.typ === "janein_text") {
       const gewaehlt = wurzel.querySelector(`[data-feld-hat="${CSS.escape(f.id)}"]:checked`);
