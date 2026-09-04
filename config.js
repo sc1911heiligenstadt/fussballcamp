@@ -234,7 +234,15 @@ const ABLAUF_MAX = 4000;
 // ⚠️ `trikotgroesse` steht seit 2026-09-03 dabei (Michel-Vorgabe): das ist die
 // Liste, die die Trainer am letzten Camptag in der Hand halten, wenn das
 // Material ausgegeben wird.
-const BETREUER_FELDER = ["kindVorname", "kindNachname", "geburtsdatum", "trikotgroesse", "allergien", "medikamente", "krankheiten", "essenHinweis", "elternTelefon", "alleinNachHause"];
+//
+// ⚠️ `abholberechtigt` steht seit 2026-09-04 dabei. Es fehlte hier einen
+// Nachmittag lang, nachdem der Worker es bekommen hatte — die Falle, vor der
+// der Absatz darüber warnt, ist also schon einmal zugeschnappt. Gefunden hat es
+// nicht das Auge, sondern `pruef-camp-statisch.mjs` (Abschnitt 2), der beide
+// Fassungen gegeneinander nagelt. Genau dafür gibt es diese Liste: sie wird
+// nirgends gelesen, sie ist die Gegenprobe. Wer sie „weil ungenutzt" entfernt,
+// nimmt dem Prüfstand seinen Maßstab.
+const BETREUER_FELDER = ["kindVorname", "kindNachname", "geburtsdatum", "trikotgroesse", "allergien", "medikamente", "krankheiten", "essenHinweis", "elternTelefon", "alleinNachHause", "abholberechtigt"];
 
 // Vorschlag für den ersten Job-Katalog. Wird nur angeboten, solange gar kein
 // Katalog existiert — danach ist der gepflegte Katalog die Wahrheit.
