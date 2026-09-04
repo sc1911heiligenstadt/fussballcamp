@@ -1302,6 +1302,7 @@ async function zeichneTeilnehmer() {
         <div class="anm-name">${escapeHtml(t.kindVorname || "")} ${escapeHtml(t.kindNachname || "")}
           <span class="an-sub">${escapeHtml(kopf.join(" · "))}</span>
           ${hinweise.length ? `<span class="an-sub"><strong>${escapeHtml(hinweise.join(" · "))}</strong></span>` : ""}
+          ${abholZeile(t)}
         </div>
         <div class="anm-marker">
           ${t.rolle === "torwart" ? `<span class="marker torwart">Torwart</span>` : ""}
@@ -1310,6 +1311,24 @@ async function zeichneTeilnehmer() {
         </div>
       </div>`;
   }).join("");
+}
+
+// Wer das Kind abholen darf — in der Liste der Betreuer.
+//
+// ⚠️ Der Marker „wird abgeholt" sagt nur, DASS jemand kommt. Wer am Ausgang
+// steht, muss wissen, WER kommen darf; ohne diese Zeile lieferte der Worker das
+// Feld zwar mit (FC_BETREUER_FELDER), aber niemand sähe es je.
+//
+// ⚠️ Das Feld ist mehrzeilig. Die Umbrüche werden zu „ · ", sonst stünde in
+// der einzeiligen Unterzeile alles ohne Trennung aneinander.
+//
+// Steht dort nichts, kommt auch nichts — bei einem Kind, das allein gehen darf,
+// räumt `leerWenn` im Worker das Feld ohnehin.
+function abholZeile(t) {
+  const wert = String(t.abholberechtigt || "").trim();
+  if (!wert) return "";
+  const eine = wert.split(/\r?\n/).map((z) => z.trim()).filter(Boolean).join(" · ");
+  return `<span class="an-sub">Abholen darf: ${escapeHtml(eine)}</span>`;
 }
 
 // Der Heimweg-Marker in der Teilnehmerliste der Betreuer.

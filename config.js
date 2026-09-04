@@ -343,6 +343,19 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.11",
+    groups: [
+      {
+        title: "Die Betreuer sehen jetzt, wer das Kind abholen darf",
+        items: [
+          "Die Eltern tragen im Formular ein, wer ihr Kind abholen darf – in der Teilnehmerliste der Betreuer stand die Angabe aber nicht. Ausgerechnet am Ausgang, wo sie gebraucht wird, fehlte sie: der Marker sagte nur „wird abgeholt“, nicht von wem.",
+          "Die Namen stehen jetzt in der Betreuerliste unter dem Kind. Bei einem Kind, das allein nach Hause darf, steht dort nichts – dann gibt es auch nichts einzutragen.",
+          "Die Datenschutz-Information im Anmeldeformular und auf der Seite „Meine Anmeldung“ nennt die Abholberechtigten jetzt ausdrücklich als Teil der Liste, die die Betreuer bekommen."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.10",
     groups: [
       {
