@@ -351,6 +351,18 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.12",
+    groups: [
+      {
+        title: "Der Excel-Export zeigt nur noch Spalten für Felder, die das Camp wirklich fragt",
+        items: [
+          "Bei einem neu angelegten Camp standen im Export drei Spalten, nach denen das Anmeldeformular gar nicht fragt: Lieblingsposition, Anschrift der Eltern und Krankenkasse. Sie waren im Camp-Dialog auf „nicht fragen“ eingestellt — der Export las das nur anders als die drei übrigen Stellen, die darüber entscheiden.",
+          "Export und Formular richten sich jetzt nach derselben Regel."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.11",
     groups: [
       {

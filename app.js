@@ -2274,7 +2274,16 @@ function exportiereAnmeldungen() {
   const liste = (camp.anmeldungen || []).filter((a) => a.status !== "abgesagt");
   if (!liste.length) return toast("Keine Anmeldung zum Ausgeben.");
 
-  const spalten = FORMULAR_FELDER.filter((f) => (camp.felder || {})[f.id] !== "aus" || f.fest);
+  // ⚠️ Dieselbe Regel wie in anmFormular() und sichtbareFelder(), NICHT
+  // `!== "aus"`. Der Unterschied ist der fehlende Schluessel: DEFAULT_FELDER
+  // nennt zwoelf Felder, `position`, `elternAnschrift` und `krankenkasse`
+  // fehlen darin, und der Camp-Dialog schreibt einen Schluessel erst beim
+  // AENDERN der Auswahl. Bei einem frisch angelegten Camp standen die drei
+  // damit auf undefined -- im Dialog als "nicht fragen", im Formular nicht
+  // gestellt, aber im Export als Spalte. Genau diese Verwechslung war schon
+  // einmal im Worker (admin-worker.js:21620, dort mit Kommentar behoben).
+  const konf = camp.felder || {};
+  const spalten = FORMULAR_FELDER.filter((f) => f.fest || konf[f.id] === "optional" || konf[f.id] === "pflicht");
   // ⚠️ Die Ausrichtung steht NICHT in FORMULAR_FELDER (sie hängt am Camp, nicht
   // an der Feldwahl) und muss deshalb eigens als Spalte mit. Ohne sie fehlte im
   // Export ausgerechnet die Zahl, wegen der es das Feld gibt.
