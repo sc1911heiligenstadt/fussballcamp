@@ -280,6 +280,23 @@ function zeigeFertig(a) {
 // schon ausgefüllt. Jedes Kind bleibt eine eigene Anmeldung mit eigenem Platz,
 // eigenem Beitrag und eigener Warteliste (Michel-Entscheidung).
 async function nochEinKind() {
+  // ⚠️ `zeigeCamp` zeichnet nur `#felder` neu. Diese drei Bedienelemente stehen
+  // AUSSERHALB davon und blieben deshalb so stehen, wie das erste Kind sie
+  // hinterlassen hat — bis zum 05.09.2026 stumm und ungefragt:
+  //
+  //   * die Zusatzantwort („Wer holt ab?", „Welche Schule?") ging unverändert
+  //     als Antwort des Geschwisterkindes mit und war damit oft schlicht falsch.
+  //   * die beiden Pflicht-Häkchen sind ZWEI getrennte Rechtserklärungen
+  //     (Art.-9-Einwilligung und Anerkennung der Teilnahmebedingungen). Für das
+  //     zweite Kind gingen sie als `true` mit, ohne dass jemand sie für DIESE
+  //     Anmeldung abgegeben hätte — bei einem Häkchen, das genau als Nachweis
+  //     der Zustimmung gedacht ist (`agbAm`/`agbStand` je Anmeldung).
+  //
+  // Vorbelegt bleiben allein die Elternangaben (`letzteEltern` in `zeigeCamp`).
+  document.getElementById("f-zusatz").value = "";
+  document.getElementById("f-agb").checked = false;
+  document.getElementById("f-datenschutz").checked = false;
+  document.getElementById("form-fehler").classList.add("fc-hidden");
   document.getElementById("fertig-bereich").classList.add("fc-hidden");
   document.getElementById("laden").classList.remove("fc-hidden");
   // Neu laden statt den alten Stand weiterzuverwenden: nach der eigenen

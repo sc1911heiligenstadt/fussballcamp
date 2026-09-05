@@ -351,6 +351,19 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.13",
+    groups: [
+      {
+        title: "Das Geschwisterkind erbt die Häkchen nicht mehr",
+        items: [
+          "„Noch ein Geschwisterkind anmelden“ füllt die Elternangaben vor — das ist so gewollt. Übernommen wurden bisher aber auch die Antwort auf die Zusatzfrage des Camps und die beiden Pflicht-Häkchen für Datenschutz und Teilnahmebedingungen.",
+          "Das sind zwei getrennte Erklärungen, und für das zweite Kind hatte sie niemand abgegeben. Beide Häkchen sind jetzt wieder leer und müssen für jede Anmeldung eigens gesetzt werden.",
+          "Auch das Feld zur Zusatzfrage startet leer — die Antwort für das erste Kind („wer holt ab“, „welche Schule“) passte für das zweite oft gar nicht."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.12",
     groups: [
       {
