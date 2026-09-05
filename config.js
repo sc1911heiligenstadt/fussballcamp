@@ -351,6 +351,18 @@ FORMULAR_FELDER.forEach((f) => {
 
 const APP_CHANGELOG = [
   {
+    version: "1.14",
+    groups: [
+      {
+        title: "Ein Camp-Tag ohne Aufgaben fällt jetzt auf",
+        items: [
+          "Wird der Zeitraum eines Camps nachträglich verlängert, kommt der neue Tag ganz ohne Aufgaben dazu — ohne Campleitung, ohne Gruppenbetreuung, ohne Erste Hilfe. Gemeldet hat das bisher nichts: „Aufgaben offen“ zählt nur die freien Plätze der Aufgaben, die es gibt, und stand deshalb weiter bei derselben Zahl.",
+          "Die Camp-Karte weist jetzt auf jeden Tag hin, an dem gar keine Aufgabe angelegt ist, und nennt das Datum."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.13",
     groups: [
       {

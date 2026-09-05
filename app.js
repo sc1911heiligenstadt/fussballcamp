@@ -472,6 +472,7 @@ function campKarte(c) {
       <a class="btn tiny ghost" href="${escapeAttr(link)}" target="_blank" rel="noopener">ansehen</a></div>` : ""}
 
     ${kalenderZeile(c)}
+    ${tageOhneAufgabenHinweis(c)}
     ${anmeldeFensterHinweis(c)}
 
     <div class="btn-row">
@@ -610,6 +611,32 @@ function kalenderZusatz(antwort) {
   return antwort && antwort.kalender === "fehler"
     ? " Der Termin im Vereinskalender ließ sich gerade nicht schreiben — der nächtliche Lauf holt ihn nach."
     : "";
+}
+
+// ⚠️ Ein Camp-Tag ganz OHNE Aufgabe wird von keiner Kennzahl gemeldet.
+// „Aufgaben offen" summiert nur die freien Plätze der VORHANDENEN Aufgaben
+// (`fcJobsFrei` im Worker) — ein Tag ohne jede Aufgabe zählt dort 0, also
+// dasselbe wie ein vollständig besetzter Tag.
+//
+// So entsteht der Fall: die Verwaltung zieht den letzten Camptag um einen Tag
+// nach hinten, `fcTageAngleichen` legt den neuen Tag mit `jobs: []` an (die
+// Aufgaben aus dem Katalog bekommt nur ein NEU angelegtes Camp), und danach
+// steht der Tag ohne Campleitung, ohne Gruppenbetreuung und ohne Erste Hilfe da.
+// Im Gitter liest sich die Zeile als Reihe von „—", also wie „diese Aufgabe
+// gibt es an dem Tag nicht" — nicht wie „hier fehlt alles". Mit dem Haken „nur
+// offene" verschwindet der Tag aus der Kartenliste sogar ganz.
+//
+// ⚠️ Die eigentliche Ursache sitzt im Worker (`fcTageAngleichen` gibt dem neuen
+// Tag keine Aufgaben mit). Diese Zeile ersetzt den Fix dort nicht, sie macht die
+// Lücke nur sichtbar — bis dahin und für jeden Tag, den jemand von Hand leert.
+function tageOhneAufgabenHinweis(c) {
+  const ohne = (c.tage || []).filter((t) => !(t.jobs || []).length);
+  if (!ohne.length) return "";
+  const wann = ohne.map((t) => datumDe(t.datum)).join(", ");
+  return `<div class="hinweis">${ohne.length === 1
+    ? `Am <strong>${escapeHtml(wann)}</strong> ist gar keine Aufgabe angelegt`
+    : `An <strong>${ohne.length} Camp-Tagen</strong> ist gar keine Aufgabe angelegt (${escapeHtml(wann)})`
+  } — weder Campleitung noch Betreuung. „Aufgaben offen“ zählt solche Tage nicht mit; unter „Aufgaben“ nachtragen.</div>`;
 }
 
 // Warum ein Camp trotz Status "offen" keine Anmeldung annimmt — sonst sucht man
