@@ -16,7 +16,7 @@
   --fc-gold-hell: #fbf2e1;
   --fc-rand: #dde1e8;
   --fc-text: #1e2330;
-  --fc-grau: #6b7280;
+  --fc-grau: #676e7c;
   --fc-radius: 12px;
 }
 
@@ -178,7 +178,7 @@ body.fc-oeffentlich {
   max-width: 100%; max-height: 62vh; width: auto; height: auto;
 }
 #fc-popup-wurzel .fc-pop-name { font-size: 17px; font-weight: 700; color: #1a56a0; margin-bottom: 3px; }
-#fc-popup-wurzel .fc-pop-zeit { font-size: 13px; color: #6b7280; margin-bottom: 7px; }
+#fc-popup-wurzel .fc-pop-zeit { font-size: 13px; color: #676e7c; margin-bottom: 7px; }
 #fc-popup-wurzel .fc-pop-frueh { font-size: 13px; font-weight: 600; color: #2d8c4e; margin-top: 2px; }
 .fc-pop-text { font-size: 14px; margin-bottom: 10px; }
 #fc-popup-wurzel .fc-pop-frei { font-size: 13px; color: #2d8c4e; font-weight: 600; margin-bottom: 10px; }
@@ -201,7 +201,7 @@ body.fc-oeffentlich {
    Fenster fuer sieben Tage stummschalten. */
 #fc-popup-wurzel .fc-pop-spaeter {
   display: inline-flex; align-items: center; min-height: 44px; margin-top: 2px;
-  background: none; border: none; color: #6b7280;
+  background: none; border: none; color: #676e7c;
   font-size: 13px; text-decoration: underline; cursor: pointer; font-family: inherit; padding: 0 2px;
 }
 
