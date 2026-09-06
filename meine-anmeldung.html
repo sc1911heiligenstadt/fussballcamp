@@ -76,18 +76,10 @@
       <div class="fc-hinweis fehler fc-hidden" id="form-fehler"></div>
       <div class="fc-hinweis ok fc-hidden" id="form-ok"></div>
 
-      <button type="submit" class="fc-btn gruen breit" id="btn-speichern">Änderungen speichern</button>
-    </form>
-
-    <div class="fc-karte" id="absage-karte">
-      <h2>Doch nicht dabei?</h2>
-      <p>Wenn dein Kind nicht teilnehmen kann, sag uns bitte ab. Der Platz geht dann an ein Kind von der Warteliste.</p>
-      <div class="fc-hinweis warn">Eine Absage lässt sich hier nicht rückgängig machen. Wenn es doch klappt, melde dich bitte direkt beim Verein.</div>
-      <p>Du bekommst danach eine Bestätigung per E-Mail. Darin steht auch, wie es mit einem bereits gezahlten Beitrag weitergeht.</p>
-      <p class="fc-grau">Eine Absage gibt den Platz frei. Die Anmeldung selbst bleibt bei uns gespeichert, bis wir das Camp aufräumen — in der Regel ein halbes Jahr nach dem letzten Camptag. Wenn du möchtest, dass wir die Angaben deines Kindes vorher löschen, schreib uns kurz; wir tun das dann von Hand.</p>
-      <button type="button" class="fc-btn rot" id="btn-absagen">Anmeldung absagen</button>
-    </div>
-
+      <!-- ⚠️ Dieser Kasten stand bis zum 06.09.2026 UNTER dem Absenden-Knopf.
+           Art. 13 DSGVO verlangt die Information zum Zeitpunkt der Erhebung --
+           wer schon abgeschickt hat, liest sie zu spaet. Beim Verschieben also
+           immer VOR den Knopf, nicht ans Seitenende. -->
     <div class="fc-karte">
       <h2>Datenschutz</h2>
       <details class="fc-details">
@@ -103,6 +95,19 @@
         </div>
       </details>
     </div>
+
+      <button type="submit" class="fc-btn gruen breit" id="btn-speichern">Änderungen speichern</button>
+    </form>
+
+    <div class="fc-karte" id="absage-karte">
+      <h2>Doch nicht dabei?</h2>
+      <p>Wenn dein Kind nicht teilnehmen kann, sag uns bitte ab. Der Platz geht dann an ein Kind von der Warteliste.</p>
+      <div class="fc-hinweis warn">Eine Absage lässt sich hier nicht rückgängig machen. Wenn es doch klappt, melde dich bitte direkt beim Verein.</div>
+      <p>Du bekommst danach eine Bestätigung per E-Mail. Darin steht auch, wie es mit einem bereits gezahlten Beitrag weitergeht.</p>
+      <p class="fc-grau">Eine Absage gibt den Platz frei. Die Anmeldung selbst bleibt bei uns gespeichert, bis wir das Camp aufräumen — in der Regel ein halbes Jahr nach dem letzten Camptag. Wenn du möchtest, dass wir die Angaben deines Kindes vorher löschen, schreib uns kurz; wir tun das dann von Hand.</p>
+      <button type="button" class="fc-btn rot" id="btn-absagen">Anmeldung absagen</button>
+    </div>
+
 
   </div>
 </div>
