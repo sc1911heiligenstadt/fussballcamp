@@ -6,7 +6,7 @@
 <title>⚽ Fußballcamp</title>
 <meta name="theme-color" content="#1a56a0" />
 <link rel="stylesheet" href="style.css?v=1.1" />
-<link rel="stylesheet" href="camp.css?v=1.6" />
+<link rel="stylesheet" href="camp.css?v=1.7" />
 </head>
 <body>
 
@@ -310,9 +310,14 @@
       <!-- ---------- Info ---------- -->
       <section class="tab-section" id="tab-info">
         <div class="card">
-          <h2>Was dieses Werkzeug macht <span class="version-badge">v<span id="app-version"></span></span></h2>
+          <h2>Was dieses Werkzeug macht</h2>
           <p>Hier werden die <strong>Fußballcamps</strong> des Vereins angelegt, auf der Vereins-Homepage beworben, die Anmeldungen der Kinder gesammelt und die Aufgaben für die Helfer verteilt.</p>
           <p class="muted">Nicht zu verwechseln mit dem <strong>Schulsport</strong>-Werkzeug: dort wird nachgewiesen, wann eine AG oder ein Camp stattgefunden hat und wie viele Kinder da waren. Hier geht es um Anmeldung, Beitrag und Helfer davor.</p>
+        </div>
+
+        <div class="card">
+          <h2>Funktionen</h2>
+          <div id="funktionen-list"></div>
         </div>
 
         <div class="card">
@@ -330,12 +335,6 @@
           <p>Die Anmeldungen enthalten <strong>Gesundheitsangaben von Kindern</strong>. Sie liegen in der Vereins-Nextcloud und verlassen den Server nur an Bearbeiter und an die Betreuer des jeweiligen Camps.</p>
           <p>Nach dem Camp läuft eine Frist. Danach schlägt die App das Aufräumen vor: Namen, Anschriften und Gesundheitsangaben werden gelöscht, die reinen Zahlen bleiben für die Statistik. <strong>Die App löscht nie von allein.</strong></p>
         </div>
-
-        <div class="card">
-          <h2>Änderungen</h2>
-          <div id="changelog"></div>
-        </div>
-
       </section>
 
     </main>
@@ -501,8 +500,8 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="config.js?v=1.16"></script>
+  <script src="config.js?v=1.17"></script>
   <script src="db.js?v=1.0"></script>
-  <script src="app.js?v=1.12"></script>
+  <script src="app.js?v=1.13"></script>
 </body>
 </html>

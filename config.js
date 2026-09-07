@@ -349,7 +349,131 @@ FORMULAR_FELDER.forEach((f) => {
   if (Array.isArray(f.gruppen)) f.optionen = f.gruppen.reduce((alle, g) => alle.concat(g.optionen || []), []);
 });
 
+// Was die App kann — Quelle der Karte "Funktionen" im Info-Reiter.
+// ⚠️ Hier steht der ZUSTAND, nicht die Änderung: keine Versionsnummern, keine
+// Daten, kein „neu“ und kein „jetzt“. Was sich geändert hat, steht im
+// APP_CHANGELOG darunter.
+const APP_FUNKTIONEN = [
+  {
+    title: "Wofür dieses Werkzeug da ist",
+    items: [
+      "Hier werden die Fußballcamps des Vereins angelegt, auf der Vereins-Homepage beworben, die Anmeldungen der Kinder gesammelt und die Aufgaben für die Helfer verteilt.",
+      "Die Eltern melden ihr Kind ohne Vereinskonto an — die Anmeldung braucht keinen Login, nur den Link oder das Fenster auf der Homepage.",
+      "Nicht zu verwechseln mit dem Schulsport-Werkzeug: dort werden nur noch die Schul-AGs nachgewiesen. Die Ferien-Camps leben hier."
+    ]
+  },
+  {
+    title: "Ein Camp anlegen",
+    items: [
+      "Ein Camp bekommt Zeitraum, tägliche Uhrzeit, Ort, Altersspanne, Platzzahl und Beitrag. Aus dem Zeitraum entstehen sofort echte Camp-Tage — sie sind die Grundlage für Aufgaben und Teilnehmerlisten.",
+      "Ein neues Camp ist zuerst ein Entwurf und für niemanden sichtbar. Erst „Anmeldung öffnen“ stellt es auf die Homepage und nimmt Anmeldungen an.",
+      "Das Anmeldefenster hat ein Datum von und bis und schließt von selbst; in der Nacht danach steht das Camp auf „Geschlossen“.",
+      "Je Camp lassen sich ein Werbeplakat hinterlegen und die Ausrichtung festlegen: Feldspieler, Torhüter oder beides."
+    ]
+  },
+  {
+    title: "Auf der Homepage und im Vereinskalender",
+    items: [
+      "Die App liefert einen fertigen Schnipsel für die Vereins-Homepage. Er wird einmal eingebaut und bleibt danach unangetastet; welches Camp dort erscheint, entscheidet allein der Status in dieser App.",
+      "Wer das Fenster auf der Homepage wegklickt, bekommt es sieben Tage lang nicht wieder zu sehen.",
+      "Zu jedem Camp gibt es zusätzlich einen normalen Link zum Weitergeben — für WhatsApp, Aushang oder Elternbrief.",
+      "Ein veröffentlichtes Camp legt sich selbst als Termin im Vereinskalender ab und zieht bei Änderungen nach."
+    ]
+  },
+  {
+    title: "Anmeldung",
+    items: [
+      "Welche Felder das Formular fragt, entscheidest du je Camp: nicht fragen, freiwillig oder Pflicht.",
+      "Ein Kind je Anmeldung. Nach dem Absenden führt ein Knopf zur nächsten Anmeldung, bei der die Elternangaben schon ausgefüllt sind.",
+      "Allergien, Medikamente und Essenshinweise laufen über Ja und Nein; erst bei „Ja“ geht ein Feld für den Text auf. Ein „Nein“ ist eine beantwortete Frage und etwas anderes als ein leeres Feld.",
+      "Vor dem Absenden stehen die Datenschutz-Information und die Teilnahmebedingungen mit je einem Pflicht-Häkchen. Ohne beide nimmt der Server keine Anmeldung an; welche Fassung der Bedingungen anerkannt wurde, wird mitgespeichert."
+    ]
+  },
+  {
+    title: "Warteliste und Nachrücken",
+    items: [
+      "Ist das Camp voll, kommt die Anmeldung auf die Warteliste — mit Platznummer, sichtbar für die Eltern.",
+      "Das Nachrücken löst ein Bearbeiter selbst aus; die Zusage geht danach automatisch per Mail raus."
+    ]
+  },
+  {
+    title: "Beitrag",
+    items: [
+      "Ein Preis je Camp, dazu ein Frühbucherpreis bis zu einem wählbaren Tag. Wer im Frühbucherfenster gebucht hat, behält den Preis auch danach.",
+      "Betrag, Kontoverbindung und Verwendungszweck stehen auf der Bestätigungsseite und in der Bestätigungsmail. Den Verwendungszweck baut die App aus Camp- und Kindernamen, damit auf dem Kontoauszug erkennbar ist, wofür das Geld kam.",
+      "Das Zahlungsziel liegt sieben Tage vor dem ersten Camp-Tag. In der Anmeldeliste wird abgehakt, wer bezahlt hat; ein Filter zeigt die offenen Beiträge, und eine Erinnerung lässt sich für alle Offenen auf einmal auslösen.",
+      "Kontoinhaber, IBAN, BIC und Bank sind gesperrt und müssen vor einer Änderung ausdrücklich freigegeben werden. Die IBAN wird über ihre Prüfziffer geprüft."
+    ]
+  },
+  {
+    title: "Ändern und Absagen",
+    items: [
+      "Jede Bestätigung enthält einen persönlichen Link. Darüber ändern die Eltern ihre Angaben oder sagen ab. Der Link geht ausschließlich per E-Mail und wird nie auf der Seite angezeigt.",
+      "Der Meldekasten nennt beim Namen, welche Felder die Eltern geändert haben. Wer speichert, ohne etwas zu ändern, löst keine Meldung aus.",
+      "Auch in der Verwaltung lassen sich alle Angaben einer Anmeldung korrigieren. Der Dialog ist beim Öffnen schreibgeschützt; erst ein Knopf macht die Felder änderbar, und der Verlauf hält fest, wer welche Felder angefasst hat.",
+      "Sagt der Verein ab, nennt der Dialog die greifende Stufe der Teilnahmebedingungen und den zurückzuzahlenden Betrag. Das ist eine Ablesehilfe, keine Anweisung — über die Rückzahlung entscheidet ein Mensch."
+    ]
+  },
+  {
+    title: "Aufgaben und Helfer",
+    items: [
+      "Der Aufgaben-Katalog wird einmal gepflegt: Name, Beschreibung, benötigte Personenzahl, Uhrzeit von und bis.",
+      "Aufgaben hängen am einzelnen Camp-Tag; ein Häkchen legt dieselbe Aufgabe auf allen Tagen des Camps an. Die Camp-Karte weist auf Tage hin, an denen gar keine Aufgabe steht.",
+      "Wer Zugriff auf das Werkzeug hat, trägt sich selbst ein und wieder aus. Eine volle Aufgabe nimmt niemanden mehr an — das prüft der Server, nicht nur die Oberfläche.",
+      "Anders als in der Spieltagscrew darf eine Person am selben Tag mehrere Aufgaben übernehmen. Helfer ohne Vereinskonto werden als freier Name eingetragen; daneben steht, wer den Eintrag vorgenommen hat."
+    ]
+  },
+  {
+    title: "Listen und Ausgaben",
+    items: [
+      "Der Aufgabenplan eines Camps lässt sich als Ganzes ausdrucken — mit allen Tagen, Zeiten und eingetragenen Helfern.",
+      "Die Teilnehmerliste für die Betreuer ist auf das Nötige verkürzt: Name, Alter, Allergien, Medikamente, Notfallnummer und die Namen der Abholberechtigten.",
+      "Die vollständige Anmeldeliste lässt sich drucken oder als Excel-Datei ausgeben — mit Nummer, Status, Zahlungsstand, Verwendungszweck und genau den Feldern, die dieses Camp abfragt."
+    ]
+  },
+  {
+    title: "E-Mails und Rückmeldung der Eltern",
+    items: [
+      "Alle Mails an die Eltern stehen mit Betreff und vollem Text in der Verwaltung und lassen sich dort ändern. Bausteine in geschweiften Klammern werden beim Verschicken ersetzt.",
+      "Ein paar Bausteine sind Pflicht — Kontoverbindung, persönlicher Link und Erstattungsregel. Ohne sie nimmt der Server die Vorlage nicht an.",
+      "Ein paar Tage nach dem letzten Camptag geht ein kurzer Feedbackbogen an die Eltern. Die Antworten sind anonym; freie Texte erscheinen erst ab drei Antworten, damit sich keine einzelne zurückrechnen lässt.",
+      "Der Bogen ist von sich aus ausgeschaltet und muss in der Verwaltung eingeschaltet werden."
+    ]
+  },
+  {
+    title: "Wer darf was",
+    items: [
+      "Sehen: Camps, Camp-Tage und Aufgaben — ohne Anmeldungen und ohne Kinderdaten.",
+      "Betreuer: Wer an einem Camp auf mindestens einer Aufgabe steht, bekommt für dieses Camp die kurze Teilnehmerliste, ohne Anschrift und ohne Beitragsstand. Diese Liste stellt der Server zusammen; wer nicht eingetragen ist, bekommt die Daten gar nicht erst geschickt.",
+      "Bearbeiten: Camps und Camp-Tage pflegen, Anmeldungen einsehen und ändern, Beiträge abhaken, nachrücken lassen, Listen ausgeben.",
+      "Administrieren: Kontoverbindung, Aufgaben-Katalog, Erinnerungen, Teilnahmebedingungen, Löschen und der Schnipsel für die Homepage. Der Reiter „Info“ ist für alle sichtbar."
+    ]
+  },
+  {
+    title: "Daten und Aufräumen",
+    items: [
+      "Die Anmeldungen enthalten Gesundheitsangaben von Kindern. Sie verlassen den Server nur an Bearbeiter und an die Betreuer des jeweiligen Camps.",
+      "Der Verlauf eines Camps hält bei Anmeldungen nur die laufende Nummer fest, keine Kindernamen.",
+      "Nach dem Camp läuft eine Frist — die Vorgabe sind sechs Monate. Danach schlägt die App das Aufräumen vor: Namen, Anschriften und Gesundheitsangaben werden gelöscht, die reinen Zahlen bleiben für die Statistik.",
+      "Die App löscht nie von allein."
+    ]
+  }
+];
+
 const APP_CHANGELOG = [
+  {
+    version: "1.15",
+    groups: [
+      {
+        title: "Im Info-Reiter steht jetzt, was die App kann",
+        items: [
+          "Die Liste der Änderungen und die Versionsnummer sind aus dem Info-Reiter verschwunden.",
+          "Stattdessen steht dort die Karte „Funktionen“: was die App kann, nach Themen geordnet.",
+          "Was sich geändert hat, steht weiterhin in den Neuigkeiten auf der Startseite der Tools-Übersicht."
+        ]
+      }
+    ]
+  },
   {
     version: "1.14",
     groups: [

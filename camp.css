@@ -351,3 +351,18 @@ label.voll textarea, #tab-verwaltung textarea { resize: vertical; min-height: 64
    aus. */
 #anm-modal-body > .hinweis + h3,
 #anm-modal-body > label + h3 { margin-top: 12px; }
+
+/* ---------- Karte "Funktionen" im Info-Reiter ---------- */
+/* Die Karte teilt sich die Optik mit der frueheren Aenderungsliste. Deren
+   Klassen .changelog-group / .cg-title / .cg-items gibt es in dieser App aber
+   nicht - die alte Liste lief ueber .changelog-version. Sie stehen deshalb hier
+   vollstaendig, uebernommen aus ToolsUebersicht/style.css.
+   Bewusst NICHT in style.css: diese Datei ist byte-gleich mit der von
+   kinderschutz und spieltagscrew, eine Ergaenzung dort liesse die drei
+   auseinanderlaufen.
+   font-size haengt sonst an .changelog-entry - eine Klasse, die diese Karte
+   nicht hat. Ohne die Angabe rendert sie eine Stufe groesser als der Rest. */
+#funktionen-list { display: flex; flex-direction: column; gap: 18px; font-size: 13px; }
+.changelog-group { display: flex; flex-direction: column; gap: 4px; }
+.changelog-group .cg-title { font-weight: 700; font-size: 14px; color: var(--blue); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+.changelog-group .cg-items { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; color: var(--text); }

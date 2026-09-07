@@ -37,8 +37,8 @@ const KONTO_FELDER = ["e-kontoinhaber", "e-iban", "e-bic", "e-bank"];
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("app-version").textContent = APP_VERSION;
   renderChangelog();
+  renderFunktionen();
   verdrahteBedienung();
   startApp();
 });
@@ -2668,8 +2668,26 @@ async function mitFehler(fn) {
   }
 }
 
+// Die Karte "Funktionen" ersetzt im Info-Reiter die frühere Änderungsliste.
+// Sie zeigt den Zustand der App, nicht ihre Geschichte.
+function renderFunktionen() {
+  const ziel = document.getElementById("funktionen-list");
+  if (!ziel) return;
+  ziel.innerHTML = APP_FUNKTIONEN.map((g) => `
+    <div class="changelog-group">
+      <div class="cg-title">${escapeHtml(g.title)}</div>
+      <ul class="cg-items">${g.items.map((i) => `<li>${escapeHtml(i)}</li>`).join("")}</ul>
+    </div>`).join("");
+}
+
+// ⚠️ Bleibt stehen, obwohl die Karte "Änderungen" aus dem Info-Reiter
+// verschwunden ist: APP_CHANGELOG wird weitergepflegt und ist die Quelle für
+// die große Anleitung und für die Neuigkeiten auf der Startseite der
+// Tools-Übersicht. Käme die Karte je zurück, zeichnet diese Funktion sie
+// wieder. Ohne den Wächter stirbt der Seitenstart an null.
 function renderChangelog() {
   const ziel = document.getElementById("changelog");
+  if (!ziel) return;
   ziel.innerHTML = APP_CHANGELOG.map((v) => `
     <div class="changelog-version">
       <h3>Version ${escapeHtml(v.version)}</h3>
